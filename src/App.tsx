@@ -399,7 +399,7 @@ Output the response in beautiful Markdown, using headings (###) for the Phases, 
       const passageContext = passageText ? `\n\nHere is the raw text of the passage for context:\n"${passageText}"` : '';
       const userQuery = `Please analyze this specific pericope: ${selectedPericope}${passageContext}`;
 
-      const apiKey = ""; // API key will be automatically provided by the Canvas environment
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || ""; // API key will be automatically provided by the Canvas environment
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
       const payload = {
