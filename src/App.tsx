@@ -1023,6 +1023,26 @@ const buildPatternSvg = (color: string, glowFilter = false) => `<svg xmlns="http
 const BASE_PATTERN_URI = `data:image/svg+xml;utf8,${encodeURIComponent(buildPatternSvg('#b59453', false))}`;
 const GLOW_PATTERN_URI = `data:image/svg+xml;utf8,${encodeURIComponent(buildPatternSvg('#fff0b8', true))}`;
 
+const FAVICON_URI = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4a3b32"/>
+      <stop offset="100%" stop-color="#1c110a"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#c5a059"/>
+      <stop offset="100%" stop-color="#855d1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bgGlow)" stroke="#c5a059" stroke-width="1.5"/>
+  <path d="M14 24C14 24 20 20 32 24C44 20 50 24 50 24V46C50 46 44 42 32 46C20 42 14 46 14 46Z" fill="#fdfaf2" stroke="#c5a059" stroke-width="1"/>
+  <line x1="32" y1="24" x2="32" y2="46" stroke="#c5a059" stroke-width="1.5"/>
+  <path d="M30 16H34V28H40V32H34V42H30V32H24V28H30V16Z" fill="url(#goldGrad)" filter="drop-shadow(0px 1px 2px rgba(0,0,0,0.6))"/>
+</svg>
+`)}`;
+
 const CollapsibleTextBlock = ({ title, children, isFetchingText }: { title: string, children: React.ReactNode, isFetchingText: boolean }) => {
   const [isOpen, setIsOpen] = useState(true);
   return (
@@ -1140,6 +1160,41 @@ export default function App() {
 
   // State for golden wave background effect
   const [waves, setWaves] = useState<{id: number, x: number, y: number}[]>([]);
+
+  React.useEffect(() => {
+    // Inject iOS share sheet meta tags & Favicon into document head dynamically
+    let linkTag = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
+    if (!linkTag) {
+      linkTag = document.createElement('link');
+      linkTag.rel = 'icon';
+      document.head.appendChild(linkTag);
+    }
+    linkTag.href = FAVICON_URI;
+
+    let appleTouchIcon = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
+    if (!appleTouchIcon) {
+      appleTouchIcon = document.createElement('link');
+      appleTouchIcon.rel = 'apple-touch-icon';
+      document.head.appendChild(appleTouchIcon);
+    }
+    appleTouchIcon.href = FAVICON_URI;
+
+    const metaTags = [
+      { name: 'apple-mobile-web-app-capable', content: 'yes' },
+      { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+      { name: 'apple-mobile-web-app-title', content: 'Biblical Leadership' }
+    ];
+
+    metaTags.forEach(tagInfo => {
+      let meta = document.querySelector(`meta[name='${tagInfo.name}']`) as HTMLMetaElement;
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.name = tagInfo.name;
+        document.head.appendChild(meta);
+      }
+      meta.content = tagInfo.content;
+    });
+  }, []);
 
   const handleStoryChange = (story: ContentItem) => {
     setSelectedStory(story);
