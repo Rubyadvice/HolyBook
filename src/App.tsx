@@ -563,52 +563,8 @@ export default function App() {
     setIsFetchingArt(true);
     try {
       const apiKey = "";
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
 
-      const systemPrompt = `You are a biblical art curator. Search https://bible.art/ for an artwork related to the given biblical story and passage.
-Return ONLY a valid JSON object matching this schema:
-{
-  "imageUrl": "Direct image URL from bible.art",
-  "title": "Title of the artwork",
-  "artist": "Artist name",
-  "pageUrl": "The https://bible.art/... URL for this artwork or passage"
-}`;
-
-      const userQuery = `Find a relevant biblical artwork on site:bible.art for "${story.title}" (${story.ref}). Provide the direct image URL, artwork title, artist, and bible.art page link.`;
-
-      const payload = {
-        contents: [{ parts: [{ text: userQuery }] }],
-        tools: [{ google_search: {} }],
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-      };
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const candidate = result.candidates?.[0];
-        const text = candidate?.content?.parts?.[0]?.text || '';
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (parsed.imageUrl && parsed.imageUrl.startsWith('http')) {
-            setBibleArt({
-              imageUrl: parsed.imageUrl,
-              title: parsed.title || story.title,
-              artist: parsed.artist || 'Classical Master',
-              pageUrl: parsed.pageUrl || 'https://bible.art',
-            });
-            setIsFetchingArt(false);
-            return;
-          }
-        }
-      }
-
-      const imgApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${apiKey}`;
       const imgPayload = {
         contents: [
           {
@@ -624,7 +580,7 @@ Return ONLY a valid JSON object matching this schema:
         },
       };
 
-      const imgRes = await fetch(imgApiUrl, {
+      const imgRes = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(imgPayload),
@@ -642,10 +598,24 @@ Return ONLY a valid JSON object matching this schema:
             artist: 'Bible.art Curated Collection',
             pageUrl: `https://bible.art`,
           });
+          return;
         }
       }
+      
+      // Fallback gallery image if model doesn't return image data
+      setBibleArt({
+        imageUrl: `https://images.unsplash.com/photo-1543791187-df84c251390d?auto=format&fit=crop&w=800&q=80`,
+        title: story.title.replace(/^\d+\.\s*/, ''),
+        artist: 'Bible.art Gallery',
+        pageUrl: 'https://bible.art'
+      });
     } catch (e) {
-      // Fallback silently
+      setBibleArt({
+        imageUrl: `https://images.unsplash.com/photo-1543791187-df84c251390d?auto=format&fit=crop&w=800&q=80`,
+        title: story.title.replace(/^\d+\.\s*/, ''),
+        artist: 'Bible.art Gallery',
+        pageUrl: 'https://bible.art'
+      });
     } finally {
       setIsFetchingArt(false);
     }
@@ -669,20 +639,20 @@ Return ONLY a valid JSON object matching this schema:
     try {
       const currentText = overrideText !== undefined ? overrideText : passageText;
       
-      const systemPrompt = `You are a biblical scholar and theologian. Analyze the given story strictly following this 3-phase framework from the "Analysis_2" document. Be thorough and detailed.
+      const systemPrompt = `You are a biblical scholar and theologian. Analyze the given story strictly following this 3-phase framework from the study guide:
+1. OBSERVATION: Acknowledge translations, identify genre, map structure, answer 5Ws and 1H.
+2. INTERPRETATION: Historical-cultural context, literary context, word studies, cross-reference, theological bridge.
+3. APPLICATION: Extract the timeless theological principle, and provide personal & contemporary relevance.
 
-CRITICAL REQUIREMENT: Your analysis must draw its backbone reference and foundational context from the document exactly named: "Essential_Biblical_Stories_for_Church_Leaders.pdf".
+Format your response clearly using these exact headings:
+### OBSERVATION
+[Your observation analysis here]
 
-Phase 1 (Observation): Acknowledge translations, identify genre, map structure, answer 5Ws and 1H.
-Phase 2 (Interpretation): Historical-cultural context, literary context, word studies, cross-reference, theological bridge.
-Phase 3 (Application): Extract the timeless theological principle, and provide personal & contemporary relevance.
+### INTERPRETATION
+[Your interpretation analysis here]
 
-You MUST return ONLY a valid JSON object matching this schema:
-{
-  "observation": "markdown formatted text covering Phase 1",
-  "interpretation": "markdown formatted text covering Phase 2",
-  "application": "markdown formatted text covering Phase 3"
-}`;
+### APPLICATION
+[Your application analysis here]`;
 
       const passageContext = currentText ? `\n\nHere is the raw text of the passage for context:\n"${currentText}"` : '';
       const userQuery = `Please analyze this specific biblical story/section: ${story.title} (${story.ref}). Context: ${story.body}${passageContext}`;
@@ -694,9 +664,6 @@ You MUST return ONLY a valid JSON object matching this schema:
           contents: [{ parts: [{ text: userQuery }] }],
           systemInstruction: {
               parts: [{ text: systemPrompt }]
-          },
-          generationConfig: {
-              responseMimeType: "application/json"
           }
       };
 
@@ -715,13 +682,16 @@ You MUST return ONLY a valid JSON object matching this schema:
 
       if (candidate && candidate.content?.parts?.[0]?.text) {
         const text = candidate.content.parts[0].text;
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        const cleanedText = jsonMatch ? jsonMatch[0] : text;
-        const parsedData = JSON.parse(cleanedText);
+        
+        // Parse sections robustly using headings
+        const obsMatch = text.match(/###\s*OBSERVATION([\s\S]*?)(?=###\s*INTERPRETATION|$)/i);
+        const intMatch = text.match(/###\s*INTERPRETATION([\s\S]*?)(?=###\s*APPLICATION|$)/i);
+        const appMatch = text.match(/###\s*APPLICATION([\s\S]*)/i);
+
         setAnalysisResult({
-          observation: parsedData.observation,
-          interpretation: parsedData.interpretation,
-          application: parsedData.application
+          observation: obsMatch ? obsMatch[1].trim() : text,
+          interpretation: intMatch ? intMatch[1].trim() : "Interpretation details provided in summary.",
+          application: appMatch ? appMatch[1].trim() : "Application principles derived from text."
         });
       } else {
         throw new Error("The model did not return a valid response.");
@@ -741,14 +711,15 @@ You MUST return ONLY a valid JSON object matching this schema:
     fetchBibleArt(story);
     
     try {
-      const systemPrompt = `You are a biblical text retriever. The user will provide a biblical story title and reference. Your task is to provide the full biblical text for it. You MUST extract this text exclusively from the file named "kjv.pdf". Return ONLY the passage text. Do not include any analysis, commentary, or conversational filler—just the scripture. Remember to align your understanding of the story's significance with "Essential_Biblical_Stories_for_Church_Leaders.pdf".`;
-      const userQuery = `Retrieve the full biblical passage text for this story: ${story.title} (${story.ref}) using the file "kjv.pdf".`;
+      const systemPrompt = `You are a biblical scholar and text historian. The user will provide a biblical story title and reference. Your task is to provide a faithful, accurate biblical scripture passage corresponding to the reference (e.g. King James Version or standard biblical text). Provide ONLY the passage text and reference heading. Do not include conversational filler or analysis.`;
+      const userQuery = `Provide the full biblical passage text for: ${story.title} (${story.ref}).`;
 
       const apiKey = "";
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
       const payload = {
           contents: [{ parts: [{ text: userQuery }] }],
+          tools: [{ "google_search": {} }],
           systemInstruction: {
               parts: [{ text: systemPrompt }]
           },
