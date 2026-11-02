@@ -362,7 +362,9 @@ const PERICOPES = [
 
 export default function App() {
   const [selectedPericope, setSelectedPericope] = useState<string>(PERICOPES[0]);
-  const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [isCoverOpen, setIsCoverOpen] = useState<boolean>(false);
+  const [isPageFlipped, setIsPageFlipped] = useState<boolean>(false);
+  const [analysisResult, setAnalysisResult] = useState<{observation: string, interpretation: string, application: string} | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -370,36 +372,97 @@ export default function App() {
   const [isFetchingText, setIsFetchingText] = useState<boolean>(false);
   const [textError, setTextError] = useState<string | null>(null);
 
-  const fetchAnalysis = async () => {
+  const fetchAnalysis = async (overridePericope?: string, overrideText?: string | null) => {
     setIsLoading(true);
     setError(null);
     setAnalysisResult(null);
 
     try {
-      const systemPrompt = `You are a biblical scholar and theologian. Analyze the given pericope strictly following this 3-phase framework from the "Analysis" document. Be thorough and detailed.
+      const pericope = overridePericope || selectedPericope;
+      const currentText = overrideText !== undefined ? overrideText : passageText;
+      
+      const systemPrompt = `You are a biblical scholar and theologian. Analyze the given pericope strictly following this 3-phase framework from the "Analysis_2" document. Be thorough and detailed. 
+      
+Instead of outputting the literal template headings (e.g. "Phase 1: Observation" or "- Identify genre:"), write flowing, insightful paragraphs for each phase that naturally incorporate the required points.
 
-Phase 1: Observation (What does the text say?)
-- Identify genre: Determine whether the text is narrative, poetry, law, prophecy, epistle, or apocalyptic.
-- Map structure: Look for thought units, narrative arcs, argument shifts, or grammatical conjunctions.
-- Ask the 5Ws and 1H: Note who is speaking, who is being addressed, key repeated words, commands, and contrasts.
+Phase 1 (Observation): Acknowledge translations, identify genre, map structure, answer 5Ws and 1H.
+Phase 2 (Interpretation): Historical-cultural context, literary context, word studies, cross-reference, theological bridge.
+Phase 3 (Application): Extract the timeless theological principle, and provide personal & contemporary relevance.
 
-Phase 2: Interpretation (What did the text mean to the original audience?)
-- Historical-cultural context: Research the original author, audience, date, and historical/cultural backdrop.
-- Literary context: Examine the immediate paragraphs before and after, as well as the flow of the broader book.
-- Word studies: Highlight 1-2 key terms in Greek or Hebrew and explain their root meaning.
-- Cross-reference: Compare with other related biblical passages.
-- Theological bridge: Consider how the passage fits into redemptive history and points toward Christ.
+You MUST return ONLY a valid JSON object matching this schema:
+{
+  "observation": "markdown formatted text covering Phase 1",
+  "interpretation": "markdown formatted text covering Phase 2",
+  "application": "markdown formatted text covering Phase 3"
+}`;
 
-Phase 3: Application (What does the text mean for us today?)
-- Principlizing: Extract the timeless theological principle.
-- Personal & contemporary relevance: Translate that timeless principle into a specific, actionable response for today rather than just moralizing or forcing a quick fix.
+      const passageContext = currentText ? `\n\nHere is the raw text of the passage for context:\n"${currentText}"` : '';
+      const userQuery = `Please analyze this specific pericope: ${pericope}${passageContext}`;
 
-Output the response in beautiful Markdown, using headings (###) for the Phases, and bold bullet points for the sub-points.`;
+      const apiKey = ""; // API key will be automatically provided by the Canvas environment
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-      const passageContext = passageText ? `\n\nHere is the raw text of the passage for context:\n"${passageText}"` : '';
-      const userQuery = `Please analyze this specific pericope: ${selectedPericope}${passageContext}`;
+      const payload = {
+          contents: [{ parts: [{ text: userQuery }] }],
+          systemInstruction: {
+              parts: [{ text: systemPrompt }]
+          },
+          generationConfig: {
+              responseMimeType: "application/json"
+          }
+      };
 
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || ""; // API key will be automatically provided by the Canvas environment
+      const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      const candidate = result.candidates?.[0];
+
+      if (candidate && candidate.content?.parts?.[0]?.text) {
+        const text = candidate.content.parts[0].text;
+        
+        // Robust JSON extraction to ignore markdown wrappers (like ```json ... ```)
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        const cleanedText = jsonMatch ? jsonMatch[0] : text;
+        
+        const parsedData = JSON.parse(cleanedText);
+        setAnalysisResult({
+          observation: parsedData.observation,
+          interpretation: parsedData.interpretation,
+          application: parsedData.application
+        });
+      } else {
+        throw new Error("The model did not return a valid response.");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to analyze passage. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAnalyzeClick = () => {
+    fetchAnalysis();
+  };
+
+  const fetchPassageText = async (overridePericope?: string) => {
+    setIsFetchingText(true);
+    setTextError(null);
+    setPassageText(null);
+    
+    try {
+      const pericope = overridePericope || selectedPericope;
+      const systemPrompt = `You are a biblical text retriever. The user will provide a pericope title. Your task is to provide the full biblical text for it from your knowledge base. Return ONLY the passage text (preferably in NKJV or ESV). Do not include any analysis, commentary, or conversational filler—just the scripture.`;
+      const userQuery = `Retrieve the full biblical passage text for this pericope: ${pericope}`;
+
+      const apiKey = ""; // API key will be automatically provided by the Canvas environment
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
       const payload = {
@@ -424,189 +487,281 @@ Output the response in beautiful Markdown, using headings (###) for the Phases, 
 
       if (candidate && candidate.content?.parts?.[0]?.text) {
         const text = candidate.content.parts[0].text;
-        setAnalysisResult(`## Analysis for: ${selectedPericope}\n\n${text}`);
+        setPassageText(text);
+        return text;
       } else {
         throw new Error("The model did not return a valid response.");
       }
     } catch (err: any) {
-      setError(err.message || "Failed to analyze passage. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleAnalyzeClick = () => {
-    fetchAnalysis();
-  };
-
-  const fetchPassageText = async () => {
-    setIsFetchingText(true);
-    setTextError(null);
-    setPassageText(null);
-    
-    const pericopeId = selectedPericope.split(':')[0];
-    const targetUrl = `https://www.semanticbible.com/cgi/2004/11/${pericopeId}.xml`;
-    
-    const maxRetries = 3;
-    let attempt = 0;
-    let success = false;
-    let xmlString = "";
-
-    while (attempt < maxRetries && !success) {
-      try {
-        // Alternate between proxies for resilience
-        const proxyUrl = attempt % 2 === 0 
-          ? `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
-          : `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-
-        const response = await fetch(proxyUrl);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        if (proxyUrl.includes('allorigins')) {
-          const data = await response.json();
-          xmlString = data.contents;
-        } else {
-          xmlString = await response.text();
-        }
-        
-        if (xmlString) {
-          success = true;
-        } else {
-          throw new Error("No content retrieved from the proxy.");
-        }
-      } catch (err: any) {
-        attempt++;
-        if (attempt >= maxRetries) {
-          setTextError("Failed to fetch passage text after multiple attempts. The server might be temporarily unavailable or blocking requests.");
-          setIsFetchingText(false);
-          return;
-        }
-        // Wait before retrying (1s, then 2s)
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-      }
-    }
-
-    try {
-      // Parse the XML
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-      
-      // Extract text content from the XML document
-      let rawText = xmlDoc.documentElement.textContent || "";
-      
-      // Basic cleanup to remove excessive whitespace/newlines
-      rawText = rawText.replace(/\s+/g, ' ').trim();
-      
-      if (!rawText) {
-          throw new Error("Could not extract readable text from the passage XML.");
-      }
-      
-      setPassageText(rawText);
-    } catch (err: any) {
-      setTextError(err.message || "Failed to parse passage text.");
+      setTextError(err.message || "Failed to retrieve passage text. Please try again.");
+      return null;
     } finally {
       setIsFetchingText(false);
     }
   };
 
+  const handleDailyPericope = async () => {
+    const today = new Date();
+    // Use consistent date string to get the same pericope all day
+    const dateString = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+    let hash = 0;
+    for (let i = 0; i < dateString.length; i++) {
+      hash = (hash << 5) - hash + dateString.charCodeAt(i);
+      hash |= 0;
+    }
+    const dailyIndex = Math.abs(hash) % PERICOPES.length;
+    const dailyPericope = PERICOPES[dailyIndex];
+    
+    setSelectedPericope(dailyPericope);
+    
+    const fetchedText = await fetchPassageText(dailyPericope);
+    await fetchAnalysis(dailyPericope, fetchedText);
+  };
+
   return (
     <div 
       className="min-h-screen font-serif selection:bg-[#c5a059]/30 py-8 px-4 flex justify-center items-start overflow-y-auto"
-      style={{ backgroundImage: "url('Screenshot 2026-11-01 at 3.47.02 PM.jpg')", backgroundRepeat: 'repeat' }}
+      style={{ backgroundImage: "url('Screenshot%202026-11-01%20at%203.47.02%20PM.jpg')", backgroundRepeat: 'repeat' }}
     >
+      <style>{`
+        @keyframes glow-pulse {
+          0%, 100% { 
+            opacity: 0.2; 
+            transform: scale(0.95); 
+            filter: drop-shadow(0 0 2px rgba(197, 160, 89, 0.2)); 
+          }
+          50% { 
+            opacity: 0.9; 
+            transform: scale(1.05); 
+            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.8)); 
+          }
+        }
+        .animate-glow-cross {
+          animation: glow-pulse 2.5s ease-in-out infinite;
+        }
+
+        .book-cover-container {
+          perspective: 3000px;
+          position: relative;
+        }
+        .book-cover {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          transform-origin: 0% 50%;
+          transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+          transform-style: preserve-3d;
+          z-index: 50;
+          cursor: pointer;
+          border-radius: 4px 12px 12px 4px;
+        }
+        .book-cover.is-open {
+          transform: rotateY(-110deg);
+          pointer-events: none;
+        }
+        .book-cover-front, .book-cover-back {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          backface-visibility: hidden;
+          border-radius: 4px 12px 12px 4px;
+        }
+        .book-cover-front {
+          background-color: #382117;
+          background-size: 100% 100%;
+          background-position: center;
+          box-shadow: 15px 15px 30px rgba(0,0,0,0.8), inset -5px 0 15px rgba(0,0,0,0.3);
+        }
+        .book-cover-back {
+          background-color: #2a1510;
+          transform: rotateY(180deg);
+          box-shadow: inset 0 0 40px rgba(0,0,0,0.9);
+          border: 12px solid #1a0d0a;
+        }
+
+        .grid-stack {
+          display: grid;
+          grid-template-columns: 1fr;
+          grid-template-rows: 1fr;
+          perspective: 3000px;
+          transform-style: preserve-3d;
+        }
+        .grid-layer {
+          grid-area: 1 / 1 / 2 / 2;
+        }
+        .page-turner {
+          transform-origin: 0% 50%;
+          transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+          transform-style: preserve-3d;
+          z-index: 20;
+          transform: rotateY(0deg);
+        }
+        .page-turner.flipped {
+          transform: rotateY(-180deg);
+        }
+        .page-front, .page-back {
+          backface-visibility: hidden;
+          width: 100%;
+          height: 100%;
+          background-color: #fffcf5;
+          transform-style: preserve-3d;
+        }
+        .page-back {
+          transform: rotateY(180deg);
+        }
+
+        .page-edge-hover {
+          background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.08));
+        }
+      `}</style>
       
-      {/* Main Book Container */}
-      <main className="w-full max-w-6xl bg-[#fdfaf2] shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-sm relative">
+      {/* Main Book Container Wrapper for 3D Perspective */}
+      <div className="book-cover-container w-full max-w-6xl mx-auto">
         
-        {/* Book Spine Edge (Left) */}
-        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#4a3b32] to-transparent z-10 opacity-40 mix-blend-multiply pointer-events-none"></div>
-        
-        {/* Pages Edge (Right) */}
-        <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-[#d4c5b0] to-transparent z-10 opacity-70 pointer-events-none border-r border-[#c5a059]"></div>
-        
-        {/* Inner page border (the text block) */}
-        <div className="m-8 lg:m-12 border-2 border-[#e6d9c3] p-8 lg:p-12 relative flex flex-col lg:flex-row gap-12 bg-white/40 shadow-inner min-h-[80vh]">
-          
-          {/* Header/Title */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#fdfaf2] px-6 text-center whitespace-nowrap">
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-widest text-[#4a3b32] uppercase">
-              The Life and Ministry <span className="text-[#8b0000]">of Jesus</span>
-            </h1>
-          </div>
-          
-          <aside className="w-full lg:w-1/3 flex flex-col border-r-0 lg:border-r-2 border-[#e6d9c3] pr-0 lg:pr-12">
-            <div className="mb-6 relative">
-              <label htmlFor="pericope-select" className="block text-sm font-bold uppercase tracking-widest text-[#8b0000] mb-3">
-                Select Passage
-              </label>
-              <div className="relative">
-                <select 
-                  id="pericope-select"
-                  value={selectedPericope}
-                  onChange={(e) => setSelectedPericope(e.target.value)}
-                  className="w-full appearance-none bg-transparent border-b-2 border-[#c5a059] py-3 pl-2 pr-10 text-stone-800 focus:outline-none focus:border-[#8b0000] rounded-none cursor-pointer text-lg truncate"
-                  style={{ textOverflow: 'ellipsis' }}
-                >
-                  {PERICOPES.map((p) => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#8b0000]">
-                  <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                </div>
+        {/* The 3D Cover */}
+        <div 
+          className={`book-cover ${isCoverOpen ? 'is-open' : ''}`}
+          onClick={() => setIsCoverOpen(true)}
+        >
+          <div className="book-cover-front relative flex flex-col items-center justify-center" style={{ backgroundImage: "url('Screenshot%202026-11-01%20at%2011.21.16%20PM.jpg')" }}>
+            
+            {/* Center Gold Foil Typography matching reference image */}
+            <div className="text-center select-none pt-12">
+              <h1 className="text-5xl lg:text-7xl font-serif font-bold tracking-[0.2em] text-[#e3c178] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] opacity-95">
+                HOLY
+              </h1>
+              <h1 className="text-5xl lg:text-7xl font-serif font-bold tracking-[0.2em] text-[#e3c178] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] opacity-95 mt-2">
+                BIBLE
+              </h1>
+            </div>
+
+            {!isCoverOpen && (
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/40 rounded-r-xl">
+                <span className="text-[#fdfaf2] text-xl font-bold tracking-widest border-2 border-[#c5a059] px-8 py-3 bg-[#4a3b32]/90 backdrop-blur-md uppercase shadow-2xl cursor-pointer">
+                  Open Bible
+                </span>
               </div>
+            )}
+          </div>
+          <div className="book-cover-back">
+            <div className="absolute inset-4 border-2 border-[#1a0d0a] opacity-30"></div>
+          </div>
+        </div>
+
+        {/* Book Inner Pages */}
+        <main className="w-full h-full bg-[#fffff8] shadow-[15px_15px_30px_rgba(0,0,0,0.8)] rounded-r-md relative border-l-[24px] border-[#3a2a22]">
+          
+          {/* Gold Foil Gilding - Top Edge */}
+          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-b from-[#b38b22] via-[#f7e099] to-[#b38b22] z-10 opacity-100 pointer-events-none rounded-tr-md"></div>
+          
+          {/* Gold Foil Gilding - Right Edge */}
+          <div className="absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-l from-[#b38b22] via-[#f7e099] to-[#b38b22] z-10 opacity-100 pointer-events-none rounded-r-md shadow-[-2px_0_5px_rgba(0,0,0,0.1)]"></div>
+          
+          {/* Gold Foil Gilding - Bottom Edge */}
+          <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-t from-[#b38b22] via-[#f7e099] to-[#b38b22] z-10 opacity-100 pointer-events-none rounded-br-md"></div>
+          
+          {/* Book Spine inner shadow */}
+          <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-black/20 to-transparent z-10 pointer-events-none"></div>
+
+          {/* Close Bible Button - Fades in only on hover near the top right corner */}
+          <button 
+            onClick={() => {
+              setIsCoverOpen(false);
+              setIsPageFlipped(false);
+            }}
+            className="absolute top-0 right-0 w-32 h-32 z-40 flex items-start justify-end p-8 group cursor-pointer"
+            title="Close Bible"
+          >
+            <div className="text-stone-400 hover:text-[#8b0000] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center">
+              <svg className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <span className="text-[10px] uppercase tracking-widest font-bold mt-1">Close</span>
+            </div>
+          </button>
+
+          {/* Inner page container using CSS Grid Stack for layering */}
+          <div className="m-6 lg:m-10 border border-[#e6d9c3] relative shadow-inner min-h-[85vh] grid-stack">
+            
+            {/* Page 2 (Underneath - Revealed when Page 1 flips) */}
+            <div className="grid-layer p-8 lg:p-12 flex flex-col items-center justify-center opacity-40 bg-[#fffcf5]">
+               <svg className="w-16 h-16 mb-4 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+               <h2 className="text-2xl font-serif text-stone-400">Blank Page</h2>
             </div>
 
-            <div className="flex flex-col gap-4 mt-4">
-              <button 
-                onClick={handleAnalyzeClick}
-                disabled={isLoading}
-                className="w-full bg-[#8b0000] hover:bg-[#660000] text-[#fdfaf2] font-semibold tracking-wider uppercase text-sm py-4 px-4 border border-[#c5a059] transition-colors duration-300 flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-[#8b0000]/20"
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Analyzing...
-                  </span>
-                ) : (
-                  "Analyze Passage"
-                )}
-              </button>
+            {/* Page 1 (Flipping Page) */}
+            <div className={`grid-layer page-turner ${isPageFlipped ? 'flipped' : ''}`}>
+              
+              {/* Front of Page 1 (Main Content) */}
+              <div className="page-front p-8 lg:p-12 flex flex-col lg:flex-row gap-12 relative shadow-[-5px_0_15px_rgba(0,0,0,0.05)]">
+                
+                {/* Clickable Right Edge to flip to Page 2 with gradient fade */}
+                <div 
+                  className="absolute top-0 right-0 w-16 h-full cursor-pointer z-30 page-edge-hover opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center group rounded-r"
+                  onClick={() => setIsPageFlipped(true)}
+                  title="Turn Page"
+                >
+                  <svg className="w-8 h-8 text-stone-500 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
 
-              <button 
-                onClick={fetchPassageText}
-                disabled={isFetchingText}
-                className="w-full bg-transparent hover:bg-[#8b0000] border-2 border-[#8b0000] text-[#8b0000] hover:text-[#fdfaf2] font-semibold tracking-wider uppercase text-sm py-4 px-4 transition-colors duration-300 flex justify-center items-center text-center group disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isFetchingText ? "Retrieving Text..." : "Read Passage Text"}
-                {!isFetchingText && (
-                  <svg className="w-4 h-4 ml-2 opacity-70 group-hover:text-[#c5a059]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                  </svg>
-                )}
-              </button>
-            </div>
+                {/* Sidebar Controls */}
+                <aside className="w-full lg:w-1/3 flex flex-col gap-6 shrink-0 relative">
+                  <button 
+                    onClick={handleDailyPericope}
+                    className="w-full bg-[#fdfaf2] border-2 border-[#c5a059] text-[#4a3b32] font-bold uppercase tracking-widest py-3 px-6 hover:bg-[#c5a059] hover:text-white transition-colors flex items-center justify-center gap-3 shadow-sm rounded-sm"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Pericope of the Day
+                  </button>
 
-            <div className="mt-8 hidden lg:block opacity-30 text-center">
-               <svg className="w-full h-auto mx-auto max-w-[150px] text-[#c5a059]" viewBox="0 0 100 20" fill="currentColor">
-                  <path d="M0,10 Q25,20 50,10 T100,10" fill="none" stroke="currentColor" strokeWidth="1"/>
-                  <circle cx="50" cy="10" r="3" />
-                  <circle cx="25" cy="10" r="1.5" />
-                  <circle cx="75" cy="10" r="1.5" />
-               </svg>
-            </div>
-          </aside>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-bold text-stone-400 uppercase tracking-widest">Select a Passage</label>
+                    <select 
+                      value={selectedPericope} 
+                      onChange={(e) => setSelectedPericope(e.target.value)}
+                      className="w-full p-3 border-b-2 border-stone-300 bg-transparent focus:outline-none focus:border-[#8b0000] font-bold text-stone-700 font-sans cursor-pointer transition-colors"
+                    >
+                      {PERICOPES.map(p => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+                  </div>
 
-          <section className="w-full lg:w-2/3 mt-8 lg:mt-0 relative min-h-[300px]">
+                  <div className="flex flex-col gap-4 mt-4">
+                    <button 
+                      onClick={handleAnalyzeClick}
+                      disabled={isLoading || isFetchingText}
+                      className="w-full bg-[#8b0000] text-[#fdfaf2] font-bold uppercase tracking-widest py-3 px-6 hover:bg-[#660000] transition-colors disabled:opacity-50 shadow-md rounded-sm"
+                    >
+                      {isLoading ? "Analyzing..." : "Analyze Passage"}
+                    </button>
+                    <button 
+                      onClick={() => fetchPassageText()}
+                      disabled={isFetchingText || isLoading}
+                      className="w-full bg-[#4a3b32] text-[#fdfaf2] font-bold uppercase tracking-widest py-3 px-6 hover:bg-[#382117] transition-colors disabled:opacity-50 shadow-md rounded-sm"
+                    >
+                      {isFetchingText ? "Retrieving..." : "Read Passage Text"}
+                    </button>
+                  </div>
+
+              <div className="mt-8 hidden lg:block opacity-30 text-center">
+                 <svg className="w-full h-auto mx-auto max-w-[150px] text-[#c5a059]" viewBox="0 0 100 20" fill="currentColor">
+                    <path d="M0,10 Q25,20 50,10 T100,10" fill="none" stroke="currentColor" strokeWidth="1"/>
+                    <circle cx="50" cy="10" r="3" />
+                    <circle cx="25" cy="10" r="1.5" />
+                    <circle cx="75" cy="10" r="1.5" />
+                 </svg>
+              </div>
+            </aside>
+
+          <section className="w-full lg:w-2/3 mt-8 lg:mt-0 relative min-h-[400px] flex flex-col" style={{ perspective: '1200px' }}>
             
             {/* Empty State */}
-            {!analysisResult && !isLoading && !error && !passageText && !isFetchingText && !textError && (
+            {!analysisResult && !isLoading && !passageText && !isFetchingText && !textError && !error && (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-stone-400 opacity-60">
                 <svg className="w-20 h-20 mb-6 text-[#c5a059]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
@@ -618,7 +773,7 @@ Output the response in beautiful Markdown, using headings (###) for the Phases, 
 
             {/* Error State for Text Fetch */}
             {textError && !isFetchingText && (
-              <div className="bg-[#fffafa] text-[#8b0000] p-6 border-2 border-[#8b0000]/30 flex flex-col items-start gap-4 mb-8">
+              <div className="bg-[#fffafa] text-[#8b0000] p-6 border-2 border-[#8b0000]/30 flex flex-col items-start gap-4 mb-8 animate-page-turn">
                 <div className="flex items-start gap-4">
                   <svg className="w-6 h-6 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                   <div>
@@ -627,7 +782,7 @@ Output the response in beautiful Markdown, using headings (###) for the Phases, 
                   </div>
                 </div>
                 <a 
-                  href={`https://www.semanticbible.com/cgi/2004/11/${selectedPericope.split(':')[0]}.xml`}
+                  href={`https://www.semanticbible.com/cgi/2004/11/${selectedPericope.split(':')[0]}.html`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-2 ml-10 text-sm font-bold uppercase tracking-wider bg-[#8b0000] text-[#fdfaf2] px-4 py-2 hover:bg-[#660000] transition-colors inline-block"
@@ -639,7 +794,7 @@ Output the response in beautiful Markdown, using headings (###) for the Phases, 
 
             {/* Passage Text Display */}
             {passageText && !isFetchingText && !textError && (
-              <article className="animate-in fade-in duration-700 mb-12 bg-stone-100/50 p-8 rounded border border-stone-200 shadow-inner">
+              <article className="animate-page-turn mb-12 bg-stone-100/50 p-8 rounded border border-stone-200 shadow-inner">
                 <h2 className="text-xl font-bold text-[#8b0000] mb-4 uppercase tracking-widest border-b border-[#c5a059]/40 pb-2">Original Text Extract</h2>
                 <p className="text-lg leading-loose text-stone-800 text-justify italic">
                   "{passageText}"
@@ -647,26 +802,23 @@ Output the response in beautiful Markdown, using headings (###) for the Phases, 
               </article>
             )}
 
-            {/* Loading Skeleton */}
-            {isLoading && (
-              <div className="animate-pulse space-y-8 mt-4">
-                <div className="space-y-3">
-                  <div className="h-6 bg-stone-200 rounded w-1/4"></div>
-                  <div className="h-4 bg-stone-200 rounded w-full"></div>
-                  <div className="h-4 bg-stone-200 rounded w-full"></div>
-                  <div className="h-4 bg-stone-200 rounded w-3/4"></div>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-6 bg-stone-200 rounded w-1/3"></div>
-                  <div className="h-4 bg-stone-200 rounded w-full"></div>
-                  <div className="h-4 bg-stone-200 rounded w-5/6"></div>
-                </div>
+            {/* Loading Glowing Cross */}
+            {(isLoading || isFetchingText) && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-white/40 backdrop-blur-[1px]">
+                <img 
+                  src="cross-1135370_960_720.png" 
+                  alt="Loading Cross"
+                  className="w-32 h-32 animate-glow-cross object-contain"
+                />
+                <p className="mt-8 text-[#4a3b32] font-bold uppercase tracking-widest text-sm animate-pulse">
+                  {isLoading ? "Consulting texts..." : "Retrieving passage..."}
+                </p>
               </div>
             )}
 
             {/* Error State for Analysis */}
             {error && !isLoading && (
-              <div className="bg-[#fffafa] text-[#8b0000] p-6 border-2 border-[#8b0000]/30 flex items-start gap-4">
+              <div className="bg-[#fffafa] text-[#8b0000] p-6 border-2 border-[#8b0000]/30 flex items-start gap-4 animate-page-turn">
                 <svg className="w-6 h-6 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                   <h4 className="font-bold uppercase tracking-widest text-sm mb-1">Analysis Failed</h4>
@@ -677,14 +829,73 @@ Output the response in beautiful Markdown, using headings (###) for the Phases, 
 
             {/* Success State for Analysis */}
             {analysisResult && !isLoading && !error && (
-              <article className="animate-in fade-in duration-700 prose prose-stone max-w-none prose-headings:text-[#8b0000] prose-headings:font-bold prose-headings:uppercase prose-headings:tracking-widest prose-h3:text-lg prose-h3:border-b prose-h3:border-[#c5a059]/40 prose-h3:pb-2 prose-p:leading-loose prose-p:text-stone-800 prose-strong:text-[#4a3b32]">
-                <ReactMarkdown>{analysisResult}</ReactMarkdown>
-              </article>
+              <div className="animate-page-turn space-y-6">
+                <h2 className="text-2xl font-bold text-[#4a3b32] mb-6 uppercase tracking-widest text-center">
+                  Analysis: {selectedPericope.includes(':') ? selectedPericope.split(':')[1] : selectedPericope}
+                </h2>
+                
+                {/* Observation Card */}
+                <article className="bg-[#fffafa] p-6 lg:p-8 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#8b0000]/80"></div>
+                  <h3 className="text-xl font-bold text-[#8b0000] mb-4 uppercase tracking-widest flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    Observation
+                  </h3>
+                  <div className="prose prose-stone max-w-none prose-p:leading-loose prose-p:text-stone-800 prose-strong:text-[#4a3b32]">
+                    <ReactMarkdown>{analysisResult.observation}</ReactMarkdown>
+                  </div>
+                </article>
+
+                {/* Interpretation Card */}
+                <article className="bg-[#fffafa] p-6 lg:p-8 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#c5a059]"></div>
+                  <h3 className="text-xl font-bold text-[#c5a059] mb-4 uppercase tracking-widest flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    Interpretation
+                  </h3>
+                  <div className="prose prose-stone max-w-none prose-p:leading-loose prose-p:text-stone-800 prose-strong:text-[#4a3b32]">
+                    <ReactMarkdown>{analysisResult.interpretation}</ReactMarkdown>
+                  </div>
+                </article>
+
+                {/* Application Card */}
+                <article className="bg-[#fffafa] p-6 lg:p-8 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-stone-700"></div>
+                  <h3 className="text-xl font-bold text-stone-700 mb-4 uppercase tracking-widest flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    Application
+                  </h3>
+                  <div className="prose prose-stone max-w-none prose-p:leading-loose prose-p:text-stone-800 prose-strong:text-[#4a3b32]">
+                    <ReactMarkdown>{analysisResult.application}</ReactMarkdown>
+                  </div>
+                </article>
+              </div>
             )}
             
           </section>
-        </div>
-      </main>
+          
+              </div> {/* End of page-front */}
+
+              {/* Back of Page 1 (Visible when flipped) */}
+              <div className="page-back p-8 lg:p-12 flex flex-col items-center justify-center border-r border-[#e6d9c3] shadow-[5px_0_15px_rgba(0,0,0,0.05)]">
+                {/* Clickable Left Edge (physically on the right of the flipped page) to flip back */}
+                <div 
+                  className="absolute top-0 right-0 w-16 h-full cursor-pointer z-30 page-edge-hover opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center group"
+                  onClick={() => setIsPageFlipped(false)}
+                  title="Previous Page"
+                >
+                  <svg className="w-8 h-8 text-stone-500 opacity-60 group-hover:opacity-100 transition-opacity transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
+                <div className="opacity-30 flex flex-col items-center">
+                   <svg className="w-12 h-12 mb-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                   <p className="font-serif">Notes</p>
+                </div>
+              </div>
+              
+            </div> {/* End of page-turner */}
+          </div> {/* End of grid-stack */}
+        </main>
+      </div>
     </div>
   );
 }
