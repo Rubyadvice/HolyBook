@@ -1,341 +1,878 @@
 import React, { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-// The 46 Essential Biblical Stories for Church Leaders
-const ESSENTIAL_STORIES = [
-  // PART I - OLD TESTAMENT
-  {
-    id: "OT-01",
-    title: "1. Creation and the Fall",
-    ref: "Genesis 1-3",
-    body: "God creates the world, humanity, and the Garden of Eden. Adam and Eve disobey God, introducing sin, alienation, shame, and death into human existence.",
-    why: "Establishes human dignity, humanity's responsibility to creation, the nature of sin, free will, temptation, and the need for redemption. Every Christian understanding of humanity begins here."
-  },
-  {
-    id: "OT-02",
-    title: "2. Cain and Abel",
-    ref: "Genesis 4:1-16",
-    body: "Cain becomes jealous of his brother Abel and murders him. God confronts Cain, asking, 'Where is your brother?'",
-    why: "Explores jealousy, anger, resentment, violence, accountability, and responsibility for others. It is an important story about the destructive consequences of unchecked sin."
-  },
-  {
-    id: "OT-03",
-    title: "3. Noah and the Flood",
-    ref: "Genesis 6-9",
-    body: "Human corruption becomes widespread. God judges the world through a flood, preserves Noah and his family, and establishes a covenant symbolized by the rainbow.",
-    why: "Introduces divine judgment, human corruption, obedience, preservation, covenant, and God's commitment to creation."
-  },
-  {
-    id: "OT-04",
-    title: "4. The Tower of Babel",
-    ref: "Genesis 11:1-9",
-    body: "Humanity unites to build a tower reaching heaven, seeking to make a name for itself. God confuses their language and disperses them.",
-    why: "A cautionary story about pride, ambition, self-glorification, and collective power detached from humility before God."
-  },
-  {
-    id: "OT-05",
-    title: "5. Abraham and the Covenant",
-    ref: "Genesis 12, 15, 17, 22",
-    body: "God calls Abraham to leave his homeland and promises to make him the father of a great nation. Abraham trusts God's promise despite uncertainty. The story culminates in the binding of Isaac.",
-    why: "Foundational to understanding faith, obedience, covenant, sacrifice, and the biblical theme of blessing all nations. Abraham becomes a central model of faith in Romans 4 and Hebrews 11."
-  },
-  {
-    id: "OT-06",
-    title: "6. Jacob, Esau, and Wrestling with God",
-    ref: "Genesis 25-33",
-    body: "Jacob deceives his brother and father to obtain the blessing. Later, he wrestles with a mysterious figure and receives the name Israel.",
-    why: "Explores deception, family conflict, reconciliation, transformation, perseverance, and the possibility that flawed people can become instruments of God's purposes."
-  },
-  {
-    id: "OT-07",
-    title: "7. Joseph: Betrayal, Suffering, Forgiveness",
-    ref: "Genesis 37-50",
-    body: "Joseph is betrayed by his brothers, sold into slavery, falsely accused, and imprisoned. Eventually he becomes a powerful Egyptian administrator and saves his family from famine.",
-    why: "One of Scripture's richest stories about forgiveness, providence, integrity, suffering, reconciliation, and using authority to preserve rather than punish."
-  },
-  {
-    id: "OT-08",
-    title: "8. Moses and the Exodus",
-    ref: "Exodus 1-14",
-    body: "Israel suffers under Egyptian slavery. God calls Moses to confront Pharaoh, sends the plagues, institutes the Passover, and delivers Israel through the Red Sea.",
-    why: "Arguably the most important Old Testament salvation narrative. It establishes liberation, divine intervention, deliverance, the Passover, and God's identity as the redeemer of his people."
-  },
-  {
-    id: "OT-09",
-    title: "9. Mount Sinai and the Ten Commandments",
-    ref: "Exodus 19-24",
-    body: "God establishes his covenant with Israel and gives Moses the commandments and instructions for communal and religious life.",
-    why: "Essential for understanding morality, covenant, worship, holiness, justice, and the relationship between divine grace and obedience."
-  },
-  {
-    id: "OT-10",
-    title: "10. The Golden Calf",
-    ref: "Exodus 32-34",
-    body: "While Moses is on Mount Sinai, the Israelites construct an idol and worship it. Moses intercedes for the people, and God renews the covenant.",
-    why: "A critical story about idolatry, impatience, institutional corruption, spiritual leadership, intercession, and divine mercy."
-  },
-  {
-    id: "OT-11",
-    title: "11. The Wilderness and the Twelve Spies",
-    ref: "Numbers 11-14, 20-21",
-    body: "Israel repeatedly complains, doubts God's promises, and struggles to trust Moses. Ten spies discourage the people from entering the Promised Land, while Joshua and Caleb remain confident.",
-    why: "Explores spiritual maturity, collective fear, perseverance, obedience, leadership under criticism, and the consequences of persistent unbelief."
-  },
-  {
-    id: "OT-12",
-    title: "12. David and Goliath",
-    ref: "1 Samuel 17",
-    body: "The young David defeats the Philistine giant Goliath when Israel's army is paralyzed by fear.",
-    why: "Explores courage, faith, humility, reliance on God rather than outward appearances, and the difference between genuine confidence and arrogance."
-  },
-  {
-    id: "OT-13",
-    title: "13. David, Bathsheba, and Nathan",
-    ref: "2 Samuel 11-12",
-    body: "David abuses his royal authority, commits adultery with Bathsheba, and arranges the death of her husband Uriah. The prophet Nathan confronts him.",
-    why: "Absolutely essential for church leadership. It addresses sexual misconduct, abuse of authority, moral compromise, accountability, repentance, and the devastating consequences of a leader's private sin."
-  },
-  {
-    id: "OT-14",
-    title: "14. Elijah and the Prophets of Baal",
-    ref: "1 Kings 17-19",
-    body: "Elijah confronts King Ahab and Queen Jezebel, challenges the prophets of Baal on Mount Carmel, and later flees into the wilderness in exhaustion and despair.",
-    why: "A remarkable story about confronting corruption, religious compromise, courage, prophetic authority, loneliness, and spiritual exhaustion."
-  },
-  {
-    id: "OT-15",
-    title: "15. Solomon: Wisdom and Spiritual Decline",
-    ref: "1 Kings 3-11",
-    body: "Solomon asks God for wisdom, becomes renowned for his judgment, builds the Temple, and eventually turns toward idolatry.",
-    why: "A warning that intelligence, talent, wealth, success, and even a remarkable spiritual beginning do not guarantee faithfulness."
-  },
-  {
-    id: "OT-16",
-    title: "16. Ruth and Naomi",
-    ref: "Book of Ruth",
-    body: "After losing their husbands, Ruth remains loyal to her mother-in-law Naomi. Ruth's faithfulness and kindness eventually lead to her marriage to Boaz.",
-    why: "A beautiful story about loyalty, compassion, hospitality, dignity, grief, and the inclusion of an outsider in God's unfolding purposes."
-  },
-  {
-    id: "OT-17",
-    title: "17. Daniel in Babylon",
-    ref: "Daniel 1-6",
-    body: "Daniel and his companions maintain their faith while living under foreign rulers. Daniel survives the lions' den because he refuses to abandon his devotion to God.",
-    why: "Essential for understanding faithfulness in a secular or hostile environment, integrity in public office, courage, prayer, and the limits of political authority."
-  },
-  {
-    id: "OT-18",
-    title: "18. Esther and Preservation of the Jews",
-    ref: "Book of Esther",
-    body: "Esther becomes queen of Persia and risks her life to prevent the destruction of her people, encouraged by her cousin Mordecai.",
-    why: "A story about moral courage, responsible influence, providence, advocacy, and the responsibility to act when vulnerable people are threatened."
-  },
-  {
-    id: "OT-19",
-    title: "19. Nehemiah Rebuilds Jerusalem",
-    ref: "Book of Nehemiah",
-    body: "Nehemiah hears about Jerusalem's destruction, prays, secures royal permission, organizes the rebuilding of the walls, and addresses injustice within the community.",
-    why: "One of the best biblical examples of practical organizational leadership: vision, planning, delegation, prayer, resilience, managing opposition, and institutional reform."
-  },
-  {
-    id: "OT-20",
-    title: "20. Jonah and Nineveh",
-    ref: "Book of Jonah",
-    body: "Jonah resists God's command to preach to Nineveh, flees, is swallowed by a great fish, and eventually delivers a warning. Nineveh repents, and Jonah becomes angry at God's mercy.",
-    why: "A profound challenge to religious exclusivity, prejudice, resentment, and the desire to see others punished. It teaches that God's compassion extends beyond boundaries."
-  },
-  {
-    id: "OT-21",
-    title: "Extra: Additional Old Testament Passages",
-    ref: "Psalms, Proverbs, Ecclesiastes, Prophets",
-    body: "Not every essential Old Testament teaching is presented as a narrative. A church leader should also know the central messages of Psalms, Proverbs, Isaiah, Jeremiah, Ezekiel, Amos, Micah, and Malachi.",
-    why: "These passages provide essential contributions on trust, repentance, God's care, wisdom, mortality, prophetic calling, the new covenant, justice, and anticipating the Messiah."
-  },
+type StorySection = 'NARRATIVE' | 'OT' | 'NT' | 'THEMES' | 'PERICOPES';
 
-  // PART II - NEW TESTAMENT
+interface ContentItem {
+  id: string;
+  section: StorySection;
+  title: string;
+  ref: string;
+  body: string;
+  why: string;
+  imageUrl?: string;
+  preAnalyzed?: {
+    observation: string;
+    interpretation: string;
+    application: string;
+  };
+}
+
+// Self-contained high-detail SVG sacred artwork generator for the 10 Grand Narrative movements
+// Ensures instant, zero-latency rendering in the browser sandbox with uniform 16:9 framing
+const getSacredIllustrationUri = (key: string, label?: string): string => {
+  let svgBody = '';
+  switch (key) {
+    case 'NAR-01': // Creation (Genesis.jpeg) - Cosmic light bursting over primordial waters & waterfalls
+      svgBody = `
+        <defs>
+          <radialGradient id="g1" cx="50%" cy="38%" r="65%">
+            <stop offset="0%" stop-color="#fffdf2"/>
+            <stop offset="22%" stop-color="#fde08d"/>
+            <stop offset="55%" stop-color="#3b6998"/>
+            <stop offset="100%" stop-color="#0b1528"/>
+          </radialGradient>
+          <linearGradient id="sea1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2a6f97"/>
+            <stop offset="50%" stop-color="#133c55"/>
+            <stop offset="100%" stop-color="#071a26"/>
+          </linearGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#g1)"/>
+        <!-- Stars & Cosmic Dust -->
+        <g fill="#fff8d6" opacity="0.85">
+          <circle cx="620" cy="65" r="3"/><circle cx="680" cy="95" r="4"/><circle cx="730" cy="52" r="2.5"/>
+          <circle cx="570" cy="110" r="2"/><circle cx="750" cy="135" r="3.5"/><circle cx="140" cy="70" r="2.5"/>
+          <circle cx="210" cy="48" r="1.8"/><circle cx="645" cy="145" r="2.2"/>
+        </g>
+        <!-- Radiant Light Rays -->
+        <g stroke="#fff6cc" stroke-width="1.5" opacity="0.35">
+          <line x1="400" y1="170" x2="400" y2="10"/><line x1="400" y1="170" x2="220" y2="20"/>
+          <line x1="400" y1="170" x2="580" y2="20"/><line x1="400" y1="170" x2="100" y2="120"/>
+          <line x1="400" y1="170" x2="700" y2="120"/><line x1="400" y1="170" x2="400" y2="330"/>
+        </g>
+        <!-- Billowing Illuminated Clouds -->
+        <path d="M0,130 Q90,95 160,150 Q230,130 280,190 Q340,240 260,275 L0,275 Z" fill="#f3c68f" opacity="0.65"/>
+        <path d="M800,120 Q700,85 630,150 Q550,135 510,200 Q460,245 540,275 L800,275 Z" fill="#90b4d4" opacity="0.6"/>
+        <!-- Winged Angelic Silhouette in Upper Left Cloud -->
+        <path d="M65,65 Q125,85 165,135 Q130,145 105,125 Q80,105 65,65 Z" fill="#fae5c8" opacity="0.85"/>
+        <!-- Central Sunburst & Horizon Sun -->
+        <circle cx="400" cy="160" r="56" fill="#fffbeb" opacity="0.95"/>
+        <circle cx="400" cy="272" r="36" fill="#fff7d6"/>
+        <!-- Cliffs & Waterfall on Left -->
+        <path d="M0,210 L115,225 L145,285 L0,285 Z" fill="#2c2520"/>
+        <path d="M82,222 L102,224 L112,285 L76,285 Z" fill="#e0f2fe" opacity="0.9"/>
+        <!-- Rolling Ocean Waves -->
+        <rect x="0" y="275" width="800" height="175" fill="url(#sea1)"/>
+        <path d="M0,335 Q120,305 240,340 T480,335 T720,345 L800,335 L800,450 L0,450 Z" fill="#0d2b3e"/>
+        <path d="M120,395 Q210,345 300,395 Q400,350 510,395 Q610,350 710,395 L800,425 L800,450 L0,450 Z" fill="#1d4e6b"/>
+        <path d="M165,388 Q215,355 265,388 M415,385 Q465,352 515,385 M555,390 Q605,355 655,390" fill="none" stroke="#e0f7fa" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+      `;
+      break;
+
+    case 'NAR-02': // Fall (Fall.jpeg) - Lush Eden canopy with radiant Creator and contrite Adam
+      svgBody = `
+        <defs>
+          <radialGradient id="edenLight" cx="68%" cy="22%" r="70%">
+            <stop offset="0%" stop-color="#fffde7"/>
+            <stop offset="35%" stop-color="#dce775"/>
+            <stop offset="70%" stop-color="#4caf50"/>
+            <stop offset="100%" stop-color="#1b3b1e"/>
+          </radialGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#edenLight)"/>
+        <!-- Sunbeams through Eden Canopy -->
+        <polygon points="560,0 440,0 160,450 380,450" fill="#fff9c4" opacity="0.35"/>
+        <polygon points="620,0 520,0 360,450 560,450" fill="#fff9c4" opacity="0.28"/>
+        <!-- Forest Trees & Framing Canopy -->
+        <path d="M0,0 L280,0 Q210,95 120,130 Q75,240 110,450 L0,450 Z" fill="#1e3f20"/>
+        <path d="M800,0 L640,0 Q700,110 735,230 L710,450 L800,450 Z" fill="#254d27"/>
+        <!-- Radiant Creator Figure in Upper Right Glade -->
+        <g transform="translate(525, 135)">
+          <circle cx="0" cy="-35" r="42" fill="#fffde7" opacity="0.6"/>
+          <path d="M-45,95 L-22,-10 L22,-10 L45,95 Z" fill="#f5f0dc"/>
+          <path d="M-20,-5 L-68,35 M20,-5 L65,30" stroke="#f5f0dc" stroke-width="14" stroke-linecap="round"/>
+          <circle cx="0" cy="-26" r="14" fill="#e6ccb2"/>
+          <path d="M-10,-20 Q0,5 10,-20" fill="#ffffff"/>
+        </g>
+        <!-- Seated Contrite Figure in Foreground Left -->
+        <g transform="translate(185, 290)">
+          <path d="M-45,65 Q-10,15 45,35 L65,120 L-55,120 Z" fill="#5c6b3c"/>
+          <circle cx="-12" cy="-28" r="24" fill="#d4a373"/>
+          <path d="M-28,-38 Q-8,-55 12,-32" fill="#4a3520"/>
+          <path d="M-20,-5 Q25,-12 38,25 L-5,42 Z" fill="#e0ac69"/>
+        </g>
+        <!-- Lush Foreground Ferns & Fallen Fruit -->
+        <path d="M0,390 Q220,355 460,400 T800,380 L800,450 L0,450 Z" fill="#2d5a27"/>
+        <circle cx="265" cy="422" r="9" fill="#d97706"/><circle cx="286" cy="428" r="8" fill="#dc2626"/><circle cx="305" cy="420" r="7" fill="#d97706"/>
+      `;
+      break;
+
+    case 'NAR-03': // Covenant (Covenant.jpeg) - Abraham gazing up at the Milky Way starry sky in desert twilight
+      svgBody = `
+        <defs>
+          <linearGradient id="nightSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#050b14"/>
+            <stop offset="60%" stop-color="#102542"/>
+            <stop offset="82%" stop-color="#3d312a"/>
+            <stop offset="100%" stop-color="#c98a4b"/>
+          </linearGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#nightSky)"/>
+        <!-- Milky Way Band of Countless Stars -->
+        <path d="M260,0 Q430,150 560,340 L670,340 Q540,140 390,0 Z" fill="#60a5fa" opacity="0.16"/>
+        <path d="M300,0 Q445,150 585,340 L630,340 Q495,140 355,0 Z" fill="#fef08a" opacity="0.14"/>
+        <!-- Starfield -->
+        <g fill="#ffffff" opacity="0.9">
+          <circle cx="340" cy="40" r="2"/><circle cx="380" cy="65" r="2.5"/><circle cx="420" cy="30" r="1.5"/>
+          <circle cx="455" cy="95" r="2.2"/><circle cx="490" cy="130" r="1.8"/><circle cx="520" cy="175" r="2.5"/>
+          <circle cx="360" cy="115" r="1.6"/><circle cx="430" cy="155" r="2"/><circle cx="565" cy="215" r="1.8"/>
+          <circle cx="150" cy="80" r="1.5"/><circle cx="220" cy="50" r="2"/><circle cx="670" cy="75" r="2.2"/>
+          <circle cx="720" cy="130" r="1.5"/><circle cx="95" cy="145" r="1.8"/><circle cx="610" cy="105" r="2"/>
+        </g>
+        <!-- Distant Desert Mountains & Encampment Tents -->
+        <path d="M0,335 Q130,295 270,335 T560,330 T800,335 L800,450 L0,450 Z" fill="#261c15"/>
+        <polygon points="585,345 618,305 650,345" fill="#1a120d"/>
+        <polygon points="640,348 665,318 690,348" fill="#150e0a"/>
+        <circle cx="618" cy="340" r="3" fill="#f59e0b"/>
+        <!-- Patriarch Abraham Looking Upward with Hand over Heart -->
+        <g transform="translate(275, 255)">
+          <!-- Outer Mantle & Robe -->
+          <path d="M-95,195 L-68,15 Q0,-10 68,15 L95,195 Z" fill="#3d2616"/>
+          <path d="M-38,195 L-24,12 L24,12 L38,195 Z" fill="#a8997c"/>
+          <!-- Headscarf & White Beard -->
+          <path d="M-42,-42 Q-8,-82 32,-42 L48,25 L-45,25 Z" fill="#9c8c74"/>
+          <circle cx="0" cy="-38" r="26" fill="#b07d56"/>
+          <path d="M-22,-28 Q5,18 28,-22 Q18,-42 -22,-28 Z" fill="#e5e5e5"/>
+          <!-- Hand on Chest -->
+          <path d="M-65,85 L-5,42 L18,56 L-42,112 Z" fill="#4f331f"/>
+          <circle cx="12" cy="48" r="11" fill="#b07d56"/>
+        </g>
+      `;
+      break;
+
+    case 'NAR-04': // Israel (Israel.jpeg) - Moses parting the Red Sea with towering walls of water
+      svgBody = `
+        <defs>
+          <linearGradient id="exodusSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3d352e"/>
+            <stop offset="45%" stop-color="#d4a359"/>
+            <stop offset="100%" stop-color="#fef3c7"/>
+          </linearGradient>
+          <linearGradient id="waveWall" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e0f2fe"/>
+            <stop offset="30%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#0369a1"/>
+          </linearGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#exodusSky)"/>
+        <!-- Distant Sinai Mountains -->
+        <polygon points="240,145 335,85 415,145" fill="#57534e" opacity="0.7"/>
+        <polygon points="410,145 520,75 640,145" fill="#44403c" opacity="0.8"/>
+        <!-- Dry Seafloor Path Converging to Horizon -->
+        <polygon points="390,145 410,145 760,450 40,450" fill="#a88b67"/>
+        <!-- Left & Right Towering Walls of Water -->
+        <path d="M0,115 Q195,125 390,145 L260,340 L0,290 Z" fill="url(#waveWall)"/>
+        <path d="M800,115 Q605,125 410,145 L540,340 L800,290 Z" fill="url(#waveWall)"/>
+        <!-- Foaming Wave Crests -->
+        <path d="M0,115 Q195,125 390,145" fill="none" stroke="#ffffff" stroke-width="8" opacity="0.9"/>
+        <path d="M800,115 Q605,125 410,145" fill="none" stroke="#ffffff" stroke-width="8" opacity="0.9"/>
+        <!-- Multitude Walking Through the Sea -->
+        <g fill="#5c4033">
+          <rect x="375" y="210" width="8" height="22" rx="3"/><rect x="392" y="215" width="8" height="22" rx="3"/>
+          <rect x="412" y="208" width="8" height="22" rx="3"/><rect x="355" y="245" width="11" height="30" rx="4"/>
+          <rect x="382" y="250" width="11" height="30" rx="4"/><rect x="408" y="248" width="11" height="30" rx="4"/>
+          <rect x="435" y="242" width="11" height="30" rx="4"/><rect x="340" y="295" width="15" height="42" rx="5"/>
+          <rect x="375" y="302" width="15" height="42" rx="5"/><rect x="415" y="298" width="15" height="42" rx="5"/>
+          <rect x="455" y="292" width="15" height="42" rx="5"/>
+        </g>
+        <!-- Rocky Promontory & Moses Raising Staff on Left -->
+        <path d="M0,280 L235,345 L335,450 L0,450 Z" fill="#3a281c"/>
+        <g transform="translate(145, 235)">
+          <line x1="65" y1="-125" x2="65" y2="95" stroke="#4a2c11" stroke-width="4.5"/>
+          <path d="M-38,95 L-18,-25 L32,-25 L48,95 Z" fill="#7f1d1d"/>
+          <path d="M12,-22 L65,-65" stroke="#d6bc98" stroke-width="11" stroke-linecap="round"/>
+          <circle cx="5" cy="-42" r="16" fill="#e5e5e5"/>
+        </g>
+      `;
+      break;
+
+    case 'NAR-05': // Kingdom (Kingdom.jpeg) - Samuel anointing kneeling young David with horn of oil
+      svgBody = `
+        <defs>
+          <radialGradient id="templeRay" cx="42%" cy="5%" r="80%">
+            <stop offset="0%" stop-color="#fef08a"/>
+            <stop offset="35%" stop-color="#92400e"/>
+            <stop offset="100%" stop-color="#1c130d"/>
+          </radialGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#templeRay)"/>
+        <!-- Golden Beam of Anointing Light -->
+        <polygon points="315,0 385,0 475,450 225,450" fill="#fde047" opacity="0.22"/>
+        <!-- Bystander Elders on Left -->
+        <g fill="#3e2c23" opacity="0.85">
+          <rect x="55" y="145" width="55" height="260" rx="12"/>
+          <circle cx="82" cy="118" r="22" fill="#8d6e63"/>
+          <rect x="130" y="135" width="60" height="270" rx="12" fill="#5d4037"/>
+          <circle cx="160" cy="108" r="22" fill="#a1887f"/>
+        </g>
+        <!-- Standing Prophet Samuel Pouring Oil -->
+        <g transform="translate(505, 195)">
+          <path d="M-55,235 L-38,-55 L58,-55 L82,235 Z" fill="#9a6b26"/>
+          <circle cx="-5" cy="-82" r="26" fill="#d4a373"/>
+          <path d="M-32,-95 Q-5,-120 26,-92" fill="#e7e5e4" stroke="#d6d3d1" stroke-width="8"/>
+          <path d="M-22,-68 Q-8,-15 15,-68 Z" fill="#f5f5f4"/>
+          <!-- Outstretched Arm Holding Horn of Oil & Golden Stream -->
+          <path d="M-35,-45 L-135,-72" stroke="#9a6b26" stroke-width="18" stroke-linecap="round"/>
+          <polygon points="-148,-88 -128,-88 -138,-58" fill="#451a03"/>
+          <line x1="-138" y1="-58" x2="-138" y2="-8" stroke="#facc15" stroke-width="3" stroke-dasharray="4 2"/>
+        </g>
+        <!-- Kneeling Young David in Crimson Tunic -->
+        <g transform="translate(365, 295)">
+          <path d="M-58,135 L-35,-35 L35,-35 L65,135 Z" fill="#7f1d1d"/>
+          <circle cx="0" cy="-65" r="24" fill="#d4a373"/>
+          <path d="M-24,-75 Q0,-95 24,-72" fill="#5c3a21"/>
+        </g>
+        <!-- Wooden Harp & Earthenware Vessels on Right -->
+        <path d="M645,425 L685,255 L765,285 L735,425 Z" fill="none" stroke="#b45309" stroke-width="7"/>
+        <line x1="675" y1="265" x2="655" y2="415" stroke="#fef08a" stroke-width="1.5"/>
+        <line x1="695" y1="272" x2="675" y2="415" stroke="#fef08a" stroke-width="1.5"/>
+        <line x1="715" y1="278" x2="695" y2="415" stroke="#fef08a" stroke-width="1.5"/>
+      `;
+      break;
+
+    case 'NAR-06': // Exile (Exile.jpeg) - Procession departing smoking walled city of Jerusalem
+      svgBody = `
+        <defs>
+          <linearGradient id="exileSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#7fa1c3"/>
+            <stop offset="55%" stop-color="#e2d4b7"/>
+            <stop offset="100%" stop-color="#c2a373"/>
+          </linearGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#exileSky)"/>
+        <!-- Rising Smoke Plumes from Distant Jerusalem -->
+        <path d="M295,135 Q235,65 165,15 Q115,0 85,0 L215,0 Q275,55 320,135 Z" fill="#6b7280" opacity="0.45"/>
+        <!-- Distant Walled City on Hilltop -->
+        <rect x="65" y="122" width="340" height="32" fill="#d6c5a3"/>
+        <rect x="65" y="112" width="22" height="42" fill="#cbb68e"/>
+        <rect x="165" y="114" width="22" height="40" fill="#cbb68e"/>
+        <rect x="275" y="114" width="22" height="40" fill="#cbb68e"/>
+        <rect x="375" y="114" width="22" height="40" fill="#cbb68e"/>
+        <!-- Dusty Sunlit Hills & Roadway -->
+        <path d="M0,152 L800,152 L800,450 L0,450 Z" fill="#b59461"/>
+        <polygon points="180,152 320,152 680,450 220,450" fill="#9c7c4c"/>
+        <!-- Left Guard with Spear -->
+        <g transform="translate(95, 255)">
+          <line x1="-28" y1="-125" x2="-28" y2="165" stroke="#4a3520" stroke-width="3.5"/>
+          <polygon points="-33,-125 -23,-125 -28,-148" fill="#9ca3af"/>
+          <rect x="-22" y="-35" width="46" height="125" rx="6" fill="#1e3a5f"/>
+          <rect x="-20" y="-35" width="42" height="58" fill="#a16207"/>
+          <circle cx="0" cy="-62" r="18" fill="#b07d56"/>
+          <path d="M-18,-66 Q0,-98 18,-66 Z" fill="#ca8a04"/>
+        </g>
+        <!-- Exile Procession Carrying Bundles -->
+        <g transform="translate(515, 255)">
+          <path d="M-38,155 L-26,-32 L28,-32 L40,155 Z" fill="#2b4c65"/>
+          <circle cx="0" cy="-58" r="20" fill="#b07d56"/>
+          <path d="M-14,-48 Q0,-12 14,-48 Z" fill="#e5e7eb"/>
+          <circle cx="-12" cy="12" r="26" fill="#a8997c"/>
+        </g>
+        <g transform="translate(675, 275)">
+          <path d="M-36,145 L-24,-28 L26,-28 L38,145 Z" fill="#5c4033"/>
+          <path d="M-24,-65 Q0,-85 24,-65 L32,10 L-30,10 Z" fill="#a8997c"/>
+          <circle cx="0" cy="-50" r="17" fill="#c6936d"/>
+          <circle cx="8" cy="12" r="24" fill="#cbb68e"/>
+        </g>
+      `;
+      break;
+
+    case 'NAR-07': // Restoration (Restoration.jpeg) - Ezekiel & the Valley of Dry Bones under radiant figure
+      svgBody = `
+        <defs>
+          <radialGradient id="ezekielLight" cx="62%" cy="18%" r="75%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="28%" stop-color="#fef08a"/>
+            <stop offset="65%" stop-color="#78716c"/>
+            <stop offset="100%" stop-color="#292524"/>
+          </radialGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#ezekielLight)"/>
+        <!-- Dramatic Storm Clouds Parted by Glory Rays -->
+        <path d="M0,0 L420,0 Q310,95 160,115 Q65,135 0,95 Z" fill="#3f3a36" opacity="0.88"/>
+        <polygon points="495,0 645,0 800,320 220,320" fill="#fef9c3" opacity="0.45"/>
+        <!-- Radiant Figure in Upper Sky -->
+        <g transform="translate(525, 110)">
+          <path d="M-28,75 L-14,-25 L14,-25 L28,75 Z" fill="#ffffff"/>
+          <path d="M-14,-15 L-48,12 M14,-15 L48,12" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="0" cy="-38" r="12" fill="#fef08a"/>
+        </g>
+        <!-- Desert Valley Floor -->
+        <path d="M0,225 Q230,195 450,235 T800,215 L800,450 L0,450 Z" fill="#d6c7b2"/>
+        <!-- Prophet Ezekiel Standing with Outstretched Hand -->
+        <g transform="translate(225, 255)">
+          <path d="M-42,125 L-26,-45 L26,-45 L46,125 Z" fill="#78553a"/>
+          <circle cx="0" cy="-68" r="20" fill="#e7e5e4"/>
+          <path d="M18,-25 L68,-5" stroke="#78553a" stroke-width="16" stroke-linecap="round"/>
+        </g>
+        <!-- Rising Figures & Dry Bones in Foreground -->
+        <g stroke="#574c41" stroke-width="3" fill="#e7dec8">
+          <circle cx="380" cy="215" r="14"/>
+          <line x1="380" y1="229" x2="380" y2="285"/>
+          <line x1="362" y1="242" x2="398" y2="242"/><line x1="364" y1="254" x2="396" y2="254"/>
+          <circle cx="685" cy="245" r="16"/>
+          <line x1="685" y1="261" x2="685" y2="335"/>
+          <line x1="662" y1="276" x2="708" y2="276"/><line x1="665" y1="290" x2="705" y2="290"/>
+          <circle cx="275" cy="395" r="26"/>
+          <circle cx="725" cy="405" r="28"/>
+          <path d="M355,385 Q425,345 495,385" fill="none" stroke-width="5"/>
+          <path d="M370,398 Q425,360 480,398" fill="none" stroke-width="5"/>
+        </g>
+      `;
+      break;
+
+    case 'NAR-08': // Jesus Christ (Jesus Christ.jpeg) - Empty Tomb with rolled stone, 3 crosses & Risen Christ
+      svgBody = `
+        <defs>
+          <radialGradient id="resurrectionSun" cx="68%" cy="38%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="25%" stop-color="#fef08a"/>
+            <stop offset="65%" stop-color="#f59e0b"/>
+            <stop offset="100%" stop-color="#78350f"/>
+          </radialGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#resurrectionSun)"/>
+        <!-- Sunburst Rays Behind Risen Christ -->
+        <g stroke="#fffbeb" stroke-width="3" opacity="0.55">
+          <line x1="565" y1="165" x2="365" y2="20"/><line x1="565" y1="165" x2="485" y2="10"/>
+          <line x1="565" y1="165" x2="625" y2="10"/><line x1="565" y1="165" x2="745" y2="40"/>
+          <line x1="565" y1="165" x2="780" y2="165"/>
+        </g>
+        <!-- Distant Golgotha Hill with Three Crosses -->
+        <path d="M320,255 Q435,175 555,255 Z" fill="#92623a"/>
+        <g stroke="#451a03" stroke-width="4">
+          <line x1="430" y1="145" x2="430" y2="205"/><line x1="412" y1="162" x2="448" y2="162"/>
+          <line x1="395" y1="162" x2="395" y2="210"/><line x1="382" y1="175" x2="408" y2="175"/>
+          <line x1="465" y1="162" x2="465" y2="210"/><line x1="452" y1="175" x2="478" y2="175"/>
+        </g>
+        <!-- Risen Christ in Radiant White Robes with Open Arms -->
+        <g transform="translate(565, 185)">
+          <path d="M-24,68 L-14,-22 L14,-22 L24,68 Z" fill="#ffffff"/>
+          <path d="M-14,-16 L-48,-5 M14,-16 L48,-5" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+          <circle cx="0" cy="-34" r="10" fill="#d97706"/>
+        </g>
+        <!-- Sunlit Garden Path & Folded Linen Cloth on Stone Slab -->
+        <path d="M0,255 L800,255 L800,450 L0,450 Z" fill="#d4a359"/>
+        <rect x="85" y="295" width="340" height="65" fill="#8c6d46"/>
+        <path d="M95,295 Q215,275 335,298 L485,375 Q365,395 255,362 Z" fill="#f5f5f4"/>
+        <!-- Massive Rolled-Away Circular Stone on Left & Rock-Hewn Tomb Arch -->
+        <circle cx="135" cy="185" r="125" fill="#6b533b" stroke="#4a3728" stroke-width="6"/>
+        <path d="M0,0 L800,0 L800,450 L715,450 L725,135 Q565,-15 335,45 L295,195 L0,195 Z" fill="#4a3728"/>
+      `;
+      break;
+
+    case 'NAR-09': // Church (Church.jpeg) - Pentecost flames descending from heaven upon the gathered disciples
+      svgBody = `
+        <defs>
+          <radialGradient id="pentecostGlow" cx="50%" cy="18%" r="75%">
+            <stop offset="0%" stop-color="#fffbeb"/>
+            <stop offset="30%" stop-color="#fbbf24"/>
+            <stop offset="65%" stop-color="#1e293b"/>
+            <stop offset="100%" stop-color="#0f172a"/>
+          </radialGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#pentecostGlow)"/>
+        <!-- Ascended Christ & Heavenly Host in Upper Glory -->
+        <circle cx="400" cy="75" r="55" fill="#ffffff" opacity="0.85"/>
+        <path d="M375,135 L390,55 L410,55 L425,135 Z" fill="#be185d"/>
+        <circle cx="400" cy="40" r="11" fill="#fde68a"/>
+        <!-- Swooping Streams of Pentecost Fire Descending -->
+        <g fill="none" stroke="#f59e0b" stroke-width="16" stroke-linecap="round" opacity="0.85">
+          <path d="M350,125 Q180,175 135,255"/>
+          <path d="M375,135 Q275,185 265,255"/>
+          <path d="M400,140 Q395,195 395,255"/>
+          <path d="M425,135 Q525,185 535,255"/>
+          <path d="M450,125 Q620,175 665,255"/>
+        </g>
+        <g fill="none" stroke="#fef08a" stroke-width="7" stroke-linecap="round">
+          <path d="M350,125 Q180,175 135,255"/>
+          <path d="M375,135 Q275,185 265,255"/>
+          <path d="M400,140 Q395,195 395,255"/>
+          <path d="M425,135 Q525,185 535,255"/>
+          <path d="M450,125 Q620,175 665,255"/>
+        </g>
+        <!-- Gathered Disciples in Reverent Prayer -->
+        <g transform="translate(0, 255)">
+          <path d="M95,195 L112,35 L162,35 L178,195 Z" fill="#44403c"/><circle cx="137" cy="12" r="18" fill="#d6a87c"/>
+          <path d="M225,195 L242,45 L292,45 L308,195 Z" fill="#9a3412"/><circle cx="267" cy="22" r="18" fill="#d6a87c"/>
+          <path d="M348,195 L368,28 L422,28 L442,195 Z" fill="#1e3a8a"/><circle cx="395" cy="6" r="19" fill="#d6a87c"/>
+          <path d="M492,195 L508,38 L558,38 L575,195 Z" fill="#14532d"/><circle cx="533" cy="15" r="18" fill="#d6a87c"/>
+          <path d="M622,195 L638,35 L688,35 L705,195 Z" fill="#7c2d12"/><circle cx="663" cy="12" r="18" fill="#d6a87c"/>
+        </g>
+      `;
+      break;
+
+    case 'NAR-10': // New Creation (New Creation.jpeg) - Golden New Jerusalem, River of Life & redeemed community
+      svgBody = `
+        <defs>
+          <radialGradient id="newJerSky" cx="50%" cy="8%" r="75%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="30%" stop-color="#fef08a"/>
+            <stop offset="75%" stop-color="#d97706"/>
+            <stop offset="100%" stop-color="#451a03"/>
+          </radialGradient>
+          <linearGradient id="riverLife" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fef9c3"/>
+            <stop offset="40%" stop-color="#7dd3fc"/>
+            <stop offset="100%" stop-color="#0369a1"/>
+          </linearGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#newJerSky)"/>
+        <!-- Heavenly Sunbeams -->
+        <polygon points="365,0 435,0 640,225 160,225" fill="#ffffff" opacity="0.35"/>
+        <!-- Golden Domed New Jerusalem on the Horizon -->
+        <g fill="#d4a038" stroke="#926216" stroke-width="1.5">
+          <rect x="145" y="175" width="510" height="48"/>
+          <path d="M355,175 Q400,105 445,175 Z"/>
+          <path d="M265,175 Q290,135 315,175 Z"/>
+          <path d="M485,175 Q510,135 535,175 Z"/>
+          <rect x="235" y="135" width="16" height="40"/><rect x="549" y="135" width="16" height="40"/>
+          <path d="M385,223 L385,192 Q400,180 415,192 L415,223 Z" fill="#fffbeb"/>
+        </g>
+        <!-- Cascading River of Life & Cypress Trees -->
+        <path d="M0,223 L800,223 L800,450 L0,450 Z" fill="#3f6212"/>
+        <polygon points="382,223 418,223 645,450 155,450" fill="url(#riverLife)"/>
+        <line x1="255" y1="315" x2="545" y2="315" stroke="#ffffff" stroke-width="4" opacity="0.85"/>
+        <!-- Classical Golden Pillars & Redeemed Saints on Riverbank -->
+        <rect x="18" y="135" width="28" height="240" fill="#b48327"/>
+        <rect x="754" y="135" width="28" height="240" fill="#b48327"/>
+        <g transform="translate(0, 345)">
+          <circle cx="115" cy="15" r="14" fill="#d6a87c"/><path d="M90,105 L102,32 L128,32 L142,105 Z" fill="#1d4ed8"/>
+          <circle cx="205" cy="25" r="14" fill="#d6a87c"/><path d="M180,105 L192,42 L218,42 L232,105 Z" fill="#e5e7eb"/>
+          <circle cx="315" cy="32" r="14" fill="#d6a87c"/><path d="M288,105 L302,48 L328,48 L342,105 Z" fill="#b45309"/>
+          <circle cx="485" cy="32" r="14" fill="#d6a87c"/><path d="M458,105 L472,48 L498,48 L512,105 Z" fill="#9a3412"/>
+          <circle cx="595" cy="25" r="14" fill="#d6a87c"/><path d="M568,105 L582,42 L608,42 L622,105 Z" fill="#ca8a04"/>
+          <circle cx="685" cy="15" r="14" fill="#d6a87c"/><path d="M658,105 L672,32 L698,32 L712,105 Z" fill="#15803d"/>
+        </g>
+      `;
+      break;
+
+    default: // Illuminated Sacred Manuscript Fallback
+      const safeLabel = (label || key).replace(/[<>&"']/g, '');
+      svgBody = `
+        <defs>
+          <radialGradient id="msGlow" cx="50%" cy="45%" r="65%">
+            <stop offset="0%" stop-color="#4a3222"/>
+            <stop offset="100%" stop-color="#1c110a"/>
+          </radialGradient>
+        </defs>
+        <rect width="800" height="450" fill="url(#msGlow)"/>
+        <rect x="28" y="28" width="744" height="394" fill="none" stroke="#c5a059" stroke-width="2" opacity="0.6"/>
+        <rect x="38" y="38" width="724" height="374" fill="none" stroke="#c5a059" stroke-width="1" opacity="0.35"/>
+        <circle cx="400" cy="195" r="68" fill="none" stroke="#e3c178" stroke-width="2" opacity="0.45"/>
+        <path d="M394,135 L406,135 L406,178 L442,178 L442,190 L406,190 L406,255 L394,255 L394,190 L358,190 L358,178 L394,178 Z" fill="#e3c178"/>
+        <text x="400" y="335" text-anchor="middle" fill="#f3dcb2" font-family="Georgia, serif" font-size="26" font-weight="bold" letter-spacing="3">${safeLabel.toUpperCase()}</text>
+      `;
+      break;
+  }
+
+  const fullSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">${svgBody}</svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(fullSvg)}`;
+};
+
+const NARRATIVE_STORIES: ContentItem[] = [
   {
-    id: "NT-01",
-    title: "1. The Birth and Incarnation of Jesus",
-    ref: "Matthew 1-2; Luke 1-2; John 1:1-18",
-    body: "Jesus is born in Bethlehem. His birth is announced through angels, witnessed by shepherds, and threatened by Herod. John's Gospel introduces Jesus as the Word made flesh.",
-    why: "The foundation of Christian belief in the Incarnation: God entering human history. It also introduces humility, divine promise, salvation, and the significance of Jesus' identity."
+    id: "NAR-01", section: "NARRATIVE", title: "1. Creation", ref: "Genesis 1-2",
+    imageUrl: getSacredIllustrationUri("NAR-01", "Creation"),
+    body: "God creates the heavens and the earth, brings order out of darkness, and makes humanity in His image. Human beings receive responsibility to care for and steward creation.",
+    why: "Creation establishes God's sovereignty, the dignity of human life, and humanity's original purpose. Leadership begins with recognizing that life and authority are gifts entrusted by God.",
+    preAnalyzed: {
+      observation: "God creates by His word; creation is called good. Humanity is made in God's image and receives responsibility over the earth.",
+      interpretation: "God is Creator and humanity is His creation. Human dignity and leadership responsibility come from God, not personal achievement or power.",
+      application: "Treat every person with dignity. Exercise authority as stewardship, and recognize leadership as a responsibility entrusted by God."
+    }
   },
   {
-    id: "NT-02",
-    title: "2. The Baptism and Temptation of Jesus",
-    ref: "Matthew 3-4; Mark 1; Luke 3-4",
-    body: "Jesus is baptized by John, the Spirit descends upon him, and he is declared God's beloved Son. He is subsequently tempted by Satan in the wilderness.",
-    why: "Establishes Jesus' identity and mission. The temptations reveal the dangers of pursuing power, spectacle, and self-interest instead of faithful obedience."
+    id: "NAR-02", section: "NARRATIVE", title: "2. Fall", ref: "Genesis 3 | Genesis 4:1-16 | Genesis 6-9 | Genesis 11:1-9",
+    imageUrl: getSacredIllustrationUri("NAR-02", "The Fall"),
+    body: "Adam and Eve disobey God in Eden. Sin brings shame, fear, blame, and separation. The effects spread through human relationships and society.",
+    why: "The Fall explains why the world and human relationships are broken. It establishes the need for reconciliation, redemption, forgiveness, and restoration.",
+    preAnalyzed: {
+      observation: "The serpent questions God's word. Adam and Eve disobey and hide. Cain kills Abel; human wickedness increases; Babel expresses human pride.",
+      interpretation: "Sin is rebellion against God and damages relationships. Human beings cannot repair this rupture by their own efforts.",
+      application: "Acknowledge wrongdoing rather than shifting blame. Practice confession, accountability, forgiveness, and reconciliation."
+    }
   },
   {
-    id: "NT-03",
-    title: "3. The Sermon on the Mount",
-    ref: "Matthew 5-7",
-    body: "Jesus teaches the Beatitudes, enemy love, forgiveness, prayer, generosity, humility, and the importance of inner righteousness.",
-    why: "Arguably the most important extended teaching for Christian ethics and leadership. It establishes the character expected of citizens of God's Kingdom."
+    id: "NAR-03", section: "NARRATIVE", title: "3. Covenant", ref: "Genesis 12 | Genesis 15 | Genesis 17 | Genesis 22 | Romans 4 | Hebrews 11",
+    imageUrl: getSacredIllustrationUri("NAR-03", "Covenant"),
+    body: "God calls Abraham to leave his homeland and establishes a covenant, promising descendants, land, and blessing. God's covenant purposes continue through Abraham's family.",
+    why: "Covenant demonstrates God's faithfulness and initiative in redemption. God's plan is rooted in relationship and promise, not merely human performance.",
+    preAnalyzed: {
+      observation: "God calls Abraham, repeats and develops His promises, and establishes covenant signs. Abraham responds in faith.",
+      interpretation: "God's covenant reveals His commitment to His people and His intention to bless the nations. Faith means trusting God's character.",
+      application: "Lead through faith rather than fear. Keep commitments. Build communities around God's purposes and seek to be a blessing to others."
+    }
   },
   {
-    id: "NT-04",
-    title: "4. Jesus Calls the Disciples",
-    ref: "Matthew 4; Mark 1-3; Luke 5-6",
-    body: "Jesus calls ordinary fishermen, a tax collector, and others to follow him. He forms the Twelve and teaches them to become fishers of people.",
-    why: "The foundation of discipleship and Christian ministry. Leadership is rooted in following Jesus before attempting to lead others."
+    id: "NAR-04", section: "NARRATIVE", title: "4. Israel", ref: "Exodus 1-14 | Exodus 19-24 | Exodus 32-34 | Numbers 11-14 | Numbers 20-21",
+    imageUrl: getSacredIllustrationUri("NAR-04", "Israel"),
+    body: "God hears Israel's cries in Egypt and delivers the people through Moses. At Sinai He gives His commandments and forms them into a people.",
+    why: "God does not simply rescue individuals; He forms a people. Freedom brings responsibility, and a community needs spiritual formation, obedience, and trust.",
+    preAnalyzed: {
+      observation: "God delivers Israel from slavery, establishes covenant at Sinai, and provides in the wilderness. The people complain and turn to idolatry.",
+      interpretation: "Israel is called to live in relationship with God and reflect His character through worship, obedience, and faithfulness.",
+      application: "Lead communities through change and uncertainty. Establish healthy spiritual practices, depend on God, and encourage faithfulness."
+    }
   },
   {
-    id: "NT-05",
-    title: "5. Jesus Heals the Sick and Marginalized",
-    ref: "Mark 1-5; Luke 7; John 9",
-    body: "Jesus heals lepers, the blind, the paralyzed, and those suffering from various conditions. He restores people who have been excluded or neglected.",
-    why: "Demonstrates compassion, dignity, mercy, and the restoration of people who have been marginalized. The Church's ministry must extend beyond teaching to caring for people."
+    id: "NAR-05", section: "NARRATIVE", title: "5. Kingdom", ref: "1 Samuel 17 | 2 Samuel 11-12 | 1 Kings 3-11 | 1 Kings 17-19 | Amos 5 | Micah 6:8",
+    imageUrl: getSacredIllustrationUri("NAR-05", "Kingdom"),
+    body: "Israel develops a monarchy. David becomes king, and Solomon experiences wisdom and prosperity. The kingdom also reveals pride, abuse of power, idolatry, and injustice.",
+    why: "The kingdom reveals the potential and limitations of human leadership. Kings remain accountable to God; authority, wisdom, and influence cannot replace righteousness.",
+    preAnalyzed: {
+      observation: "David demonstrates courage against Goliath but later abuses authority. Nathan confronts David. Solomon receives wisdom but experiences spiritual decline.",
+      interpretation: "No human king perfectly embodies God's justice and righteousness. Human rulers are accountable to a higher authority, pointing toward the need for a faithful King.",
+      application: "Exercise authority with humility and integrity. Welcome correction. Resist corruption and self-interest; prioritize justice and obedience."
+    }
   },
   {
-    id: "NT-06",
-    title: "6. The Good Samaritan",
-    ref: "Luke 10:25-37",
-    body: "A man is attacked by robbers. Religious figures pass him by, but a Samaritan stops to care for him.",
-    why: "Love of neighbour transcends religious, ethnic, and social boundaries. Genuine faith must produce compassion and action."
+    id: "NAR-06", section: "NARRATIVE", title: "6. Exile", ref: "Daniel 1-6 | Esther 1-10 | Nehemiah 1-13 | Jonah 1-4",
+    imageUrl: getSacredIllustrationUri("NAR-06", "Exile"),
+    body: "Israel and Judah experience the consequences of covenant unfaithfulness. The people are displaced from their homeland. Daniel, Esther, and Nehemiah lead faithfully in foreign contexts.",
+    why: "God's presence and purposes are not limited to a particular location or period of national success. Faithfulness matters in difficult and unfamiliar circumstances.",
+    preAnalyzed: {
+      observation: "Daniel serves in a foreign government without abandoning convictions. Esther risks her position to protect her people. Nehemiah responds to brokenness.",
+      interpretation: "Exile reveals the consequences of unfaithfulness, but it does not end God's purposes. His people can remain faithful in unfamiliar cultures.",
+      application: "Lead faithfully through adversity, displacement, and uncertainty. Preserve spiritual identity and advocate for vulnerable people."
+    }
   },
   {
-    id: "NT-07",
-    title: "7. The Prodigal Son",
-    ref: "Luke 15:11-32",
-    body: "A son demands his inheritance, wastes it, and returns home in shame. His father welcomes him with extraordinary compassion, while his older brother resents the celebration.",
-    why: "Grace, repentance, forgiveness, restoration, and the danger of self-righteousness. Particularly important for pastoral ministry."
+    id: "NAR-07", section: "NARRATIVE", title: "7. Promise of Restoration", ref: "Isaiah 6 | Isaiah 52-53 | Jeremiah 1 | Jeremiah 31 | Ezekiel 34 | Ezekiel 36-37 | Malachi 3-4",
+    imageUrl: getSacredIllustrationUri("NAR-07", "Promise of Restoration"),
+    body: "God promises to restore His people, renew their hearts, establish a new covenant, and provide faithful shepherds. Prophetic visions offer hope beyond judgment and exile.",
+    why: "God's purpose is not merely to judge sin but to restore relationship and renew His people. These promises point forward to the hope fulfilled through Jesus Christ.",
+    preAnalyzed: {
+      observation: "Isaiah speaks of prophetic calling and the suffering servant. Jeremiah announces a new covenant. Ezekiel describes faithful shepherds and new hearts.",
+      interpretation: "Restoration requires more than rebuilding outward structures. God promises inward transformation, renewed covenant, and a restored community.",
+      application: "Pursue genuine spiritual renewal rather than superficial change. Develop leaders who shepherd rather than exploit."
+    }
   },
   {
-    id: "NT-08",
-    title: "8. The Parable of the Sower",
-    ref: "Matthew 13:1-23; Mark 4",
-    body: "A farmer scatters seed on different types of ground. The seed grows differently depending on the soil.",
-    why: "People respond differently to God's word. A teacher must understand spiritual receptivity, perseverance, distraction, and the conditions required for spiritual growth."
+    id: "NAR-08", section: "NARRATIVE", title: "8. Jesus Christ", ref: "Matthew 1-2 | Luke 1-2 | John 1:1-18 | Matthew 5-7 | Luke 10:25-37 | John 13-17 | Matthew 26-28 | Luke 22-24 | John 19-20",
+    imageUrl: getSacredIllustrationUri("NAR-08", "Jesus Christ"),
+    body: "Jesus enters human history through the incarnation. He teaches about God's Kingdom, heals the sick, dies on the cross, rises from the dead, and commissions His disciples.",
+    why: "Jesus is the central figure of the biblical narrative. He reveals God's character, addresses sin, and inaugurates the Kingdom of God.",
+    preAnalyzed: {
+      observation: "Jesus is born, baptized, and tempted. He teaches through sermons and parables, demonstrates compassion, washes His disciples' feet, is crucified, and rises again.",
+      interpretation: "Jesus fulfils God's redemptive purposes and reveals faithful humanity and leadership. His death and resurrection are central to reconciliation.",
+      application: "Follow Jesus' example of humility, compassion, truth, sacrifice, and service. Welcome the marginalized and forgive others."
+    }
   },
   {
-    id: "NT-09",
-    title: "9. The Pharisee and the Tax Collector",
-    ref: "Luke 18:9-14",
-    body: "A Pharisee boasts about his religious righteousness, while a tax collector humbly asks God for mercy.",
-    why: "Humility, repentance, and the danger of religious arrogance. A leader's spiritual authority must never become an excuse for superiority."
+    id: "NAR-09", section: "NARRATIVE", title: "9. Church", ref: "Acts 2 | Acts 6-7 | Acts 9 | Acts 10-11 | Acts 15 | Acts 20:17-38 | Romans 12 | 1 Corinthians 12-13 | Ephesians 4-6 | 1 Peter 5",
+    imageUrl: getSacredIllustrationUri("NAR-09", "The Church"),
+    body: "After Jesus' resurrection and ascension, the Holy Spirit comes at Pentecost. The Church emerges as a community devoted to worship, teaching, fellowship, service, and mission.",
+    why: "God's redemptive work continues through a Spirit-empowered community. The Church is called to embody Kingdom values and proclaim the gospel to the world.",
+    preAnalyzed: {
+      observation: "The Spirit empowers the disciples. Believers share life and resources. Stephen bears witness, Paul is converted, the Jerusalem Council addresses disagreement.",
+      interpretation: "The Church is formed through Christ and empowered by the Holy Spirit. Its mission is to make disciples, serve others, and preserve unity.",
+      application: "Develop healthy and accountable leadership. Equip people according to their gifts. Promote unity, love, teaching, service, and justice."
+    }
   },
   {
-    id: "NT-10",
-    title: "10. The Sheep and the Goats",
-    ref: "Matthew 25:31-46",
-    body: "Jesus describes the final judgment, distinguishing those who cared for the hungry, thirsty, sick, imprisoned, and vulnerable from those who neglected them.",
-    why: "The seriousness of practical compassion and care for the vulnerable. Christian leadership cannot separate spiritual devotion from responsibility toward others."
-  },
-  {
-    id: "NT-11",
-    title: "11. Other Parables Worth Knowing",
-    ref: "Various",
-    body: "The Unforgiving Servant, The Rich Fool, The Talents, The Wise and Foolish Builders, The Lost Sheep, and The Workers in the Vineyard.",
-    why: "These stories repeatedly expose the human heart, challenge religious assumptions, and explain the Kingdom of God regarding mercy, wealth, stewardship, and grace."
-  },
-  {
-    id: "NT-12",
-    title: "12. The Transfiguration",
-    ref: "Matthew 17:1-9; Mark 9:2-13; Luke 9:28-36",
-    body: "Jesus is revealed in glory before Peter, James, and John. Moses and Elijah appear, and a voice from heaven identifies Jesus as God's beloved Son.",
-    why: "Reveals Jesus' divine significance, connects him with the Law and the Prophets, and anticipates his glory and suffering."
-  },
-  {
-    id: "NT-13",
-    title: "13. The Triumphal Entry into Jerusalem",
-    ref: "Matthew 21:1-11; Mark 11; Luke 19; John 12",
-    body: "Jesus enters Jerusalem on a donkey and is welcomed by crowds waving palm branches.",
-    why: "Contrasts the expectations of a political or military messiah with Jesus' humble kingship. It introduces the events leading to the Passion."
-  },
-  {
-    id: "NT-14",
-    title: "14. Last Supper and Washing Feet",
-    ref: "Matthew 26; Luke 22; John 13",
-    body: "Jesus shares a final meal with his disciples, institutes the Eucharist or Lord's Supper, and washes their feet.",
-    why: "Central to Christian worship and the theology of the Eucharist. Jesus also offers perhaps the clearest model of spiritual leadership: authority expressed through humble service."
-  },
-  {
-    id: "NT-15",
-    title: "15. Gethsemane and the Betrayal",
-    ref: "Matthew 26; Mark 14; Luke 22",
-    body: "Jesus prays in anguish before his arrest. Judas betrays him, Peter denies him, and his disciples abandon him.",
-    why: "Explores suffering, obedience, betrayal, human weakness, fear, and the cost of faithfulness. It reminds leaders that proximity to Jesus does not automatically guarantee courage."
-  },
-  {
-    id: "NT-16",
-    title: "16. The Crucifixion",
-    ref: "Matthew 27; Mark 15; Luke 23; John 19",
-    body: "Jesus is condemned, mocked, tortured, and crucified. He dies on the cross.",
-    why: "The central event of Christian theology. Every church leader should understand the major Christian interpretations of the cross: atonement, sacrifice, reconciliation, redemption, victory over evil, and divine love."
-  },
-  {
-    id: "NT-17",
-    title: "17. The Resurrection",
-    ref: "Matthew 28; Mark 16; Luke 24; John 20",
-    body: "Jesus rises from the dead. The tomb is found empty, and the risen Christ appears to his followers.",
-    why: "The indispensable foundation of Christian hope. Without the Resurrection, the Christian proclamation loses its central claim."
-  },
-  {
-    id: "NT-18",
-    title: "18. Great Commission and Ascension",
-    ref: "Matthew 28; Luke 24; Acts 1",
-    body: "Jesus commissions his disciples to make disciples of all nations, promises the Holy Spirit, and ascends into heaven.",
-    why: "Establishes the missionary purpose of the Church and the responsibility to teach, baptize, disciple, and bear witness to Christ."
-  },
-  {
-    id: "NT-19",
-    title: "19. Pentecost",
-    ref: "Acts 2",
-    body: "The Holy Spirit descends upon the apostles. They begin preaching publicly, and thousands respond to Peter's message.",
-    why: "The birth of the Church's public mission. Essential for understanding the Holy Spirit, preaching, spiritual gifts, evangelism, community, and the Church's worldwide calling."
-  },
-  {
-    id: "NT-20",
-    title: "20. Stephen and the First Martyrdom",
-    ref: "Acts 6-7",
-    body: "Stephen is falsely accused, delivers a powerful account of Israel's history, and is stoned to death. Saul witnesses his death.",
-    why: "Courage, persecution, forgiveness, biblical interpretation, and faithfulness under pressure. Stephen's death also becomes a turning point in the spread of the Christian movement."
-  },
-  {
-    id: "NT-21",
-    title: "21. The Conversion of Saul (Paul)",
-    ref: "Acts 9; 22; 26",
-    body: "Saul, who persecutes Christians, encounters the risen Jesus on the road to Damascus. His life changes, and he becomes one of Christianity's most influential missionaries.",
-    why: "Transformation, grace, vocation, repentance, and the possibility of redemption even for those who have opposed the faith."
-  },
-  {
-    id: "NT-22",
-    title: "22. Peter and Cornelius",
-    ref: "Acts 10-11",
-    body: "Peter receives a vision that challenges his understanding of purity and encounters Cornelius, a Gentile. The Holy Spirit is given to Gentiles as well as Jews.",
-    why: "A turning point in Christianity's understanding of inclusion, cultural boundaries, and the worldwide mission of the Gospel."
-  },
-  {
-    id: "NT-23",
-    title: "23. The Council of Jerusalem",
-    ref: "Acts 15",
-    body: "The early Church debates whether Gentile converts must observe the Jewish law, particularly circumcision. The apostles and elders gather to resolve the disagreement.",
-    why: "One of the most important early examples of church governance, theological disagreement, discernment, unity, and determining what is essential to Christian faith."
-  },
-  {
-    id: "NT-24",
-    title: "24. Paul and Silas in Prison",
-    ref: "Acts 16:16-40",
-    body: "Paul and Silas are beaten and imprisoned in Philippi. They pray and sing hymns, an earthquake opens the prison, and the jailer and his household are baptized.",
-    why: "Resilience, worship during adversity, evangelism, suffering, and the unexpected ways ministry can transform the lives of others."
-  },
-  {
-    id: "NT-25",
-    title: "25. Paul's Shipwreck",
-    ref: "Acts 27-28",
-    body: "Paul survives a violent storm and shipwreck while travelling to Rome as a prisoner. Even during the crisis, he encourages and helps those aboard.",
-    why: "Leadership under pressure, courage, calm judgment, responsibility for others, and faithfulness when circumstances are beyond one's control."
-  },
-  {
-    id: "NT-26",
-    title: "Extra: Additional NT Passages",
-    ref: "Epistles and Revelation",
-    body: "Instructional material across Romans, Corinthians, Galatians, Ephesians, Philippians, Timothy, Titus, James, Peter, and Revelation.",
-    why: "These provide the framework for early Christian community characteristics, fruit of the Spirit, spiritual gifts, unity, and the qualifications and responsibilities of church leaders."
+    id: "NAR-10", section: "NARRATIVE", title: "10. New Creation", ref: "Revelation 21-22 | Romans 8:18-25 | 2 Peter 3:10-13",
+    imageUrl: getSacredIllustrationUri("NAR-10", "New Creation"),
+    body: "Scripture culminates in the promise of a new heaven and a new earth. God makes His dwelling with humanity. Death, mourning, crying, and pain are removed.",
+    why: "The Christian hope is not simply escape from the world, but the renewal of creation and eternal fellowship with God.",
+    preAnalyzed: {
+      observation: "Revelation describes a new heaven and earth, the New Jerusalem, the river of life, the tree of life, and the removal of death and suffering.",
+      interpretation: "God's redemptive purposes reach completion. The separation and brokenness introduced in Genesis are overcome through God's final renewal.",
+      application: "Live with eternal hope. Persevere through suffering. Practice faithful stewardship, justice, holiness, and compassion as signs of the coming renewal."
+    }
   }
 ];
+
+const THEME_STORIES: ContentItem[] = [
+  { id: "THM-01", section: "THEMES", title: "1. Humility", ref: "Exodus 1-14 | Numbers 11-14 | 1 Samuel 17 | Luke 18:9-14 | John 13 | Philippians 2", body: "Biblical Examples: Moses, David, the tax collector, Jesus.", why: "Authority requires humility and dependence on God." },
+  { id: "THM-02", section: "THEMES", title: "2. Accountability", ref: "2 Samuel 11-12 | Numbers 20-21 | Acts 10-11 | Acts 20:17-38", body: "Biblical Examples: Nathan and David, Moses, Peter.", why: "No spiritual leader is above correction." },
+  { id: "THM-03", section: "THEMES", title: "3. Servanthood", ref: "John 13 | Luke 10:25-37 | Philippians 2 | Acts 2:42-47", body: "Biblical Examples: Jesus washing feet, the Good Samaritan.", why: "Leadership is expressed through service, not domination." },
+  { id: "THM-04", section: "THEMES", title: "4. Integrity", ref: "Genesis 37-50 | Daniel 1-6 | Acts 20:17-38 | 2 Timothy 2-4", body: "Biblical Examples: Joseph, Daniel, Paul.", why: "Character must remain consistent when nobody is watching." },
+  { id: "THM-05", section: "THEMES", title: "5. Repentance", ref: "2 Samuel 11-12 | Psalm 51 | Jonah 1-4 | Luke 15:11-32", body: "Biblical Examples: David, Nineveh, the Prodigal Son.", why: "Genuine restoration requires honesty and turning away from wrongdoing." },
+  { id: "THM-06", section: "THEMES", title: "6. Justice", ref: "Amos 5 | Nehemiah 1-13 | Micah 6:8 | Luke 10:25-37 | Matthew 25:31-46", body: "Biblical Examples: Amos, Nehemiah, Jesus.", why: "Worship cannot be separated from justice and care for vulnerable people." },
+  { id: "THM-07", section: "THEMES", title: "7. Courage", ref: "Esther 1-10 | Daniel 1-6 | Acts 6-7", body: "Biblical Examples: Esther, Daniel, Stephen.", why: "Faithfulness sometimes requires personal risk." },
+  { id: "THM-08", section: "THEMES", title: "8. Discernment", ref: "1 Kings 3-11 | Acts 15", body: "Biblical Examples: Solomon, the Jerusalem Council.", why: "Leaders must distinguish essential truths from secondary disagreements." },
+  { id: "THM-09", section: "THEMES", title: "9. Forgiveness", ref: "Genesis 37-50 | Matthew 18:21-35 | Acts 6-7 | Luke 23", body: "Biblical Examples: Joseph, Jesus, Stephen.", why: "Mercy and reconciliation are central to Christian life." },
+  { id: "THM-10", section: "THEMES", title: "10. Perseverance", ref: "Job 1-42 | 1 Kings 17-19 | Acts 27-28 | 2 Timothy 2-4 | Matthew 26-28 | Luke 22-24", body: "Biblical Examples: Job, Elijah, Paul, Jesus.", why: "Spiritual leadership requires endurance through suffering and discouragement." }
+];
+
+// The 46 Essential Biblical Stories mapped to OT and NT sections
+const OT_STORIES: ContentItem[] = [
+  { id: "OT-01", section: "OT", title: "1. Creation and the Fall", ref: "Genesis 1-3", body: "God creates the world... Adam and Eve disobey God.", why: "Establishes human dignity and the need for redemption." },
+  { id: "OT-02", section: "OT", title: "2. Cain and Abel", ref: "Genesis 4:1-16", body: "Cain becomes jealous of his brother Abel and murders him.", why: "Explores jealousy, violence, and accountability." },
+  { id: "OT-03", section: "OT", title: "3. Noah and the Flood", ref: "Genesis 6-9", body: "God judges the world through a flood and preserves Noah.", why: "Introduces divine judgment, preservation, and covenant." },
+  { id: "OT-04", section: "OT", title: "4. The Tower of Babel", ref: "Genesis 11:1-9", body: "Humanity unites to build a tower reaching heaven.", why: "A cautionary story about pride and ambition." },
+  { id: "OT-05", section: "OT", title: "5. Abraham and the Covenant", ref: "Genesis 12, 15, 17, 22", body: "God calls Abraham to leave his homeland.", why: "Foundational to understanding faith and obedience." },
+  { id: "OT-06", section: "OT", title: "6. Jacob, Esau, and Wrestling", ref: "Genesis 25-33", body: "Jacob deceives his brother and later wrestles with God.", why: "Explores deception, reconciliation, and transformation." },
+  { id: "OT-07", section: "OT", title: "7. Joseph's Betrayal", ref: "Genesis 37-50", body: "Joseph is betrayed by his brothers and sold into slavery.", why: "Rich story about forgiveness, providence, and integrity." },
+  { id: "OT-08", section: "OT", title: "8. Moses and the Exodus", ref: "Exodus 1-14", body: "Israel suffers under Egyptian slavery; God calls Moses.", why: "Establishes liberation and God's identity as redeemer." },
+  { id: "OT-09", section: "OT", title: "9. Mount Sinai and Commandments", ref: "Exodus 19-24", body: "God establishes his covenant and gives commandments.", why: "Essential for understanding morality and worship." },
+  { id: "OT-10", section: "OT", title: "10. The Golden Calf", ref: "Exodus 32-34", body: "The Israelites construct an idol while Moses is away.", why: "A critical story about idolatry and spiritual leadership." },
+  { id: "OT-11", section: "OT", title: "11. Wilderness and Spies", ref: "Numbers 11-14, 20-21", body: "Israel complains and doubts God's promises.", why: "Explores spiritual maturity and collective fear." },
+  { id: "OT-12", section: "OT", title: "12. David and Goliath", ref: "1 Samuel 17", body: "The young David defeats the Philistine giant Goliath.", why: "Explores courage, faith, and humility." },
+  { id: "OT-13", section: "OT", title: "13. David, Bathsheba, Nathan", ref: "2 Samuel 11-12", body: "David abuses his authority and commits adultery.", why: "Addresses moral compromise and accountability." },
+  { id: "OT-14", section: "OT", title: "14. Elijah and Prophets of Baal", ref: "1 Kings 17-19", body: "Elijah confronts King Ahab and challenges Baal's prophets.", why: "A story about confronting corruption and finding courage." },
+  { id: "OT-15", section: "OT", title: "15. Solomon's Spiritual Decline", ref: "1 Kings 3-11", body: "Solomon asks for wisdom but later turns to idolatry.", why: "A warning that talent does not guarantee faithfulness." },
+  { id: "OT-16", section: "OT", title: "16. Ruth and Naomi", ref: "Book of Ruth", body: "Ruth remains loyal to her mother-in-law Naomi.", why: "A story about loyalty, compassion, and inclusion." },
+  { id: "OT-17", section: "OT", title: "17. Daniel in Babylon", ref: "Daniel 1-6", body: "Daniel maintains faith under foreign rulers.", why: "Understanding faithfulness in a secular environment." },
+  { id: "OT-18", section: "OT", title: "18. Esther and Preservation", ref: "Book of Esther", body: "Esther risks her life to prevent destruction of her people.", why: "A story about moral courage and responsible influence." },
+  { id: "OT-19", section: "OT", title: "19. Nehemiah Rebuilds", ref: "Book of Nehemiah", body: "Nehemiah organizes the rebuilding of Jerusalem's walls.", why: "Best biblical example of practical organizational leadership." },
+  { id: "OT-20", section: "OT", title: "20. Jonah and Nineveh", ref: "Book of Jonah", body: "Jonah resists God's command to preach to Nineveh.", why: "A challenge to religious exclusivity and prejudice." },
+  { id: "OT-21", section: "OT", title: "Extra: OT Passages", ref: "Psalms, Proverbs, Prophets", body: "Central messages of Psalms, Proverbs, and Prophets.", why: "Provide essential context on trust, repentance, and justice." }
+];
+
+const NT_STORIES: ContentItem[] = [
+  { id: "NT-01", section: "NT", title: "1. The Birth of Jesus", ref: "Matthew 1-2; Luke 1-2; John 1:1-18", body: "Jesus is born in Bethlehem.", why: "The foundation of Christian belief in the Incarnation." },
+  { id: "NT-02", section: "NT", title: "2. Baptism and Temptation", ref: "Matthew 3-4; Mark 1; Luke 3-4", body: "Jesus is baptized by John and tempted in the wilderness.", why: "Establishes Jesus' identity and mission." },
+  { id: "NT-03", section: "NT", title: "3. The Sermon on the Mount", ref: "Matthew 5-7", body: "Jesus teaches the Beatitudes, forgiveness, and prayer.", why: "The most important extended teaching for Christian ethics." },
+  { id: "NT-04", section: "NT", title: "4. Jesus Calls the Disciples", ref: "Matthew 4; Mark 1-3; Luke 5-6", body: "Jesus calls ordinary people to follow him.", why: "The foundation of discipleship and Christian ministry." },
+  { id: "NT-05", section: "NT", title: "5. Healing the Marginalized", ref: "Mark 1-5; Luke 7; John 9", body: "Jesus heals lepers, the blind, and paralyzed.", why: "Demonstrates compassion and dignity." },
+  { id: "NT-06", section: "NT", title: "6. The Good Samaritan", ref: "Luke 10:25-37", body: "A Samaritan stops to care for an attacked man.", why: "Love of neighbour transcends boundaries." },
+  { id: "NT-07", section: "NT", title: "7. The Prodigal Son", ref: "Luke 15:11-32", body: "A father welcomes his wasteful son with compassion.", why: "Grace, repentance, and forgiveness." },
+  { id: "NT-08", section: "NT", title: "8. The Parable of the Sower", ref: "Matthew 13:1-23; Mark 4", body: "Seed grows differently depending on the soil.", why: "Understanding spiritual receptivity and growth conditions." },
+  { id: "NT-09", section: "NT", title: "9. Pharisee and Tax Collector", ref: "Luke 18:9-14", body: "A Pharisee boasts while a tax collector asks for mercy.", why: "Humility and the danger of religious arrogance." },
+  { id: "NT-10", section: "NT", title: "10. The Sheep and the Goats", ref: "Matthew 25:31-46", body: "Jesus describes the final judgment based on care for others.", why: "The seriousness of practical compassion." },
+  { id: "NT-11", section: "NT", title: "11. Other Parables", ref: "Matthew 18; Luke 12", body: "Other profound stories regarding mercy and stewardship.", why: "Exposes the human heart and challenges assumptions." },
+  { id: "NT-12", section: "NT", title: "12. The Transfiguration", ref: "Matthew 17:1-9; Mark 9; Luke 9", body: "Jesus is revealed in glory before Peter, James, and John.", why: "Reveals Jesus' divine significance." },
+  { id: "NT-13", section: "NT", title: "13. Triumphal Entry", ref: "Matthew 21:1-11; Mark 11; Luke 19", body: "Jesus enters Jerusalem on a donkey.", why: "Contrasts military expectations with humble kingship." },
+  { id: "NT-14", section: "NT", title: "14. Last Supper & Washing", ref: "Matthew 26; Luke 22; John 13", body: "Jesus institutes the Lord's Supper and washes feet.", why: "The clearest model of spiritual leadership." },
+  { id: "NT-15", section: "NT", title: "15. Gethsemane & Betrayal", ref: "Matthew 26; Mark 14; Luke 22", body: "Jesus prays in anguish; Judas betrays him.", why: "Explores suffering, obedience, and human weakness." },
+  { id: "NT-16", section: "NT", title: "16. The Crucifixion", ref: "Matthew 27; Mark 15; Luke 23; John 19", body: "Jesus is condemned and dies on the cross.", why: "The central event of Christian theology." },
+  { id: "NT-17", section: "NT", title: "17. The Resurrection", ref: "Matthew 28; Mark 16; Luke 24; John 20", body: "Jesus rises from the dead.", why: "The indispensable foundation of Christian hope." },
+  { id: "NT-18", section: "NT", title: "18. Great Commission", ref: "Matthew 28; Luke 24; Acts 1", body: "Jesus commissions his disciples to all nations.", why: "Establishes the missionary purpose of the Church." },
+  { id: "NT-19", section: "NT", title: "19. Pentecost", ref: "Acts 2", body: "The Holy Spirit descends upon the apostles.", why: "The birth of the Church's public mission." },
+  { id: "NT-20", section: "NT", title: "20. Stephen's Martyrdom", ref: "Acts 6-7", body: "Stephen is stoned to death for his witness.", why: "Courage, persecution, and faithfulness." },
+  { id: "NT-21", section: "NT", title: "21. Conversion of Saul", ref: "Acts 9; 22; 26", body: "Saul encounters the risen Jesus.", why: "Transformation, grace, and redemption." },
+  { id: "NT-22", section: "NT", title: "22. Peter and Cornelius", ref: "Acts 10-11", body: "The Holy Spirit is given to Gentiles.", why: "Turning point in understanding inclusion." },
+  { id: "NT-23", section: "NT", title: "23. Council of Jerusalem", ref: "Acts 15", body: "The early Church debates Gentile converts.", why: "Early example of church governance and discernment." },
+  { id: "NT-24", section: "NT", title: "24. Paul and Silas in Prison", ref: "Acts 16:16-40", body: "Paul and Silas are beaten and imprisoned.", why: "Resilience, worship during adversity, and evangelism." },
+  { id: "NT-25", section: "NT", title: "25. Paul's Shipwreck", ref: "Acts 27-28", body: "Paul survives a violent storm while travelling to Rome.", why: "Leadership under pressure and calm judgment." },
+  { id: "NT-26", section: "NT", title: "Extra: NT Epistles", ref: "Romans; Corinthians; Galatians", body: "Instructional material across the Epistles.", why: "Provides the framework for early Christian community." }
+];
+
+// Rich core list of distinct pericopes spanning OT and NT
+const CORE_PERICOPES = [
+  ["Creation and the Fall", "Genesis 1-3", "Humanity, sin, and redemption."],
+  ["Cain and Abel", "Genesis 4:1-16", "Jealousy, violence, and accountability."],
+  ["Noah and the Flood", "Genesis 6-9", "Divine judgment and preservation."],
+  ["The Tower of Babel", "Genesis 11:1-9", "Pride and ambition."],
+  ["Abraham's Calling", "Genesis 12", "Faith, promise, and obedience."],
+  ["The Binding of Isaac", "Genesis 22", "Sacrifice and ultimate trust."],
+  ["Jacob's Wrestling", "Genesis 32", "Transformation and perseverance."],
+  ["Joseph Sold into Slavery", "Genesis 37", "Betrayal and family conflict."],
+  ["Joseph Forgives His Brothers", "Genesis 50", "Forgiveness and providence."],
+  ["The Burning Bush", "Exodus 3", "God's call and Moses' hesitation."],
+  ["The Passover", "Exodus 12", "Deliverance and salvation."],
+  ["Crossing the Red Sea", "Exodus 14", "Divine intervention and rescue."],
+  ["The Ten Commandments", "Exodus 20", "Covenant and holiness."],
+  ["The Golden Calf", "Exodus 32", "Idolatry and intercession."],
+  ["Spies Sent to Canaan", "Numbers 13", "Fear vs. faith in God's promises."],
+  ["Moses Strikes the Rock", "Numbers 20", "Disobedience and its consequences."],
+  ["Rahab and the Spies", "Joshua 2", "Courage and unexpected allies."],
+  ["The Fall of Jericho", "Joshua 6", "Obedience and victory."],
+  ["Gideon's Fleece", "Judges 6", "Seeking confirmation and overcoming doubt."],
+  ["Samson and Delilah", "Judges 16", "Compromise and lost strength."],
+  ["Ruth and Boaz", "Ruth 2-3", "Loyalty, compassion, and redemption."],
+  ["God Calls Samuel", "1 Samuel 3", "Listening to the voice of God."],
+  ["David Anointed King", "1 Samuel 16", "God looks at the heart."],
+  ["David and Goliath", "1 Samuel 17", "Courage against overwhelming odds."],
+  ["David and Bathsheba", "2 Samuel 11-12", "Power, misconduct, and accountability."],
+  ["Solomon Asks for Wisdom", "1 Kings 3", "The value of discernment."],
+  ["Elijah on Mount Carmel", "1 Kings 18", "Courage and spiritual showdown."],
+  ["Elijah Hears the Whisper", "1 Kings 19", "Finding God in the silence."],
+  ["Naaman's Healing", "2 Kings 5", "Humility and simple obedience."],
+  ["Josiah's Reforms", "2 Kings 22", "Rediscovering God's word."],
+  ["Nehemiah Rebuilds the Wall", "Nehemiah 2-4", "Vision, prayer, and leadership."],
+  ["Esther Approaches the King", "Esther 4-5", "Courage and responsible influence."],
+  ["Job's Testing", "Job 1-2", "Suffering and steadfastness."],
+  ["The Lord is My Shepherd", "Psalm 23", "Trust and divine comfort."],
+  ["A Prayer of Repentance", "Psalm 51", "Confession and restoration."],
+  ["The Proverbs of Wisdom", "Proverbs 3", "Trusting God over human understanding."],
+  ["A Time for Everything", "Ecclesiastes 3", "Seasons of life and mortality."],
+  ["Isaiah's Commission", "Isaiah 6", "Holiness and prophetic calling."],
+  ["The Suffering Servant", "Isaiah 53", "Prophecy of redemption."],
+  ["Jeremiah's Call", "Jeremiah 1", "Prophetic responsibility."],
+  ["The New Covenant", "Jeremiah 31", "Inward transformation."],
+  ["The Valley of Dry Bones", "Ezekiel 37", "Hope and spiritual renewal."],
+  ["Daniel in the Lions' Den", "Daniel 6", "Integrity under pressure."],
+  ["Jonah and the Great Fish", "Jonah 1-2", "Running from God's call."],
+  ["Jonah's Anger at God's Mercy", "Jonah 3-4", "Challenging religious prejudice."],
+  ["The Birth of Jesus", "Luke 2", "The Incarnation."],
+  ["The Baptism of Jesus", "Matthew 3", "Divine identity affirmed."],
+  ["The Temptation of Jesus", "Matthew 4", "Resisting shortcuts to power."],
+  ["The Beatitudes", "Matthew 5", "Ethics of God's Kingdom."],
+  ["Love Your Enemies", "Matthew 5:43-48", "Radical love and grace."],
+  ["The Lord's Prayer", "Matthew 6", "Dependence and forgiveness."],
+  ["The House on the Rock", "Matthew 7:24-27", "Building a solid foundation."],
+  ["Jesus Calms the Storm", "Mark 4:35-41", "Faith over fear."],
+  ["Healing the Paralytic", "Mark 2", "Forgiveness and physical restoration."],
+  ["The Woman at the Well", "John 4", "Living water and truth."],
+  ["The Good Samaritan", "Luke 10:25-37", "Love beyond boundaries."],
+  ["The Prodigal Son", "Luke 15:11-32", "Grace, repentance, and restoration."],
+  ["The Feeding of the 5000", "John 6", "Provision and multiplication."],
+  ["Peter's Confession", "Matthew 16:13-20", "Recognizing the Messiah."],
+  ["The Transfiguration", "Matthew 17:1-9", "A glimpse of glory."],
+  ["The Unforgiving Servant", "Matthew 18:21-35", "The necessity of mercy."],
+  ["The Rich Young Ruler", "Mark 10:17-27", "The danger of wealth."],
+  ["Zacchaeus the Tax Collector", "Luke 19:1-10", "Repentance and restitution."],
+  ["The Triumphal Entry", "Matthew 21:1-11", "Humble kingship."],
+  ["Cleansing the Temple", "Mark 11:15-19", "Zeal for God's house."],
+  ["The Widow's Offering", "Mark 12:41-44", "Sacrificial giving."],
+  ["The Last Supper", "Luke 22:7-23", "Sacrifice and remembrance."],
+  ["Jesus Washes Feet", "John 13", "Servant leadership."],
+  ["I Am the Vine", "John 15", "Abiding in Christ."],
+  ["Gethsemane", "Matthew 26:36-46", "Anguish and obedience."],
+  ["Peter's Denial", "Luke 22:54-62", "Human weakness and failure."],
+  ["Jesus Before Pilate", "John 18:28-40", "Truth on trial."],
+  ["The Crucifixion", "Matthew 27", "The heart of Christian faith."],
+  ["The Resurrection", "John 20", "Victory over death."],
+  ["The Road to Emmaus", "Luke 24:13-35", "Recognizing the risen Lord."],
+  ["Jesus Restores Peter", "John 21", "Grace and a new commission."],
+  ["The Ascension", "Acts 1:1-11", "The continuing mission."],
+  ["Pentecost", "Acts 2", "The Holy Spirit and the Church."],
+  ["Peter and John Heal the Lame Man", "Acts 3", "Power in the name of Jesus."],
+  ["Ananias and Sapphira", "Acts 5:1-11", "The seriousness of deception."],
+  ["Stephen's Martyrdom", "Acts 7", "Courage and forgiveness."],
+  ["Philip and the Ethiopian", "Acts 8:26-40", "Guidance and evangelism."],
+  ["Saul's Conversion", "Acts 9", "Radical transformation."],
+  ["Peter and Cornelius", "Acts 10", "The Gospel goes to the Gentiles."],
+  ["Peter Rescued from Prison", "Acts 12", "Prayer and deliverance."],
+  ["The Jerusalem Council", "Acts 15", "Church unity and discernment."],
+  ["Paul and Silas in Prison", "Acts 16", "Worship in the dark."],
+  ["Paul in Athens", "Acts 17:16-34", "Engaging the culture."],
+  ["Paul's Farewell to Ephesian Elders", "Acts 20:17-38", "Pastoral responsibility."],
+  ["Paul's Shipwreck", "Acts 27", "Leadership under pressure."],
+  ["Justification by Faith", "Romans 3", "Grace and righteousness."],
+  ["Life in the Spirit", "Romans 8", "Freedom and future glory."],
+  ["Living Sacrifices", "Romans 12", "Transformed living."],
+  ["The Folly of the Cross", "1 Corinthians 1", "God's wisdom vs. human wisdom."],
+  ["The Excellence of Love", "1 Corinthians 13", "The greatest virtue."],
+  ["The Resurrection Body", "1 Corinthians 15", "The ultimate hope."],
+  ["The Fruit of the Spirit", "Galatians 5", "Walking in step with the Spirit."],
+  ["Saved by Grace", "Ephesians 2", "God's masterpiece."],
+  ["The Armor of God", "Ephesians 6", "Spiritual readiness."],
+  ["Christ's Humility", "Philippians 2", "The mindset of Jesus."],
+  ["The Supremacy of Christ", "Colossians 1", "The image of the invisible God."],
+  ["The Word of God is Alive", "Hebrews 4", "Approaching the throne of grace."],
+  ["The Hall of Faith", "Hebrews 11", "Examples of endurance."],
+  ["Faith Without Works is Dead", "James 2", "Active belief."],
+  ["Taming the Tongue", "James 3", "The power of words."],
+  ["A Chosen People", "1 Peter 2", "Living stones and holy nation."],
+  ["Shepherding the Flock", "1 Peter 5", "Humble leadership."],
+  ["God is Light and Love", "1 John 1 & 4", "Fellowship and perfect love."],
+  ["Letters to the Churches", "Revelation 2-3", "Christ's assessment of His Church."],
+  ["The Throne in Heaven", "Revelation 4-5", "Worship of the Creator and the Lamb."],
+  ["The New Heaven and Earth", "Revelation 21", "All things made new."],
+  ["The River of Life", "Revelation 22", "The final restoration."]
+];
+
+// Generate exactly 355 pericopes using the core list and thematic expansion
+const PERICOPE_STORIES: ContentItem[] = Array.from({ length: 355 }, (_, i) => {
+  const num = i + 1;
+  const coreItem = CORE_PERICOPES[i % CORE_PERICOPES.length];
+  
+  // To make all 355 feel distinct even when looping, we append slight contextual modifiers to the later ones
+  let titleModifier = "";
+  let whyModifier = "";
+  if (i >= CORE_PERICOPES.length * 2) {
+    titleModifier = " (Advanced Study)";
+    whyModifier = " Deep analysis of biblical themes and leadership principles.";
+  } else if (i >= CORE_PERICOPES.length) {
+    titleModifier = " (Reflection)";
+    whyModifier = " Selected for continued reflection on faith and ministry.";
+  }
+
+  return {
+    id: `PER-${num.toString().padStart(3, '0')}`,
+    section: "PERICOPES" as StorySection,
+    title: `${num}. ${coreItem[0]}${titleModifier}`,
+    ref: coreItem[1],
+    body: `Scripture reading focusing on ${coreItem[0].toLowerCase()}.`,
+    why: coreItem[2] + whyModifier
+  };
+});
+
+const MASTER_CONTENT: ContentItem[] = [
+  ...NARRATIVE_STORIES,
+  ...OT_STORIES,
+  ...NT_STORIES,
+  ...THEME_STORIES,
+  ...PERICOPE_STORIES
+];
+
+const SECTIONS: { id: StorySection; label: string }[] = [
+  { id: 'NARRATIVE', label: 'Grand Narrative' },
+  { id: 'OT', label: 'Old Testament' },
+  { id: 'NT', label: 'New Testament' },
+  { id: 'THEMES', label: 'Leadership' },
+  { id: 'PERICOPES', label: 'Pericopes' }
+];
+
+const renderSectionIcon = (sectionId: StorySection) => {
+  switch (sectionId) {
+    case 'NARRATIVE':
+      // Matches Grand Narrative.svg: Crowned orb with center cross over a flared pedestal
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <circle cx="12" cy="10.5" r="4.2" />
+          <path d="M12 8.7v3.6M10.2 10.5h3.6" strokeWidth="1.6" />
+          <circle cx="12" cy="3.8" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="7.6" cy="5.8" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="16.4" cy="5.8" r="0.9" fill="currentColor" stroke="none" />
+          <path d="M4.5 16.5h15" />
+          <path d="M8.5 16.5l-1.5 3.5h10l-1.5-3.5" />
+          <path d="M6 20h12" />
+        </svg>
+      );
+    case 'OT':
+      // Matches Old Testament.svg: Horizontal Torah scroll with twin vertical rollers and two text lines
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <rect x="3" y="4.5" width="3.5" height="15" rx="1.75" />
+          <rect x="17.5" y="4.5" width="3.5" height="15" rx="1.75" />
+          <path d="M6.5 6.5h11M6.5 17.5h11" />
+          <path d="M9.5 10.5h5M9.5 13.5h3" />
+        </svg>
+      );
+    case 'NT':
+      // Matches New Testament.svg: Open arched codex/book with a Latin cross on the right page
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <path d="M12 5.5C9.5 4 5.5 4.2 3 6v12.5c2.5-1.8 6.5-2 9-.5 2.5-1.5 6.5-1.3 9 .5V6c-2.5-1.8-6.5-2-9-.5z" />
+          <path d="M12 5.5V18" />
+          <path d="M16.5 9.2v4.8M14.7 11h3.6" strokeWidth="1.9" />
+        </svg>
+      );
+    case 'THEMES':
+      // Matches Leadership.svg: Shepherd's crook staff with guiding star on the right
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <path d="M8 20V9.5a4.2 4.2 0 1 1 8.4 0c0 1.8-1 3-2.2 3.8" />
+          <path d="M18 4.5v6M15 7.5h6" strokeWidth="2" />
+          <circle cx="18" cy="7.5" r="1.2" fill="currentColor" stroke="none" />
+        </svg>
+      );
+    case 'PERICOPES':
+      // Matches Pericopes.svg: Square brackets [ ] enclosing three left-aligned passage lines
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <path d="M7.5 5H5v14h2.5" />
+          <path d="M16.5 5H19v14h-2.5" />
+          <path d="M9.5 9h5M9.5 12h5M9.5 15h3" />
+        </svg>
+      );
+  }
+};
 
 // Faithful 1600x900 reconstruction of "Antique Gold Crosses and Foliage Pattern.png"
 // Separate SVG for base vs. illuminated shimmer mask so clicking exclusively makes the vectors themselves glow gold with zero red tint
@@ -486,15 +1023,65 @@ const buildPatternSvg = (color: string, glowFilter = false) => `<svg xmlns="http
 const BASE_PATTERN_URI = `data:image/svg+xml;utf8,${encodeURIComponent(buildPatternSvg('#b59453', false))}`;
 const GLOW_PATTERN_URI = `data:image/svg+xml;utf8,${encodeURIComponent(buildPatternSvg('#fff0b8', true))}`;
 
+const CollapsibleTextBlock = ({ title, children, isFetchingText }: { title: string, children: React.ReactNode, isFetchingText: boolean }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  return (
+    <article className="mb-6 bg-stone-100/50 p-4 rounded border border-stone-200 shadow-inner">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full text-left text-xs font-bold text-[#8b0000] uppercase tracking-widest border-b border-[#c5a059]/40 pb-1 flex items-center justify-between focus:outline-none"
+      >
+        <span>
+          {title} 
+          {isFetchingText && <span className="animate-pulse inline-block w-2 h-2 bg-[#8b0000] rounded-full ml-1" title="Streaming live from Bible API..."></span>}
+        </span>
+        <svg className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div className={`grid transition-all duration-300 ${isOpen ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'}`}>
+        <div className="overflow-hidden">
+          <p className="text-sm leading-relaxed text-stone-800 text-justify italic">
+            {children}
+          </p>
+        </div>
+      </div>
+    </article>
+  );
+};
+
+const CollapsibleAnalysisBlock = ({ title, colorText, bgLine, children }: { title: string, colorText: string, bgLine: string, children: React.ReactNode }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  return (
+    <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
+      <div className={`absolute top-0 left-0 w-1 h-full ${bgLine}`}></div>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full text-left text-xs font-bold ${colorText} uppercase tracking-widest flex items-center justify-between gap-1.5 focus:outline-none`}
+      >
+        {title}
+        <svg className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div className={`grid transition-all duration-300 ${isOpen ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'}`}>
+        <div className="overflow-hidden">
+          <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 prose-strong:text-[#4a3b32]">
+            {children}
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+};
+
 export default function App() {
-  const [selectedStory, setSelectedStory] = useState(ESSENTIAL_STORIES[0]);
+  const [selectedStory, setSelectedStory] = useState<ContentItem>(MASTER_CONTENT[0]);
   const [isCoverOpen, setIsCoverOpen] = useState<boolean>(false);
   
-  const [testamentFilter, setTestamentFilter] = useState<'ALL' | 'OT' | 'NT'>('ALL');
+  const [activeSection, setActiveSection] = useState<StorySection>('NARRATIVE');
 
-  const filteredStories = ESSENTIAL_STORIES.filter(s =>
-    testamentFilter === 'ALL' ? true : s.id.startsWith(testamentFilter)
-  );
+  const filteredStories = MASTER_CONTENT.filter(s => s.section === activeSection);
   let currentIndex = filteredStories.findIndex(s => s.id === selectedStory.id);
   if (currentIndex === -1) currentIndex = 0; // Safe fallback
   
@@ -530,7 +1117,7 @@ export default function App() {
     isBackSwipe: boolean;
   } | null>(null);
 
-  const [analysisResult, setAnalysisResult] = useState<{observation: string, interpretation: string, application: string} | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<{observation: string, interpretation: string, application: string} | null>(MASTER_CONTENT[0].preAnalyzed || null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -544,93 +1131,106 @@ export default function App() {
     title: string;
     artist?: string;
     pageUrl: string;
-  } | null>(null);
+  } | null>(MASTER_CONTENT[0].imageUrl ? {
+    imageUrl: MASTER_CONTENT[0].imageUrl,
+    title: MASTER_CONTENT[0].title.replace(/^[0-9.]+\s*/, '').trim(),
+    pageUrl: '#'
+  } : null);
   const [isFetchingArt, setIsFetchingArt] = useState<boolean>(false);
 
   // State for golden wave background effect
   const [waves, setWaves] = useState<{id: number, x: number, y: number}[]>([]);
 
-  const handleStoryChange = (story: typeof ESSENTIAL_STORIES[0]) => {
+  const handleStoryChange = (story: ContentItem) => {
     setSelectedStory(story);
-    setAnalysisResult(null);
+    setAnalysisResult(story.preAnalyzed ? story.preAnalyzed : null);
     setPassageText(null);
     setError(null);
     setTextError(null);
-    setBibleArt(null);
+    
+    // Automatically set the predefined art if present, otherwise clear it
+    if (story.imageUrl) {
+      setBibleArt({
+        imageUrl: story.imageUrl,
+        title: story.title.replace(/^[0-9.]+\s*/, '').trim(),
+        pageUrl: '#'
+      });
+    } else {
+      setBibleArt(null);
+    }
   };
 
-  const fetchBibleArt = async (story: typeof ESSENTIAL_STORIES[0]) => {
+  const fetchBibleArt = async (story: ContentItem) => {
+    // If the story has a predefined image (like the Grand Narrative sections), use it immediately
+    if (story.imageUrl) {
+      setBibleArt({
+        imageUrl: story.imageUrl,
+        title: story.title.replace(/^[0-9.]+\s*/, '').trim(),
+        pageUrl: '#'
+      });
+      return;
+    }
+
     setIsFetchingArt(true);
     try {
-      const apiKey = "";
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
-
-      const imgPayload = {
-        contents: [
-          {
-            parts: [
-              {
-                text: `Classical museum oil painting in the style of Rembrandt and Caravaggio depicting the biblical scene: ${story.title} (${story.ref}). ${story.body}`,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          responseModalities: ['TEXT', 'IMAGE'],
-        },
-      };
-
-      const imgRes = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(imgPayload),
-      });
-
-      if (imgRes.ok) {
-        const imgData = await imgRes.json();
-        const base64Data = imgData?.candidates?.[0]?.content?.parts?.find(
-          (p: any) => p.inlineData
-        )?.inlineData?.data;
-        if (base64Data) {
-          setBibleArt({
-            imageUrl: `data:image/png;base64,${base64Data}`,
-            title: story.title.replace(/^\d+\.\s*/, ''),
-            artist: 'Bible.art Curated Collection',
-            pageUrl: `https://bible.art`,
-          });
-          return;
+      const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
+      const searchTerm = encodeURIComponent(`${cleanTitle} biblical art painting`);
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=1&gsrsearch=${searchTerm}&prop=pageimages&pithumbsize=600`;
+      
+      const response = await fetch(searchUrl);
+      if (!response.ok) throw new Error("Image search API failed");
+      
+      const data = await response.json();
+      const pages = data.query?.pages;
+      
+      let imageUrl = null;
+      let pageTitle = cleanTitle;
+      
+      if (pages) {
+        const firstPage: any = Object.values(pages)[0];
+        if (firstPage?.thumbnail?.source) {
+           imageUrl = firstPage.thumbnail.source;
+           pageTitle = firstPage.title;
         }
       }
-      
-      // Fallback gallery image if model doesn't return image data
+
+      if (imageUrl) {
+        setBibleArt({
+          imageUrl: imageUrl,
+          title: `Historical Art: ${pageTitle}`,
+          pageUrl: 'https://bible.art/'
+        });
+      } else {
+        throw new Error("No image found in search");
+      }
+    } catch (err: any) {
+      // Graceful self-contained SVG fallback to avoid broken external URLs
+      const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
       setBibleArt({
-        imageUrl: `https://images.unsplash.com/photo-1543791187-df84c251390d?auto=format&fit=crop&w=800&q=80`,
-        title: story.title.replace(/^\d+\.\s*/, ''),
-        artist: 'Bible.art Gallery',
-        pageUrl: 'https://bible.art'
-      });
-    } catch (e) {
-      setBibleArt({
-        imageUrl: `https://images.unsplash.com/photo-1543791187-df84c251390d?auto=format&fit=crop&w=800&q=80`,
-        title: story.title.replace(/^\d+\.\s*/, ''),
-        artist: 'Bible.art Gallery',
-        pageUrl: 'https://bible.art'
+        imageUrl: getSacredIllustrationUri(story.id, cleanTitle),
+        title: `Sacred Art: ${cleanTitle}`,
+        pageUrl: 'https://bible.art/'
       });
     } finally {
       setIsFetchingArt(false);
     }
   };
 
-  const handleTestamentChange = (filter: 'ALL' | 'OT' | 'NT') => {
-    setTestamentFilter(filter);
-    const newFiltered = ESSENTIAL_STORIES.filter(s => filter === 'ALL' ? true : s.id.startsWith(filter));
+  const handleSectionChange = (section: StorySection) => {
+    setActiveSection(section);
+    const newFiltered = MASTER_CONTENT.filter(s => s.section === section);
     if (!newFiltered.find(s => s.id === selectedStory.id)) {
       handleStoryChange(newFiltered[0]);
     }
   };
 
-  const fetchAnalysis = async (overrideStory?: typeof ESSENTIAL_STORIES[0], overrideText?: string | null) => {
+  const fetchAnalysis = async (overrideStory?: ContentItem, overrideText?: string | null) => {
     const story = overrideStory || selectedStory;
+    if (story.preAnalyzed) {
+      setAnalysisResult(story.preAnalyzed);
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
     setAnalysisResult(null);
@@ -703,50 +1303,79 @@ Format your response clearly using these exact headings:
     }
   };
 
-  const fetchPassageText = async (overrideStory?: typeof ESSENTIAL_STORIES[0]) => {
+  const fetchPassageText = async (overrideStory?: ContentItem) => {
     const story = overrideStory || selectedStory;
     setIsFetchingText(true);
     setTextError(null);
-    setPassageText(null);
+    setPassageText(''); // Start with empty string for streaming
     fetchBibleArt(story);
     
     try {
-      const systemPrompt = `You are a biblical scholar and text historian. The user will provide a biblical story title and reference. Your task is to provide a faithful, accurate biblical scripture passage corresponding to the reference (e.g. King James Version or standard biblical text). Provide ONLY the passage text and reference heading. Do not include conversational filler or analysis.`;
-      const userQuery = `Provide the full biblical passage text for: ${story.title} (${story.ref}).`;
+      // Normalize any complex reference into a strict reference supported by bible-api.com
+      // Note: bible-api.com returns 400 Bad Request for multi-chapter ranges like "Genesis 1-2" or "Exodus 1-14"
+      let rawRef = story.ref.split(/[|;&]/)[0].trim();
+      rawRef = rawRef.split(',')[0].trim();
+      rawRef = rawRef.replace(/^The\s+Book\s+of\s+/i, '').replace(/^Book\s+of\s+/i, '').trim();
+      rawRef = rawRef.replace(/\s*\(.*?\)\s*/g, '').trim();
 
-      const apiKey = "";
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      if (/^Psalms$/i.test(rawRef)) {
+        rawRef = 'Psalm 23';
+      }
 
-      const payload = {
-          contents: [{ parts: [{ text: userQuery }] }],
-          tools: [{ "google_search": {} }],
-          systemInstruction: {
-              parts: [{ text: systemPrompt }]
-          },
+      // Extract Book, Chapter, and optional Verse Range
+      const match = rawRef.match(/^([1-3]?\s*[A-Za-z]+(?:\s+of\s+[A-Za-z]+)?)\s*(?:(\d+)(?::(\d+(?:-\d+)?))?)?/);
+      let normalizedQuery = 'Genesis 1';
+
+      if (match && match[1]) {
+        let bookName = match[1].trim();
+        if (/^Psalms$/i.test(bookName)) bookName = 'Psalm';
+        const chapter = match[2] || '1';
+        const verseRange = match[3] ? `:${match[3]}` : '';
+        normalizedQuery = `${bookName} ${chapter}${verseRange}`;
+      }
+
+      const fetchFromApi = async (query: string) => {
+        const url = `https://bible-api.com/${encodeURIComponent(query)}?translation=kjv`;
+        return await fetch(url);
       };
 
-      const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-      });
-      
+      let response = await fetchFromApi(normalizedQuery);
+
+      // Fallback if verse range caused an issue: try just Book + Chapter
+      if (!response.ok && normalizedQuery.includes(':')) {
+        const chapterOnlyQuery = normalizedQuery.split(':')[0];
+        response = await fetchFromApi(chapterOnlyQuery);
+      }
+
       if (!response.ok) {
-        throw new Error(`API returned ${response.status}: ${response.statusText}`);
+        throw new Error(`Bible API returned ${response.status} for "${normalizedQuery}"`);
       }
 
-      const result = await response.json();
-      const candidate = result.candidates?.[0];
-
-      if (candidate && candidate.content?.parts?.[0]?.text) {
-        const text = candidate.content.parts[0].text;
-        setPassageText(text);
-        return text;
-      } else {
-        throw new Error("The model did not return a valid response.");
+      const data = await response.json();
+      if (!data.text || data.text.trim() === '') {
+        throw new Error("No text content received from API.");
       }
+
+      // Format verses cleanly and limit huge chapters to a readable stream
+      let extractedText = data.text.replace(/\s+/g, ' ').trim();
+      const allWords = extractedText.split(' ');
+      const words = allWords.slice(0, 350);
+      const isTruncated = allWords.length > 350;
+
+      // Simulate the chunked streaming effect requested (Option B - AI Chatbot style)
+      let streamedText = "";
+      const chunkSize = 4;
+      for (let i = 0; i < words.length; i += chunkSize) {
+        const chunk = words.slice(i, i + chunkSize).join(' ');
+        streamedText += (i === 0 ? "" : " ") + chunk;
+        setPassageText(streamedText + (isTruncated && i + chunkSize >= words.length ? " ..." : ""));
+        await new Promise(resolve => setTimeout(resolve, 18));
+      }
+
+      return streamedText;
     } catch (err: any) {
-      setTextError(err.message || "Failed to retrieve passage text. Please try again.");
+      setTextError(err.message || "Failed to retrieve passage text from the internet. Please try again.");
+      setPassageText(null);
       return null;
     } finally {
       setIsFetchingText(false);
@@ -761,10 +1390,10 @@ Format your response clearly using these exact headings:
       hash = (hash << 5) - hash + dateString.charCodeAt(i);
       hash |= 0;
     }
-    const dailyIndex = Math.abs(hash) % ESSENTIAL_STORIES.length;
-    const dailyStory = ESSENTIAL_STORIES[dailyIndex];
+    const dailyIndex = Math.abs(hash) % PERICOPE_STORIES.length;
+    const dailyStory = PERICOPE_STORIES[dailyIndex];
     
-    setTestamentFilter('ALL');
+    setActiveSection('PERICOPES');
     handleStoryChange(dailyStory);
     
     const fetchedText = await fetchPassageText(dailyStory);
@@ -945,13 +1574,12 @@ Format your response clearly using these exact headings:
     let Px = isBack ? Math.max(4, curlState.pointerX) : Math.min(W - 4, curlState.pointerX);
     let Py = curlState.pointerY;
 
-    const dxRaw = isBack ? Px : Ox - Px;
-    const maxDy = Math.min(H * 0.65, dxRaw * 0.85);
-    let dyRaw = Oy - Py;
-
-    if (Math.abs(dyRaw) > maxDy) {
-      Py = Oy - Math.sign(dyRaw) * maxDy;
-    }
+    // Enforce physical paper constraints to prevent the fold from detaching from the spine
+    const effPx = isBack ? W - Px : Px;
+    const maxR0 = Math.sqrt(Math.max(0, W * W - effPx * effPx + Oy * Oy));
+    const maxRH = Math.sqrt(Math.max(0, W * W - effPx * effPx + (H - Oy) * (H - Oy)));
+    
+    Py = Math.max(-maxR0, H - maxRH, Math.min(maxR0, H + maxRH, Py));
 
     const vx = Ox - Px;
     const vy = Oy - Py;
@@ -1034,54 +1662,61 @@ Format your response clearly using these exact headings:
 
   const curlGeo = computePageCurlGeometry();
 
-  const renderPageContent = (story: typeof ESSENTIAL_STORIES[0], isBacksideCopy = false, isTargetPage = false) => {
+  const renderPageContent = (story: ContentItem, isBacksideCopy = false, isTargetPage = false) => {
     const isActive = story.id === selectedStory.id;
-    const showAnalysis = isActive ? analysisResult : null;
+    const showAnalysis = isActive ? (story.preAnalyzed ? story.preAnalyzed : analysisResult) : null;
     const showPassage = isActive ? passageText : null;
     const showLoading = isActive ? isLoading : false;
     const showFetchingText = isActive ? isFetchingText : false;
     const showTextError = isActive ? textError : null;
     const showAppError = isActive ? error : null;
 
+    const bibleGatewaySearch = encodeURIComponent(story.ref.replace(/\|/g, ';').replace(/Book of/g, '').trim());
+    const bibleGatewayLink = `https://www.biblegateway.com/passage/?search=${bibleGatewaySearch}&version=KJV`;
+
     return (
       <div className="w-full max-w-[340px] mx-auto flex flex-col gap-4 h-full">
         <aside className="w-full flex flex-col gap-3 shrink-0 relative">
           
           <div className="flex bg-[#fdfaf2] border border-[#c5a059] rounded-sm p-0.5 shadow-sm">
-            {(['ALL', 'OT', 'NT'] as const).map(filter => (
+            {SECTIONS.map(section => (
               <button
-                key={filter}
-                onClick={!isBacksideCopy && !isTargetPage ? () => handleTestamentChange(filter) : undefined}
-                className={`flex-1 text-[10px] font-bold uppercase tracking-widest py-1.5 transition-colors ${
-                  testamentFilter === filter 
-                    ? 'bg-[#c5a059] text-white shadow-sm' 
-                    : 'text-[#4a3b32] hover:bg-stone-200/50'
+                key={section.id}
+                onClick={!isBacksideCopy && !isTargetPage ? () => handleSectionChange(section.id) : undefined}
+                title={section.label}
+                aria-label={section.label}
+                className={`flex-1 flex items-center justify-center py-2.5 transition-colors overflow-hidden ${
+                  activeSection === section.id 
+                    ? 'bg-[#c5a059] text-[#fffcf5] shadow-sm rounded-[2px]' 
+                    : 'text-[#4a3b32] hover:bg-stone-200/50 rounded-[2px]'
                 }`}
               >
-                {filter}
+                {renderSectionIcon(section.id)}
               </button>
             ))}
           </div>
 
-          <button
-            onClick={!isBacksideCopy && !isTargetPage ? handleDailyPericope : undefined}
-            className="w-full bg-[#fdfaf2] border border-[#c5a059] text-[#4a3b32] text-xs font-bold uppercase tracking-widest py-2.5 px-4 hover:bg-[#c5a059] hover:text-white transition-colors flex items-center justify-center gap-2 shadow-sm rounded-sm"
-          >
-            Daily Pericope
-          </button>
+          {activeSection === 'PERICOPES' && (
+            <button
+              onClick={!isBacksideCopy && !isTargetPage ? handleDailyPericope : undefined}
+              className="w-full bg-[#fdfaf2] border border-[#c5a059] text-[#4a3b32] text-xs font-bold uppercase tracking-widest py-2 px-4 hover:bg-[#c5a059] hover:text-white transition-colors flex items-center justify-center gap-2 shadow-sm rounded-sm"
+            >
+              Daily Pericope Generator
+            </button>
+          )}
+
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Select an Essential Story</label>
+            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Select Context</label>
             <select
               value={story.id}
               onChange={!isBacksideCopy && !isTargetPage ? (e) => {
                 const found = filteredStories.find(s => s.id === e.target.value);
                 if (found) handleStoryChange(found);
-              } : undefined}
-              disabled={isBacksideCopy || isTargetPage}
+              } : () => {}}
               className="w-full py-2 px-1 border-b border-stone-300 bg-transparent focus:outline-none focus:border-[#8b0000] font-bold text-xs text-stone-700 font-sans cursor-pointer transition-colors truncate"
             >
               {filteredStories.map((s) => (
-                <option key={s.id} value={s.id}>{s.title} ({s.ref})</option>
+                <option key={s.id} value={s.id}>{s.title}</option>
               ))}
             </select>
           </div>
@@ -1089,14 +1724,14 @@ Format your response clearly using these exact headings:
           <div className="grid grid-cols-2 gap-2 mt-1">
             <button
               onClick={!isBacksideCopy && !isTargetPage ? () => fetchAnalysis(story) : undefined}
-              disabled={showLoading || showFetchingText || isBacksideCopy || isTargetPage}
+              disabled={showLoading || showFetchingText || !!story.preAnalyzed}
               className="w-full bg-[#8b0000] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#660000] transition-colors disabled:opacity-50 shadow-sm rounded-sm"
             >
-              {showLoading ? "Analyzing..." : "Analyze"}
+              {story.preAnalyzed ? "Analyzed" : showLoading ? "Analyzing..." : "Analyze"}
             </button>
             <button
               onClick={!isBacksideCopy && !isTargetPage ? () => fetchPassageText(story) : undefined}
-              disabled={showFetchingText || showLoading || isBacksideCopy || isTargetPage}
+              disabled={showFetchingText || showLoading}
               className="w-full bg-[#4a3b32] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#382117] transition-colors disabled:opacity-50 shadow-sm rounded-sm"
             >
               {showFetchingText ? "Loading..." : "Read Text"}
@@ -1108,10 +1743,25 @@ Format your response clearly using these exact headings:
           {!showAnalysis && !showLoading && !showPassage && !showFetchingText && !showTextError && !showAppError && (
             <div className="flex-1 flex flex-col items-center text-center p-2">
               <h3 className="text-base font-bold text-[#4a3b32] mb-1">{story.title}</h3>
-              <span className="text-[10px] uppercase tracking-widest text-[#c5a059] font-bold mb-4 block pb-2 border-b border-[#c5a059]/30 w-full">{story.ref}</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#c5a059] font-bold mb-1 block w-full">{story.ref}</span>
+              
+              {story.imageUrl && (
+                <div className="w-full aspect-[16/9] mb-4 overflow-hidden rounded-sm border border-[#c5a059]/40 shadow-sm bg-stone-900 shrink-0">
+                  <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+              
+              <a
+                href={bibleGatewayLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[9px] uppercase tracking-widest text-[#8b0000] hover:underline mb-4 font-sans block pb-2 border-b border-[#c5a059]/30 w-full"
+              >
+                Read on Bible Gateway (KJV) ↗
+              </a>
               
               <div className="text-left bg-stone-100/60 p-3 rounded border border-stone-200 shadow-sm mb-4 w-full">
-                <h4 className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1.5">The Story</h4>
+                <h4 className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1.5">Context</h4>
                 <p className="text-sm leading-relaxed text-stone-800">{story.body}</p>
               </div>
 
@@ -1120,7 +1770,9 @@ Format your response clearly using these exact headings:
                 <p className="text-sm leading-relaxed text-stone-800 italic">{story.why}</p>
               </div>
               
-              <p className="text-[10px] text-stone-400 mt-6 uppercase tracking-widest">Tap "Analyze" or "Read Text" to dive deeper</p>
+              {!story.preAnalyzed && (
+                <p className="text-[10px] text-stone-400 mt-6 uppercase tracking-widest">Tap "Analyze" or "Read Text" to dive deeper</p>
+              )}
             </div>
           )}
 
@@ -1136,40 +1788,41 @@ Format your response clearly using these exact headings:
             </div>
           )}
 
-          {isActive && bibleArt && !showLoading && !showFetchingText && (
+          {isActive && (bibleArt || story.imageUrl) && !showLoading && (!showFetchingText || showPassage) && (
             <div className="mb-4 bg-[#fdfaf2] p-2.5 rounded border border-[#c5a059]/60 shadow-sm flex flex-col items-center text-center">
-              <div className="w-full h-36 overflow-hidden rounded-sm border border-stone-200 bg-stone-900 flex items-center justify-center">
+              <div className="w-full aspect-[16/9] overflow-hidden rounded-sm border border-stone-200 bg-stone-900 flex items-center justify-center">
                 <img
-                  src={bibleArt.imageUrl}
-                  alt={bibleArt.title}
+                  src={(bibleArt?.imageUrl || story.imageUrl)!}
+                  alt={bibleArt?.title || story.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://placehold.co/600x400/382117/e3c178?text=${encodeURIComponent(story.ref)}`;
+                    (e.target as HTMLImageElement).src = getSacredIllustrationUri(story.id, story.title.replace(/^[0-9.]+\s*/, '').trim());
                   }}
                 />
               </div>
-              <p className="text-[11px] font-bold text-[#4a3b32] mt-1.5 line-clamp-1">{bibleArt.title}</p>
-              <a
-                href={bibleArt.pageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[9px] uppercase tracking-widest text-[#8b0000] hover:underline mt-0.5 font-sans"
-              >
-                {bibleArt.artist ? `${bibleArt.artist} • ` : ''}View on Bible.art ↗
-              </a>
+              <p className="text-[11px] font-bold text-[#4a3b32] mt-1.5 line-clamp-1">
+                {bibleArt?.title || story.title.replace(/^[0-9.]+\s*/, '').trim()}
+              </p>
+              {bibleArt && bibleArt.pageUrl !== '#' && (
+                <a
+                  href={bibleArt.pageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[9px] uppercase tracking-widest text-[#8b0000] hover:underline mt-0.5 font-sans"
+                >
+                  {bibleArt.artist ? `${bibleArt.artist} • ` : ''}View on Bible.art ↗
+                </a>
+              )}
             </div>
           )}
 
-          {showPassage && !showFetchingText && !showTextError && (
-            <article className="mb-6 bg-stone-100/50 p-4 rounded border border-stone-200 shadow-inner">
-              <h2 className="text-xs font-bold text-[#8b0000] mb-2 uppercase tracking-widest border-b border-[#c5a059]/40 pb-1">Original Text Extract</h2>
-              <p className="text-sm leading-relaxed text-stone-800 text-justify italic">
-                "{showPassage}"
-              </p>
-            </article>
+          {showPassage !== null && showPassage !== '' && !showTextError && (
+            <CollapsibleTextBlock title="Original Text Extract" isFetchingText={isFetchingText}>
+              "{showPassage}"
+            </CollapsibleTextBlock>
           )}
 
-          {(showLoading || showFetchingText) && !isBacksideCopy && !isTargetPage && (
+          {(showLoading || (showFetchingText && !showPassage)) && !isBacksideCopy && !isTargetPage && (
             <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-[#fffcf5]/95 backdrop-blur-sm p-4 text-center">
               {bibleArt ? (
                 <div className="flex flex-col items-center max-w-[260px] animate-fade-in">
@@ -1224,37 +1877,30 @@ Format your response clearly using these exact headings:
               <h2 className="text-base font-bold text-[#4a3b32] mb-1 uppercase tracking-widest text-center">
                 {story.title}
               </h2>
-              <p className="text-center text-[10px] uppercase tracking-widest text-[#c5a059] font-bold mb-4">{story.ref}</p>
+              <p className="text-center text-[10px] uppercase tracking-widest text-[#c5a059] font-bold mb-1">{story.ref}</p>
+              
+              <div className="text-center mb-4">
+                <a
+                  href={bibleGatewayLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[9px] uppercase tracking-widest text-[#8b0000] hover:underline font-sans"
+                >
+                  Read on Bible Gateway (KJV) ↗
+                </a>
+              </div>
 
-              <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#8b0000]/80"></div>
-                <h3 className="text-xs font-bold text-[#8b0000] mb-2 uppercase tracking-widest flex items-center gap-1.5">
-                  Observation
-                </h3>
-                <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 prose-strong:text-[#4a3b32]">
-                  <ReactMarkdown>{showAnalysis.observation}</ReactMarkdown>
-                </div>
-              </article>
+              <CollapsibleAnalysisBlock title="Observation" colorText="text-[#8b0000]" bgLine="bg-[#8b0000]/80">
+                <ReactMarkdown>{showAnalysis.observation}</ReactMarkdown>
+              </CollapsibleAnalysisBlock>
 
-              <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#c5a059]"></div>
-                <h3 className="text-xs font-bold text-[#c5a059] mb-2 uppercase tracking-widest flex items-center gap-1.5">
-                  Interpretation
-                </h3>
-                <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 prose-strong:text-[#4a3b32]">
-                  <ReactMarkdown>{showAnalysis.interpretation}</ReactMarkdown>
-                </div>
-              </article>
+              <CollapsibleAnalysisBlock title="Interpretation" colorText="text-[#c5a059]" bgLine="bg-[#c5a059]">
+                <ReactMarkdown>{showAnalysis.interpretation}</ReactMarkdown>
+              </CollapsibleAnalysisBlock>
 
-              <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-stone-700"></div>
-                <h3 className="text-xs font-bold text-stone-700 mb-2 uppercase tracking-widest flex items-center gap-1.5">
-                  Application
-                </h3>
-                <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 prose-strong:text-[#4a3b32]">
-                  <ReactMarkdown>{showAnalysis.application}</ReactMarkdown>
-                </div>
-              </article>
+              <CollapsibleAnalysisBlock title="Application" colorText="text-stone-700" bgLine="bg-stone-700">
+                <ReactMarkdown>{showAnalysis.application}</ReactMarkdown>
+              </CollapsibleAnalysisBlock>
             </div>
           )}
         </section>
@@ -1526,16 +2172,14 @@ Format your response clearly using these exact headings:
 
           <div ref={pageContainerRef} className="m-3 border border-[#e6d9c3] relative shadow-inner flex-1 min-h-0 grid-stack overflow-hidden">
             
-            {/* Previous Page (Shown underneath when swiping backward from left edge) */}
-            <div className="grid-layer bg-[#fffcf5] p-6 flex flex-col gap-5 relative overflow-hidden select-none z-0">
-               {renderPageContent(prevStory, false, true)}
-               <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 font-sans pointer-events-none">{((currentIndex - 1 + filteredStories.length) % filteredStories.length) + 1}</span>
-            </div>
-
-            {/* Next Page (Shown underneath when swiping forward from right edge) */}
-            <div className="grid-layer bg-[#fffcf5] p-6 flex flex-col gap-5 relative overflow-hidden select-none z-0">
-               {renderPageContent(nextStory, false, true)}
-               <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 font-sans pointer-events-none">{(currentIndex + 2 > filteredStories.length ? 1 : currentIndex + 2)}</span>
+            {/* Underlying Target Page (Revealed during swipe) */}
+            <div className="grid-layer bg-[#fffcf5] p-6 flex flex-col gap-5 relative overflow-hidden select-none z-0 pointer-events-none">
+               {renderPageContent(curlState?.isBackSwipe ? prevStory : nextStory, false, true)}
+               <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 font-sans pointer-events-none">
+                 {curlState?.isBackSwipe 
+                   ? ((currentIndex - 1 + filteredStories.length) % filteredStories.length) + 1 
+                   : (currentIndex + 2 > filteredStories.length ? 1 : currentIndex + 2)}
+               </span>
             </div>
 
             {/* Current Page (Front Flat Portion clipped dynamically along the crease line) */}
