@@ -1182,7 +1182,8 @@ export default function App() {
     const metaTags = [
       { name: 'apple-mobile-web-app-capable', content: 'yes' },
       { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
-      { name: 'apple-mobile-web-app-title', content: 'Biblical Leadership' }
+      { name: 'apple-mobile-web-app-title', content: 'Biblical Leadership' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover' }
     ];
 
     metaTags.forEach(tagInfo => {
@@ -1794,7 +1795,7 @@ Format your response clearly using these exact headings:
           </div>
         </aside>
 
-        <section className="w-full relative flex-1 min-h-[260px] flex flex-col overflow-y-auto pb-4">
+        <section className="w-full relative flex-1 min-h-[260px] flex flex-col overflow-y-auto overscroll-contain pb-4">
           {!showAnalysis && !showLoading && !showPassage && !showFetchingText && !showTextError && !showAppError && (
             <div className="flex-1 flex flex-col items-center text-center p-2">
               <h3 className="text-base font-bold text-[#4a3b32] mb-1">{story.title}</h3>
@@ -1981,7 +1982,7 @@ Format your response clearly using these exact headings:
 
   return (
     <div 
-      className="h-screen w-screen font-serif selection:bg-[#c5a059]/30 p-2 sm:p-6 flex justify-center items-center overflow-hidden relative bg-[#0c0b09] cursor-pointer"
+      className="fixed inset-0 h-[100dvh] w-full font-serif selection:bg-[#c5a059]/30 p-2 sm:p-6 flex justify-center items-center overflow-hidden bg-[#0c0b09] cursor-pointer overscroll-none"
       style={{
         backgroundImage: `url("${BASE_PATTERN_URI}")`,
         backgroundRepeat: 'repeat',
@@ -2012,6 +2013,16 @@ Format your response clearly using these exact headings:
         </React.Fragment>
       ))}
       <style>{`
+        body, html {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          overscroll-behavior: none;
+          background-color: #0c0b09;
+        }
+        
         @property --shimmer-r {
           syntax: '<length>';
           inherits: false;
@@ -2164,7 +2175,7 @@ Format your response clearly using these exact headings:
         }
       `}</style>
       
-      <div className="book-cover-container book-interactive-area w-full max-w-[400px] aspect-[9/19.5] max-h-[94vh] my-auto mx-auto relative z-20 cursor-default">
+      <div className="book-cover-container book-interactive-area w-full max-w-[400px] aspect-[9/19.5] max-h-[96dvh] my-auto mx-auto relative z-20 cursor-default">
         
         <div 
           className={`book-cover ${isCoverOpen ? 'is-open' : ''}`}
