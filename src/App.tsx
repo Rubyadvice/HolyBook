@@ -1019,19 +1019,19 @@ const CollapsibleTextBlock = ({ title, children, isFetchingText }: { title: stri
     <article className="mb-6 bg-stone-100/50 p-4 rounded border border-stone-200 shadow-inner">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-left text-xs font-bold text-[#8b0000] uppercase tracking-widest border-b border-[#c5a059]/40 pb-1 flex items-center justify-between focus:outline-none"
+        className="w-full text-left text-xs font-bold text-[#8b0000] uppercase tracking-widest border-b border-[#c5a059]/40 pb-1 flex items-center justify-between focus:outline-none ui-font"
       >
         <span>
           {title} 
           {isFetchingText && <span className="animate-pulse inline-block w-2 h-2 bg-[#8b0000] rounded-full ml-1" title="Streaming live from Bible API..."></span>}
         </span>
-        <svg className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-4 h-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
-      <div className={`grid transition-all duration-300 ${isOpen ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'}`}>
+      <div className={`grid transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'}`}>
         <div className="overflow-hidden">
-          <p className="text-sm leading-relaxed text-stone-800 text-justify italic">
+          <p className="text-sm leading-relaxed text-stone-800 text-justify italic reading-font">
             {children}
           </p>
         </div>
@@ -1047,16 +1047,16 @@ const CollapsibleAnalysisBlock = ({ title, colorText, bgLine, children }: { titl
       <div className={`absolute top-0 left-0 w-1 h-full ${bgLine}`}></div>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full text-left text-xs font-bold ${colorText} uppercase tracking-widest flex items-center justify-between gap-1.5 focus:outline-none`}
+        className={`w-full text-left text-xs font-bold ${colorText} uppercase tracking-widest flex items-center justify-between gap-1.5 focus:outline-none ui-font`}
       >
         {title}
-        <svg className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-4 h-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
-      <div className={`grid transition-all duration-300 ${isOpen ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'}`}>
+      <div className={`grid transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'}`}>
         <div className="overflow-hidden">
-          <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 prose-strong:text-[#4a3b32]">
+          <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 prose-strong:text-[#4a3b32] reading-font">
             {children}
           </div>
         </div>
@@ -1070,6 +1070,10 @@ export default function App() {
   const [isCoverOpen, setIsCoverOpen] = useState<boolean>(false);
   
   const [activeSection, setActiveSection] = useState<StorySection>('NARRATIVE');
+
+  // Custom In-Page Animated Antique Golden Dropdown state
+  const [isContextDropdownOpen, setIsContextDropdownOpen] = useState<boolean>(false);
+  const [dropdownFilter, setDropdownFilter] = useState<string>('');
 
   // State for the Dove Lexicon Highlighting & Context Menu Popover
   const [isHighlightMode, setIsHighlightMode] = useState<boolean>(false);
@@ -1182,6 +1186,8 @@ export default function App() {
     setError(null);
     setTextError(null);
     setActiveWordContext(null);
+    setIsContextDropdownOpen(false);
+    setDropdownFilter('');
     
     // Automatically set the predefined art if present, otherwise clear it
     if (story.imageUrl) {
@@ -1193,6 +1199,19 @@ export default function App() {
     } else {
       setBibleArt(null);
     }
+  };
+
+  const handleDailyPericope = () => {
+    if (!interactive || !pageContainerRef.current) return;
+    const pericopes = MASTER_CONTENT.filter(s => s.section === 'PERICOPES');
+    const today = new Date();
+    // Use day of year to deterministically pick a daily reading
+    const start = new Date(today.getFullYear(), 0, 0);
+    const diff = today.getTime() - start.getTime();
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.floor(diff / oneDay);
+    const dailyIndex = dayOfYear % pericopes.length;
+    handleStoryChange(pericopes[dailyIndex]);
   };
 
   const fetchBibleArt = async (story: ContentItem) => {
@@ -1253,6 +1272,8 @@ export default function App() {
 
   const handleSectionChange = (section: StorySection) => {
     setActiveSection(section);
+    setIsContextDropdownOpen(false);
+    setDropdownFilter('');
     const newFiltered = MASTER_CONTENT.filter(s => s.section === section);
     if (!newFiltered.find(s => s.id === selectedStory.id)) {
       handleStoryChange(newFiltered[0]);
@@ -1431,31 +1452,14 @@ Format your response clearly using these exact headings:
     }
   };
 
-  const handleDailyPericope = async () => {
-    const today = new Date();
-    const dateString = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-    let hash = 0;
-    for (let i = 0; i < dateString.length; i++) {
-      hash = (hash << 5) - hash + dateString.charCodeAt(i);
-      hash |= 0;
-    }
-    const dailyIndex = Math.abs(hash) % PERICOPE_STORIES.length;
-    const dailyStory = PERICOPE_STORIES[dailyIndex];
-    
-    setActiveSection('PERICOPES');
-    handleStoryChange(dailyStory);
-    
-    const fetchedText = await fetchPassageText(dailyStory);
-    await fetchAnalysis(dailyStory, fetchedText);
-  };
-
-  // Smoothly animate the page curl to its final state on release or tap
+  // Smoothly animate the page curl to its final state using Apple-style damped spring physics
   const animateCurlTo = (
     fromX: number,
     fromY: number,
     originY: number,
     targetFlipped: boolean,
-    isBackSwipe = false
+    isBackSwipe = false,
+    initialVelocityPxPerMs = 0
   ) => {
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     const rect = pageContainerRef.current?.getBoundingClientRect();
@@ -1467,16 +1471,33 @@ Format your response clearly using these exact headings:
       ? (isBackSwipe ? W * 2.02 : -W * 0.98)
       : (isBackSwipe ? 2 : W);
     const toY = originY;
-    const animStart = performance.now();
-    const duration = 420;
+
+    // Spring physics state (mass = 1, stiffness = 290, damping = 28 for crisp iOS-like critically/under-damped feel)
+    let curX = fromX;
+    let curY = fromY;
+    let velX = initialVelocityPxPerMs * 1000; // Convert px/ms to px/s
+    let velY = 0;
+    const stiffness = 290;
+    const damping = 28;
+    let lastTime = performance.now();
 
     const step = (now: number) => {
-      const t = Math.min(1, (now - animStart) / duration);
-      const ease = 1 - Math.pow(1 - t, 3);
-      const curX = fromX + (toX - fromX) * ease;
-      const curY = fromY + (toY - fromY) * ease;
+      // Clamp dt to max 32ms to avoid numerical instability on frame drops
+      const dt = Math.min(0.032, Math.max(0.001, (now - lastTime) / 1000));
+      lastTime = now;
 
-      if (t < 1) {
+      const forceX = -stiffness * (curX - toX) - damping * velX;
+      const forceY = -stiffness * (curY - toY) - damping * velY;
+
+      velX += forceX * dt;
+      velY += forceY * dt;
+      curX += velX * dt;
+      curY += velY * dt;
+
+      const distRemaining = Math.hypot(toX - curX, toY - curY);
+      const speed = Math.hypot(velX, velY);
+
+      if (distRemaining > 0.75 || speed > 12) {
         setCurlState({
           pointerX: curX,
           pointerY: curY,
@@ -1507,6 +1528,7 @@ Format your response clearly using these exact headings:
   ) => {
     e.stopPropagation();
     setActiveWordContext(null);
+    setIsContextDropdownOpen(false);
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     e.currentTarget.setPointerCapture(e.pointerId);
 
@@ -1594,7 +1616,7 @@ Format your response clearly using these exact headings:
 
     if (dist < 12 && dt < 300) {
       dragStartRef.current = null;
-      animateCurlTo(curX, curY, originY, true, isBackSwipe);
+      animateCurlTo(curX, curY, originY, true, isBackSwipe, isBackSwipe ? 1.2 : -1.2);
       return;
     }
 
@@ -1603,7 +1625,7 @@ Format your response clearly using these exact headings:
       ? rawReleaseX > rect.width * 0.42 || velocity > 0.3
       : curX < rect.width * 0.48 || velocity < -0.35;
     dragStartRef.current = null;
-    animateCurlTo(curX, curY, originY, targetFlipped, isBackSwipe);
+    animateCurlTo(curX, curY, originY, targetFlipped, isBackSwipe, velocity);
   };
 
   // True physical paper fold calculation using perpendicular bisector
@@ -1765,21 +1787,29 @@ Format your response clearly using these exact headings:
     const bibleGatewaySearch = encodeURIComponent(story.ref.replace(/\|/g, ';').replace(/Book of/g, '').trim());
     const bibleGatewayLink = `https://www.biblegateway.com/passage/?search=${bibleGatewaySearch}&version=KJV`;
 
+    const visibleDropdownOptions = dropdownFilter.trim()
+      ? filteredStories.filter(
+          (s) =>
+            s.title.toLowerCase().includes(dropdownFilter.toLowerCase()) ||
+            s.ref.toLowerCase().includes(dropdownFilter.toLowerCase())
+        )
+      : filteredStories;
+
     return (
-      <div className="w-full max-w-[340px] mx-auto flex flex-col gap-4 h-full">
-        <aside className="w-full flex flex-col gap-3 shrink-0 relative">
+      <div className="w-full max-w-[356px] mx-auto flex flex-col gap-3.5 h-full reading-font">
+        <aside className="w-full flex flex-col gap-2.5 shrink-0 relative z-30">
           
-          <div className="flex bg-[#fdfaf2] border border-[#c5a059] rounded-sm p-0.5 shadow-sm">
+          <div className="flex bg-[#fdfaf2] border border-[#c5a059] rounded-md p-0.5 shadow-sm">
             {SECTIONS.map(section => (
               <button
                 key={section.id}
                 onClick={interactive ? () => handleSectionChange(section.id) : undefined}
                 title={section.label}
                 aria-label={section.label}
-                className={`flex-1 flex items-center justify-center py-2.5 transition-colors overflow-hidden ${
+                className={`flex-1 flex items-center justify-center py-2 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden active:scale-[0.99] active:opacity-60 ${
                   activeSection === section.id 
-                    ? 'bg-[#c5a059] text-[#fffcf5] shadow-sm rounded-[2px]' 
-                    : 'text-[#4a3b32] hover:bg-stone-200/50 rounded-[2px]'
+                    ? 'bg-[#c5a059] text-[#fffcf5] shadow-sm rounded-[4px] scale-[1.01]' 
+                    : 'text-[#4a3b32] hover:bg-stone-200/50 rounded-[4px]'
                 }`}
               >
                 {renderSectionIcon(section.id)}
@@ -1790,40 +1820,122 @@ Format your response clearly using these exact headings:
           {activeSection === 'PERICOPES' && (
             <button
               onClick={interactive ? handleDailyPericope : undefined}
-              className="w-full bg-[#fdfaf2] border border-[#c5a059] text-[#4a3b32] text-xs font-bold uppercase tracking-widest py-2 px-4 hover:bg-[#c5a059] hover:text-white transition-colors flex items-center justify-center gap-2 shadow-sm rounded-sm"
+              className="w-full bg-[#fdfaf2] border border-[#c5a059] text-[#4a3b32] text-[11px] font-bold uppercase tracking-widest py-2 px-4 hover:bg-[#c5a059] hover:text-white active:scale-[0.99] active:opacity-60 transition-all flex items-center justify-center gap-2 shadow-sm rounded-md ui-font"
             >
-              Daily Pericope Generator
+              <span>✦</span> Daily Pericope Generator
             </button>
           )}
 
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Select Context</label>
-            <select
-              value={story.id}
-              onChange={interactive ? (e) => {
-                const found = filteredStories.find(s => s.id === e.target.value);
-                if (found) handleStoryChange(found);
-              } : () => {}}
-              className="w-full py-2 px-1 border-b border-stone-300 bg-transparent focus:outline-none focus:border-[#8b0000] font-bold text-xs text-stone-700 font-sans cursor-pointer transition-colors truncate"
+          {/* Custom In-Page Animated Antique Golden Dropdown */}
+          <div className="flex flex-col gap-1 relative">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ui-font">
+                Select Context
+              </label>
+              <span className="text-[9px] text-[#c5a059] font-semibold tracking-wider uppercase ui-font">
+                {currentIndex + 1} of {filteredStories.length}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={interactive ? (e) => {
+                e.stopPropagation();
+                setIsContextDropdownOpen(prev => !prev);
+              } : undefined}
+              className={`w-full py-2 px-3 rounded-md border text-left flex items-center justify-between gap-2 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-sm active:opacity-60 ui-font ${
+                isContextDropdownOpen && interactive
+                  ? 'bg-[#fdfaf2] border-[#8b0000] ring-2 ring-[#c5a059]/35'
+                  : 'bg-[#fdfaf2]/90 border-[#c5a059]/70 hover:border-[#c5a059]'
+              }`}
             >
-              {filteredStories.map((s) => (
-                <option key={s.id} value={s.id}>{s.title}</option>
-              ))}
-            </select>
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-xs text-[#382117] truncate">
+                  {story.title}
+                </div>
+                <div className="text-[10px] text-[#8b0000]/80 truncate font-medium">
+                  {story.ref}
+                </div>
+              </div>
+              <span className={`w-6 h-6 rounded-full bg-[#c5a059]/15 text-[#4a3b32] flex items-center justify-center shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isContextDropdownOpen && interactive ? 'rotate-180 bg-[#c5a059] text-white' : ''}`}>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.3" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </button>
+
+            {/* Animated In-Page Dropdown Sheet */}
+            {interactive && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className={`grid transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  isContextDropdownOpen
+                    ? 'grid-rows-[1fr] opacity-100 mt-1'
+                    : 'grid-rows-[0fr] opacity-0 pointer-events-none mt-0'
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="bg-[#fdfaf2]/95 backdrop-blur-md border-2 border-[#c5a059] rounded-md shadow-[0_14px_30px_rgba(36,19,12,0.28)] overflow-hidden">
+                    {filteredStories.length > 10 && (
+                      <div className="p-2 border-b border-[#c5a059]/30 bg-[#fffcf5]">
+                        <input
+                          type="text"
+                          value={dropdownFilter}
+                          onChange={(e) => setDropdownFilter(e.target.value)}
+                          placeholder="Search title or scripture..."
+                          className="w-full px-2.5 py-1.5 text-xs bg-[#fdfaf2] border border-[#c5a059]/50 rounded focus:outline-none focus:border-[#8b0000] text-[#382117] placeholder:text-stone-400 ui-font"
+                        />
+                      </div>
+                    )}
+                    <div className="max-h-56 overflow-y-auto overscroll-contain divide-y divide-[#e6d9c3]/60 no-scrollbar">
+                      {visibleDropdownOptions.length === 0 ? (
+                        <div className="p-3 text-center text-xs text-stone-400 italic ui-font">
+                          No matching passages found
+                        </div>
+                      ) : (
+                        visibleDropdownOptions.map((item) => {
+                          const isSelected = item.id === story.id;
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => handleStoryChange(item)}
+                              className={`w-full text-left px-3 py-2 flex items-center justify-between gap-2 transition-colors ui-font ${
+                                isSelected
+                                  ? 'bg-gradient-to-r from-[#c5a059]/25 via-[#c5a059]/15 to-transparent text-[#8b0000] font-bold'
+                                  : 'hover:bg-[#c5a059]/10 text-stone-700'
+                              }`}
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs truncate">{item.title}</div>
+                                <div className="text-[10px] text-stone-500 truncate">{item.ref}</div>
+                              </div>
+                              {isSelected && (
+                                <span className="text-[#8b0000] text-xs font-bold shrink-0">✓</span>
+                              )}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-stretch gap-2 mt-1">
+          <div className="flex items-stretch gap-2 mt-0.5 ui-font">
             <button
               onClick={interactive ? () => fetchAnalysis(story) : undefined}
               disabled={showLoading || showFetchingText || !!story.preAnalyzed}
-              className="flex-1 bg-[#8b0000] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#660000] transition-colors disabled:opacity-50 shadow-sm rounded-sm"
+              className="flex-1 bg-[#8b0000] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#660000] active:scale-[0.98] active:opacity-60 transition-all disabled:opacity-50 shadow-sm rounded-md"
             >
               {story.preAnalyzed ? "Analyzed" : showLoading ? "Analyzing..." : "Analyze"}
             </button>
             <button
               onClick={interactive ? () => fetchPassageText(story) : undefined}
               disabled={showFetchingText || showLoading}
-              className="flex-1 bg-[#4a3b32] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#382117] transition-colors disabled:opacity-50 shadow-sm rounded-sm"
+              className="flex-1 bg-[#4a3b32] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#382117] active:scale-[0.98] active:opacity-60 transition-all disabled:opacity-50 shadow-sm rounded-md"
             >
               {showFetchingText ? "Loading..." : "Read Text"}
             </button>
@@ -1836,7 +1948,7 @@ Format your response clearly using these exact headings:
               } : undefined}
               title={isHighlightMode ? "Disable Biblical Key Terms Scanner" : "Scan & Highlight Names, Places, and Key Terms"}
               aria-label="Scan and highlight biblical terms"
-              className={`w-10 shrink-0 flex items-center justify-center rounded-sm border transition-all shadow-sm ${
+              className={`w-10 shrink-0 flex items-center justify-center rounded-md border transition-all active:scale-95 active:opacity-60 shadow-sm ${
                 isHighlightMode
                   ? 'bg-[#8b0000] text-[#fdfaf2] border-[#8b0000] ring-2 ring-[#c5a059]/60'
                   : 'bg-[#fdfaf2] text-[#4a3b32] border-[#c5a059] hover:bg-[#c5a059]/20'
@@ -1848,9 +1960,10 @@ Format your response clearly using these exact headings:
         </aside>
 
         <section
-          className="w-full relative flex-1 min-h-[260px] flex flex-col overflow-y-auto overscroll-contain pb-4"
+          className="w-full relative flex-1 min-h-[240px] flex flex-col overflow-y-auto overscroll-contain pb-5 no-scrollbar"
           onClick={() => {
             if (activeWordContext) setActiveWordContext(null);
+            if (isContextDropdownOpen) setIsContextDropdownOpen(false);
           }}
         >
           {!showAnalysis && !showLoading && !showPassage && !showFetchingText && !showTextError && !showAppError && (
@@ -2045,7 +2158,7 @@ Format your response clearly using these exact headings:
 
   return (
     <div 
-      className="fixed inset-0 h-[100dvh] w-full font-serif selection:bg-[#c5a059]/30 p-2 sm:p-6 flex justify-center items-center overflow-hidden bg-[#0c0b09] cursor-pointer overscroll-none"
+      className="fixed inset-0 h-[100dvh] w-full reading-font selection:bg-[#c5a059]/30 p-0 sm:p-6 flex justify-center items-center overflow-hidden bg-[#0c0b09] cursor-pointer overscroll-none"
       style={{
         backgroundImage: `url("Antique%20Gold%20Crosses%20and%20Foliage%20Pattern.png")`,
         backgroundRepeat: 'repeat',
@@ -2076,6 +2189,13 @@ Format your response clearly using these exact headings:
         </React.Fragment>
       ))}
       <style>{`
+        :root {
+          --font-reading: ui-serif, "New York", -apple-system-ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+          --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+          --safe-top: env(safe-area-inset-top, 0px);
+          --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
         body, html {
           margin: 0;
           padding: 0;
@@ -2084,6 +2204,45 @@ Format your response clearly using these exact headings:
           overflow: hidden;
           overscroll-behavior: none;
           background-color: #0c0b09;
+          font-family: var(--font-reading);
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          text-rendering: optimizeLegibility;
+        }
+
+        .reading-font {
+          font-family: var(--font-reading);
+        }
+
+        .ui-font {
+          font-family: var(--font-ui);
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        @keyframes popover-spring {
+          0% {
+            opacity: 0;
+            transform: scale(0.6);
+          }
+          60% {
+            transform: scale(1.05);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-popover-spring {
+          animation: popover-spring 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         
         @property --shimmer-r {
@@ -2184,7 +2343,7 @@ Format your response clearly using these exact headings:
           width: 100%;
           height: 100%;
           transform-origin: left center;
-          transition: transform 1.4s cubic-bezier(0.25, 1, 0.5, 1);
+          transition: transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
           transform-style: preserve-3d;
           z-index: 50;
           cursor: pointer;
@@ -2238,7 +2397,7 @@ Format your response clearly using these exact headings:
         }
       `}</style>
       
-      <div className="book-cover-container book-interactive-area w-full max-w-[400px] aspect-[9/19.5] max-h-[96dvh] my-auto mx-auto relative z-20 cursor-default">
+      <div className="book-cover-container book-interactive-area w-full h-[100dvh] sm:h-auto sm:max-w-[410px] sm:aspect-[9/19.5] sm:max-h-[95dvh] my-auto mx-auto relative z-20 cursor-default">
         
         <div 
           className={`book-cover ${isCoverOpen ? 'is-open' : ''}`}
@@ -2285,26 +2444,36 @@ Format your response clearly using these exact headings:
             onClick={(e) => {
               e.stopPropagation();
               setIsCoverOpen(false);
-              setCurlState(null);
             }}
-            title="Click cover spine to close Bible"
-            className="absolute left-0 top-0 bottom-0 w-[16px] z-40 cursor-pointer bg-transparent hover:bg-[#c5a059]/25 transition-colors rounded-l-[4px]"
-          />
+            className="absolute top-2 left-[-45px] sm:left-[-60px] text-white opacity-50 hover:opacity-100 cursor-pointer p-2 z-10 transition-opacity"
+            title="Close Bible"
+          >
+            <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </div>
         )}
 
-        <main className="absolute inset-0 w-full h-full bg-[#fffcf5] shadow-[15px_15px_30px_rgba(0,0,0,0.8)] rounded-[4px_12px_12px_4px] border-l-[14px] border-[#3a2a22] flex flex-col overflow-hidden box-border">
+        <main className="absolute inset-0 w-full h-full bg-[#fffcf5] shadow-[15px_15px_30px_rgba(0,0,0,0.8)] rounded-none sm:rounded-[4px_12px_12px_4px] border-l-[10px] sm:border-l-[14px] border-[#3a2a22] flex flex-col overflow-hidden box-border">
           
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-b from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none rounded-tr-[12px]"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-l from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none rounded-r-[12px] shadow-[-2px_0_5px_rgba(0,0,0,0.1)]"></div>
-          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-t from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none rounded-br-[12px]"></div>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-b from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-tr-[12px]"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-l from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-r-[12px] shadow-[-2px_0_5px_rgba(0,0,0,0.1)]"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-t from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-br-[12px]"></div>
           <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-black/20 to-transparent z-30 pointer-events-none"></div>
 
-          <div ref={pageContainerRef} className="m-3 border border-[#e6d9c3] relative shadow-inner flex-1 min-h-0 grid-stack overflow-hidden">
+          <div
+            ref={pageContainerRef}
+            style={{
+              paddingTop: 'max(0.5rem, var(--safe-top))',
+              paddingBottom: 'max(0.5rem, var(--safe-bottom))',
+            }}
+            className="m-2 sm:m-3 border border-[#e6d9c3] relative shadow-inner flex-1 min-h-0 grid-stack overflow-hidden"
+          >
             
             {/* Underlying Target Page (Revealed during swipe) */}
-            <div className="grid-layer bg-[#fffcf5] p-6 flex flex-col gap-5 relative overflow-hidden select-none z-0 pointer-events-none">
+            <div className="grid-layer bg-[#fffcf5] px-4 py-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden select-none z-0 pointer-events-none">
                {renderPageContent(curlState?.isBackSwipe ? selectedStory : nextStory, false, true)}
-               <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 font-sans pointer-events-none">
+               <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
                  {curlState?.isBackSwipe 
                    ? (currentIndex + 1) 
                    : (currentIndex + 2 > filteredStories.length ? 1 : currentIndex + 2)}
@@ -2313,14 +2482,14 @@ Format your response clearly using these exact headings:
 
             {/* Current Page (Front Flat Portion clipped dynamically along the crease line) */}
             <div 
-              className="grid-layer bg-[#fffcf5] p-6 flex flex-col gap-5 relative overflow-hidden select-none z-10"
+              className="grid-layer bg-[#fffcf5] px-4 py-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden select-none z-10"
               style={{
                 clipPath: curlGeo.frontClip,
                 pointerEvents: curlGeo.isCurling ? 'none' : 'auto',
               }}
             >
               {renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, false, false)}
-              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 font-sans pointer-events-none">
+              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
                 {curlState?.isBackSwipe
                   ? ((currentIndex - 1 + filteredStories.length) % filteredStories.length) + 1 
                   : (currentIndex + 1)}
@@ -2400,8 +2569,9 @@ Format your response clearly using these exact headings:
                 onClick={(e) => e.stopPropagation()}
                 style={{
                   top: `${Math.min(Math.max(activeWordContext.y + 12, 70), 460)}px`,
+                  transformOrigin: `${activeWordContext.x - 20}px -12px`
                 }}
-                className="absolute left-4 right-4 z-40 bg-[#fdfaf2] border-2 border-[#c5a059] rounded shadow-[0_10px_25px_rgba(0,0,0,0.45)] p-3.5 text-left animate-fade-in"
+                className="absolute left-4 right-4 z-40 bg-[#fdfaf2] border-2 border-[#c5a059] rounded shadow-[0_10px_25px_rgba(0,0,0,0.45)] p-3.5 text-left animate-popover-spring"
               >
                 <div className="flex items-start justify-between gap-2 border-b border-[#c5a059]/40 pb-1.5 mb-2">
                   <div>
@@ -2414,7 +2584,7 @@ Format your response clearly using these exact headings:
                   </div>
                   <button
                     onClick={() => setActiveWordContext(null)}
-                    className="text-stone-400 hover:text-[#8b0000] text-xs font-bold px-1.5 py-0.5 rounded"
+                    className="text-stone-400 hover:text-[#8b0000] text-xs font-bold px-1.5 py-0.5 rounded active:opacity-60 transition-opacity"
                     aria-label="Close context menu"
                   >
                     ✕
