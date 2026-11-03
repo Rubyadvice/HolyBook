@@ -980,7 +980,7 @@ const renderDoveIcon = () => (
     {/* Back / Secondary Wing */}
     <path d="M47 41 C43 32, 37 22, 39 10 C42 16, 46 23, 51 30 C56 36, 56 41, 49 46 C46 43, 45 41, 43 37 C40 32, 36 25, 36 17 C33 22, 35 30, 41 37 C37 35, 34 30, 33 24 C32 30, 36 37, 45 43 Z" />
     {/* Main Sweeping Forewing with Layered Feathers & Negative-Space Arch */}
-    <path d="M46 49 C47 42, 42 36, 33 31 C24 26, 17 18, 14 12 C12 18, 16 28, 22 34 C17 31, 13 25, 11 20 C11 27, 16 35, 24 41 C18 39, 13 34, 11 30 C11 37, 17 44, 26 48 C20 47, 15 44, 13 40 C13 46, 19 52, 28 54 C22 54, 17 52, 16 49 C16 54, 22 58, 30 59 C25 60, 20 59, 19 57 C20 61, 25 63, 33 62 C29 64, 24 64, 23 62 C25 66, 31 66, 38 63 C35 67, 29 70, 22 69 C16 68, 11 66, 8 64 C7 67, 7 71, 9 73 C13 74, 19 74, 25 73 C18 75, 12 75, 8 75 C8 78, 10 81, 13 82 C17 82, 23 80, 29 76 C22 81, 16 83, 12 84 C13 87, 16 89, 20 89 C24 88, 29 83, 34 78 C29 85, 24 89, 20 91 C22 93, 25 94, 29 93 C31 87, 35 80, 42 75 C52 68, 59 58, 63 45 C65 40, 68 38, 72 39 C70 36, 66 35, 62 35 C56 35, 51 41, 46 49 Z M60 40 C58.3 40, 57 38.7, 57 37 C57 35.3, 58.3 34, 60 34 C61.7 34, 63 35.3, 63 37 C63 38.7, 61.7 40, 60 40 Z" />
+    <path d="M46 49 C47 42, 42 36, 33 31 C24 26, 17 18, 14 12 C12 18, 16 28, 22 34 C17 31, 13 25, 11 20 C11 27, 16 35, 24 41 C18 39, 13 34, 11 30 C11 37, 17 44, 26 48 C20 47, 15 44, 13 40 C13 46, 19 52, 28 54 C22 54, 17 52, 16 49 C16 54, 22 58, 30 59 C25 60, 20 59, 19 57 C20 61, 25 63, 33 62 C29 64, 24 64, 23 62 C25 66, 31 66, 38 63 C35 67, 29 70, 22 69 C16 68, 11 66, 8 64 C7 67, 7 71, 9 73 C13 74, 19 74, 25 73 C18 75, 12 75, 8 75 C8 78, 10 81, 13 82 C17 82, 23 80, 29 76 C22 81, 16 83, 12 84 C13 87, 16 89, 20 89 C24 88, 29 83, 34 78 C29 85, 24 89, 20 91 C22 93, 25 94, 29 93 C31 87, 35 80, 42 75 C52 68, 59 58, 63 45 C65 40, 68 38, 72 39 C70 36, 66 35, 62 35 C56 35, 51 41, 46 49 Z M60 40 C58.3 40, 57 38.7, 57 37 C57 35.3, 58.3 34, 60 34 C61.7 34, 63 35.3, 63 37 C63 38.7,61.7 40, 60 40 Z" />
     {/* Upper Olive Leaf */}
     <path d="M72 37 C72 31, 77 27, 83 28 C83 34, 78 38, 72 37 Z" />
     {/* Lower Olive Leaf */}
@@ -1668,6 +1668,7 @@ Format your response clearly using these exact headings:
         creaseX: W,
         creaseY: H / 2,
         normalAngleDeg: 0,
+        flapWidth: 0,
       };
     }
 
@@ -1707,7 +1708,8 @@ Format your response clearly using these exact headings:
       { x: 0, y: H },
     ];
 
-    const signedDist = (p: { x: number; y: number }) => (p.x - Mx) * nx + (p.y - My) * ny;
+    const signedDist = (p: { x: { valueOf(): number } | number; y: { valueOf(): number } | number }) =>
+      (Number(p.x) - Mx) * nx + (Number(p.y) - My) * ny;
 
     const clipPolygon = (keepFoldedSide: boolean) => {
       const result: { x: number; y: number }[] = [];
@@ -1757,6 +1759,7 @@ Format your response clearly using these exact headings:
     const ty = 2 * ny * (nx * Mx + ny * My);
 
     const normalAngleDeg = (Math.atan2(ny, nx) * 180) / Math.PI;
+    const flapWidth = vLen * 0.5;
 
     return {
       isCurling: foldedPts.length >= 3,
@@ -1766,6 +1769,7 @@ Format your response clearly using these exact headings:
       creaseX: Mx,
       creaseY: My,
       normalAngleDeg,
+      flapWidth,
     };
   };
 
@@ -1780,6 +1784,9 @@ Format your response clearly using these exact headings:
     const showTextError = isActive ? textError : null;
     const showAppError = isActive ? error : null;
     const interactive = !isBacksideCopy && !isTargetPage;
+
+    const storyIdx = filteredStories.findIndex(s => s.id === story.id);
+    const displayIndex = storyIdx !== -1 ? storyIdx + 1 : currentIndex + 1;
 
     const handleWordClick = (entry: LexiconEntry, e: React.MouseEvent<HTMLSpanElement>) => {
       if (!interactive || !pageContainerRef.current) return;
@@ -1858,14 +1865,14 @@ Format your response clearly using these exact headings:
             </button>
           )}
 
-          {/* Custom In-Page Animated Antique Golden Dropdown */}
+          {/* Custom In-Page Animated Antique Golden Dropdown (Overlay-positioned so it never shifts header spacing) */}
           <div className="flex flex-col gap-1 relative">
             <div className="flex items-center justify-between">
               <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ui-font">
                 Select Context
               </label>
               <span className="text-[9px] text-[#c5a059] font-semibold tracking-wider uppercase ui-font">
-                {currentIndex + 1} of {filteredStories.length}
+                {displayIndex} of {filteredStories.length}
               </span>
             </div>
 
@@ -1896,14 +1903,14 @@ Format your response clearly using these exact headings:
               </span>
             </button>
 
-            {/* Animated In-Page Dropdown Sheet */}
+            {/* Animated Floating Dropdown Sheet (Takes zero layout space when closed or open) */}
             {interactive && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className={`grid transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                className={`absolute left-0 right-0 top-full z-50 grid transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] origin-top ${
                   isContextDropdownOpen
-                    ? 'grid-rows-[1fr] opacity-100 mt-1'
-                    : 'grid-rows-[0fr] opacity-0 pointer-events-none mt-0'
+                    ? 'grid-rows-[1fr] opacity-100 mt-1.5 scale-y-100'
+                    : 'grid-rows-[0fr] opacity-0 pointer-events-none mt-0 scale-y-95'
                 }`}
               >
                 <div className="overflow-hidden">
@@ -2486,140 +2493,151 @@ Format your response clearly using these exact headings:
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-b from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-tr-[12px]"></div>
           <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-l from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-r-[12px] shadow-[-2px_0_5px_rgba(0,0,0,0.1)]"></div>
           <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-t from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-br-[12px]"></div>
-          <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-black/20 to-transparent z-30 pointer-events-none"></div>
 
           <div
             ref={pageContainerRef}
-            style={{
-              paddingTop: 'max(0.5rem, var(--safe-top))',
-              paddingBottom: 'max(0.5rem, var(--safe-bottom))',
-            }}
-            className="m-2 sm:m-3 border border-[#e6d9c3] relative shadow-inner flex-1 min-h-0 grid-stack overflow-hidden"
+            className="w-full h-full relative flex-1 min-h-0 grid-stack overflow-hidden"
           >
             
             {/* Underlying Target Page (Revealed during swipe) */}
-            <div className="grid-layer bg-[#fffcf5] px-4 py-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden select-none z-0 pointer-events-none">
+            <div
+              style={{
+                paddingTop: 'calc(max(0.5rem, var(--safe-top)) + 1.25rem)',
+                paddingBottom: 'calc(max(0.5rem, var(--safe-bottom)) + 1.25rem)',
+              }}
+              className="grid-layer bg-[#fffcf5] px-6 sm:px-8 flex flex-col gap-4 relative overflow-hidden select-none z-0 pointer-events-none"
+            >
+               <div className="absolute inset-2 sm:inset-3 border border-[#e6d9c3] pointer-events-none z-20" />
                {renderPageContent(curlState?.isBackSwipe ? selectedStory : nextStory, false, true)}
-               <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
+               <span className="absolute bottom-3.5 sm:bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
                  {curlState?.isBackSwipe 
                    ? (currentIndex + 1) 
                    : (currentIndex + 2 > filteredStories.length ? 1 : currentIndex + 2)}
                </span>
             </div>
 
-            {/* Apple Books-style Ambient & Contact Shadow cast onto the underlying page beneath the turning sheet */}
+            {/* Apple Books-style Infinite Crease Shadow cast onto the revealed page (4000px tall so top/bottom ends never enter viewport) */}
             {curlGeo.isCurling && (
               <div className="grid-layer pointer-events-none z-[5] relative overflow-hidden">
                 <div
                   className="absolute pointer-events-none"
                   style={{
-                    width: '1400px',
-                    height: '1400px',
+                    width: '4000px',
+                    height: '4000px',
                     left: `${curlGeo.creaseX}px`,
                     top: `${curlGeo.creaseY}px`,
                     transform: `translate(-50%, -50%) rotate(${curlGeo.normalAngleDeg}deg)`,
                     background: curlState?.isBackSwipe
-                      ? 'linear-gradient(to left, rgba(20,12,6,0) 49.6%, rgba(20,12,6,0.42) 50.2%, rgba(28,16,8,0.24) 52.8%, rgba(28,16,8,0.09) 57.5%, rgba(28,16,8,0) 66%)'
-                      : 'linear-gradient(to right, rgba(20,12,6,0) 49.6%, rgba(20,12,6,0.42) 50.2%, rgba(28,16,8,0.24) 52.8%, rgba(28,16,8,0.09) 57.5%, rgba(28,16,8,0) 66%)',
+                      ? 'linear-gradient(to left, rgba(20,12,6,0) 49.85%, rgba(20,12,6,0.34) 50.05%, rgba(28,16,8,0.18) 50.8%, rgba(28,16,8,0.06) 52.2%, rgba(28,16,8,0) 54.5%)'
+                      : 'linear-gradient(to right, rgba(20,12,6,0) 49.85%, rgba(20,12,6,0.34) 50.05%, rgba(28,16,8,0.18) 50.8%, rgba(28,16,8,0.06) 52.2%, rgba(28,16,8,0) 54.5%)',
                   }}
                 />
               </div>
             )}
 
-            {/* Current Page (Front Flat Portion clipped dynamically along the crease line) */}
+            {/* Current Page (Front Flat Portion clipped dynamically along the crease line without container edge drop-shadow) */}
             <div 
               className="grid-layer relative overflow-hidden select-none z-10"
               style={{
                 pointerEvents: curlGeo.isCurling ? 'none' : 'auto',
-                filter: curlGeo.isCurling
-                  ? 'drop-shadow(0px 8px 18px rgba(24, 14, 8, 0.26)) drop-shadow(0px 2px 4px rgba(24, 14, 8, 0.18))'
-                  : 'none',
               }}
             >
               <div
-                className="w-full h-full bg-[#fffcf5] px-4 py-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden"
+                className="w-full h-full bg-[#fffcf5] px-6 sm:px-8 flex flex-col gap-4 relative overflow-hidden"
                 style={{
                   clipPath: curlGeo.frontClip,
+                  paddingTop: 'calc(max(0.5rem, var(--safe-top)) + 1.25rem)',
+                  paddingBottom: 'calc(max(0.5rem, var(--safe-bottom)) + 1.25rem)',
                 }}
               >
+                <div className="absolute inset-2 sm:inset-3 border border-[#e6d9c3] pointer-events-none z-20" />
                 {renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, false, false)}
-                <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
+                <span className="absolute bottom-3.5 sm:bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
                   {curlState?.isBackSwipe
                     ? ((currentIndex - 1 + filteredStories.length) % filteredStories.length) + 1 
                     : (currentIndex + 1)}
                 </span>
+
+                {/* Soft shadow cast by the curled flap onto the flat front page (purely crease-aligned, no horizontal top/bottom cutoff) */}
+                {curlGeo.isCurling && (
+                  <div
+                    className="absolute pointer-events-none z-30"
+                    style={{
+                      width: '4000px',
+                      height: '4000px',
+                      left: `${curlGeo.creaseX}px`,
+                      top: `${curlGeo.creaseY}px`,
+                      transform: `translate(-50%, -50%) rotate(${curlGeo.normalAngleDeg}deg)`,
+                      background: curlState?.isBackSwipe
+                        ? `linear-gradient(to right, rgba(18,10,5,0) 50%, rgba(18,10,5,0.22) 50.15%, rgba(18,10,5,0.28) calc(50% + ${Math.min(340, curlGeo.flapWidth).toFixed(0)}px), rgba(18,10,5,0.12) calc(50% + ${(Math.min(340, curlGeo.flapWidth) + 22).toFixed(0)}px), rgba(18,10,5,0) calc(50% + ${(Math.min(340, curlGeo.flapWidth) + 58).toFixed(0)}px))`
+                        : `linear-gradient(to left, rgba(18,10,5,0) 50%, rgba(18,10,5,0.22) 50.15%, rgba(18,10,5,0.28) calc(50% + ${Math.min(340, curlGeo.flapWidth).toFixed(0)}px), rgba(18,10,5,0.12) calc(50% + ${(Math.min(340, curlGeo.flapWidth) + 22).toFixed(0)}px), rgba(18,10,5,0) calc(50% + ${(Math.min(340, curlGeo.flapWidth) + 58).toFixed(0)}px))`,
+                    }}
+                  />
+                )}
               </div>
             </div>
 
-            {/* 3D Curled Backside Flap + Multi-Layered Apple Books Cast Shadow */}
+            {/* 3D Curled Backside Flap with Crease-Aligned Cylindrical Shading */}
             {curlGeo.isCurling && (
-              <div
-                className="grid-layer pointer-events-none z-20 relative overflow-hidden"
-                style={{
-                  filter: curlState?.isBackSwipe
-                    ? 'drop-shadow(18px 12px 26px rgba(18,10,5,0.46)) drop-shadow(6px 3px 10px rgba(18,10,5,0.3)) drop-shadow(1px 1px 2px rgba(18,10,5,0.25))'
-                    : 'drop-shadow(-18px 12px 26px rgba(18,10,5,0.46)) drop-shadow(-6px 3px 10px rgba(18,10,5,0.3)) drop-shadow(-1px 1px 2px rgba(18,10,5,0.25))',
-                }}
-              >
+              <div className="grid-layer pointer-events-none z-20 relative overflow-hidden">
                 <div
-                  className="w-full h-full bg-[#efe5d0] relative overflow-hidden select-none"
+                  className="w-full h-full bg-[#efe5d0] relative select-none"
                   style={{
                     clipPath: curlGeo.reflectedBackClip,
                   }}
                 >
                   <div
-                    className="w-full h-full p-6 flex flex-col gap-5 opacity-[0.16] pointer-events-none"
+                    className="w-full h-full px-6 sm:px-8 flex flex-col gap-5 opacity-[0.16] pointer-events-none relative"
                     style={{
                       transformOrigin: '0 0',
                       transform: curlGeo.matrix,
+                      paddingTop: 'calc(max(0.5rem, var(--safe-top)) + 1.25rem)',
+                      paddingBottom: 'calc(max(0.5rem, var(--safe-bottom)) + 1.25rem)',
                     }}
                   >
+                    <div className="absolute inset-2 sm:inset-3 border border-[#e6d9c3] pointer-events-none" />
                     {renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, true, false)}
                   </div>
 
-                  {/* Specular paper cylinder highlight & inner fold crease shading */}
+                  {/* Specular paper cylinder highlight & inner fold crease shading (4000px tall so no top/bottom edge ever shows) */}
                   <div
                     className="absolute pointer-events-none"
                     style={{
-                      width: '1200px',
-                      height: '1200px',
+                      width: '4000px',
+                      height: '4000px',
                       left: `${curlGeo.creaseX}px`,
                       top: `${curlGeo.creaseY}px`,
                       transform: `translate(-50%, -50%) rotate(${curlGeo.normalAngleDeg}deg)`,
                       background: curlState?.isBackSwipe
-                        ? 'linear-gradient(to right, rgba(40,24,12,0.18) 49.8%, rgba(255,253,248,0.88) 51.2%, rgba(235,222,196,0.4) 54%, rgba(28,16,8,0.18) 58.5%, rgba(0,0,0,0) 66%)'
-                        : 'linear-gradient(to left, rgba(40,24,12,0.18) 49.8%, rgba(255,253,248,0.88) 51.2%, rgba(235,222,196,0.4) 54%, rgba(28,16,8,0.18) 58.5%, rgba(0,0,0,0) 66%)',
+                        ? 'linear-gradient(to right, rgba(40,24,12,0.22) 49.95%, rgba(255,253,248,0.88) 50.45%, rgba(235,222,196,0.38) 51.5%, rgba(28,16,8,0.16) 53.2%, rgba(0,0,0,0) 56%)'
+                        : 'linear-gradient(to left, rgba(40,24,12,0.22) 49.95%, rgba(255,253,248,0.88) 50.45%, rgba(235,222,196,0.38) 51.5%, rgba(28,16,8,0.16) 53.2%, rgba(0,0,0,0) 56%)',
                     }}
                   />
                 </div>
               </div>
             )}
 
-            {/* Left Edge Swiping Zone (Restricted strictly below the Analyze / Read Text / Dove button row) */}
+            {/* Invisible Left Edge Swiping Zone (Restricted below the top button row, no visible bar or shadow) */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
-              className="absolute bottom-0 left-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-gradient-to-r from-black/10 to-transparent opacity-50 hover:opacity-100 transition-opacity flex items-center justify-start pl-1.5 touch-none rounded-tr-md"
+              className="absolute bottom-0 left-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
               onPointerDown={(e) => handlePointerDown(e, true)}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
-              title="Drag or tap below header from left edge to turn back"
-            >
-              <div className="w-1 h-12 bg-stone-400/50 rounded-full"></div>
-            </div>
+              title="Drag or tap from left edge to turn back"
+            />
 
-            {/* Right Edge Swiping Zone (Restricted strictly below the Analyze / Read Text / Dove button row) */}
+            {/* Invisible Right Edge Swiping Zone (Restricted below the top button row, no visible bar or shadow) */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
-              className="absolute bottom-0 right-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-gradient-to-l from-black/10 to-transparent opacity-50 hover:opacity-100 transition-opacity flex items-center justify-end pr-1.5 touch-none rounded-tl-md"
+              className="absolute bottom-0 right-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
               onPointerDown={(e) => handlePointerDown(e, false)}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
-              title="Drag or tap below header from right edge to turn forward"
-            >
-              <div className="w-1 h-12 bg-stone-400/50 rounded-full"></div>
-            </div>
+              title="Drag or tap from right edge to turn forward"
+            />
 
             {/* Biblical Term Context Menu Popover */}
             {activeWordContext && (
