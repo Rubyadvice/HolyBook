@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4a3b32"/>
+      <stop offset="100%" stop-color="#1c110a"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#c5a059"/>
+      <stop offset="100%" stop-color="#855d1a"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded App Icon Background -->
+  <rect width="64" height="64" rx="14" fill="url(#bgGlow)" stroke="#c5a059" stroke-width="1.5"/>
+  <!-- Open Bible Base -->
+  <path d="M14 24C14 24 20 20 32 24C44 20 50 24 50 24V46C50 46 44 42 32 46C20 42 14 46 14 46Z" fill="#fdfaf2" stroke="#c5a059" stroke-width="1"/>
+  <!-- Center Book Spine & Pages Divider -->
+  <line x1="32" y1="24" x2="32" y2="46" stroke="#c5a059" stroke-width="1.5"/>
+  <!-- Central Glowing Latin Cross -->
+  <path d="M30 16H34V28H40V32H34V42H30V32H24V28H30V16Z" fill="url(#goldGrad)" filter="drop-shadow(0px 1px 2px rgba(0,0,0,0.6))"/>
+</svg>
