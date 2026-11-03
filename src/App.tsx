@@ -114,8 +114,8 @@ const findLexiconEntry = (word: string): LexiconEntry | undefined => {
   return matchedKey ? BIBLICAL_LEXICON[matchedKey] : undefined;
 };
 
-// Self-contained high-detail SVG sacred artwork generator for the 10 Grand Narrative movements
-// Ensures instant, zero-latency rendering in the browser sandbox with uniform 16:9 framing
+// Self-contained high-detail SVG sacred artwork generator for fallback illustrations
+// Ensures instant, zero-latency rendering if offline or while historical art loads
 const getSacredIllustrationUri = (key: string, label?: string): string => {
   let svgBody = '';
   switch (key) {
@@ -576,10 +576,23 @@ const getSacredIllustrationUri = (key: string, label?: string): string => {
   return `data:image/svg+xml;utf8,${encodeURIComponent(fullSvg)}`;
 };
 
+// Curated historical painting search queries for the 10 Grand Narrative movements
+const NARRATIVE_ART_SEARCH_TERMS: Record<string, string> = {
+  "NAR-01": "Creation of Light Gustave Dore Genesis painting",
+  "NAR-02": "Expulsion from the Garden of Eden Thomas Cole painting",
+  "NAR-03": "Abraham sacrifice Isaac Rembrandt biblical painting",
+  "NAR-04": "Crossing the Red Sea Nicolas Poussin painting",
+  "NAR-05": "David with the Harp Rembrandt biblical painting",
+  "NAR-06": "Daniel in the Lions Den Rubens biblical painting",
+  "NAR-07": "Prophet Isaiah Michelangelo Sistine Chapel painting",
+  "NAR-08": "Resurrection of Christ Carl Bloch biblical painting",
+  "NAR-09": "Pentecost Jean II Restout biblical painting",
+  "NAR-10": "The New Jerusalem Gustave Dore Revelation biblical art"
+};
+
 const NARRATIVE_STORIES: ContentItem[] = [
   {
     id: "NAR-01", section: "NARRATIVE", title: "1. Creation", ref: "Genesis 1-2",
-    imageUrl: getSacredIllustrationUri("NAR-01", "Creation"),
     body: "God creates the heavens and the earth, brings order out of darkness, and makes humanity in His image. Human beings receive responsibility to care for and steward creation.",
     why: "Creation establishes God's sovereignty, the dignity of human life, and humanity's original purpose. Leadership begins with recognizing that life and authority are gifts entrusted by God.",
     preAnalyzed: {
@@ -590,7 +603,6 @@ const NARRATIVE_STORIES: ContentItem[] = [
   },
   {
     id: "NAR-02", section: "NARRATIVE", title: "2. Fall", ref: "Genesis 3 | Genesis 4:1-16 | Genesis 6-9 | Genesis 11:1-9",
-    imageUrl: getSacredIllustrationUri("NAR-02", "The Fall"),
     body: "Adam and Eve disobey God in Eden. Sin brings shame, fear, blame, and separation. The effects spread through human relationships and society.",
     why: "The Fall explains why the world and human relationships are broken. It establishes the need for reconciliation, redemption, forgiveness, and restoration.",
     preAnalyzed: {
@@ -601,7 +613,6 @@ const NARRATIVE_STORIES: ContentItem[] = [
   },
   {
     id: "NAR-03", section: "NARRATIVE", title: "3. Covenant", ref: "Genesis 12 | Genesis 15 | Genesis 17 | Genesis 22 | Romans 4 | Hebrews 11",
-    imageUrl: getSacredIllustrationUri("NAR-03", "Covenant"),
     body: "God calls Abraham to leave his homeland and establishes a covenant, promising descendants, land, and blessing. God's covenant purposes continue through Abraham's family.",
     why: "Covenant demonstrates God's faithfulness and initiative in redemption. God's plan is rooted in relationship and promise, not merely human performance.",
     preAnalyzed: {
@@ -612,7 +623,6 @@ const NARRATIVE_STORIES: ContentItem[] = [
   },
   {
     id: "NAR-04", section: "NARRATIVE", title: "4. Israel", ref: "Exodus 1-14 | Exodus 19-24 | Exodus 32-34 | Numbers 11-14 | Numbers 20-21",
-    imageUrl: getSacredIllustrationUri("NAR-04", "Israel"),
     body: "God hears Israel's cries in Egypt and delivers the people through Moses. At Sinai He gives His commandments and forms them into a people.",
     why: "God does not simply rescue individuals; He forms a people. Freedom brings responsibility, and a community needs spiritual formation, obedience, and trust.",
     preAnalyzed: {
@@ -623,7 +633,6 @@ const NARRATIVE_STORIES: ContentItem[] = [
   },
   {
     id: "NAR-05", section: "NARRATIVE", title: "5. Kingdom", ref: "1 Samuel 17 | 2 Samuel 11-12 | 1 Kings 3-11 | 1 Kings 17-19 | Amos 5 | Micah 6:8",
-    imageUrl: getSacredIllustrationUri("NAR-05", "Kingdom"),
     body: "Israel develops a monarchy. David becomes king, and Solomon experiences wisdom and prosperity. The kingdom also reveals pride, abuse of power, idolatry, and injustice.",
     why: "The kingdom reveals the potential and limitations of human leadership. Kings remain accountable to God; authority, wisdom, and influence cannot replace righteousness.",
     preAnalyzed: {
@@ -634,7 +643,6 @@ const NARRATIVE_STORIES: ContentItem[] = [
   },
   {
     id: "NAR-06", section: "NARRATIVE", title: "6. Exile", ref: "Daniel 1-6 | Esther 1-10 | Nehemiah 1-13 | Jonah 1-4",
-    imageUrl: getSacredIllustrationUri("NAR-06", "Exile"),
     body: "Israel and Judah experience the consequences of covenant unfaithfulness. The people are displaced from their homeland. Daniel, Esther, and Nehemiah lead faithfully in foreign contexts.",
     why: "God's presence and purposes are not limited to a particular location or period of national success. Faithfulness matters in difficult and unfamiliar circumstances.",
     preAnalyzed: {
@@ -645,7 +653,6 @@ const NARRATIVE_STORIES: ContentItem[] = [
   },
   {
     id: "NAR-07", section: "NARRATIVE", title: "7. Promise of Restoration", ref: "Isaiah 6 | Isaiah 52-53 | Jeremiah 1 | Jeremiah 31 | Ezekiel 34 | Ezekiel 36-37 | Malachi 3-4",
-    imageUrl: getSacredIllustrationUri("NAR-07", "Promise of Restoration"),
     body: "God promises to restore His people, renew their hearts, establish a new covenant, and provide faithful shepherds. Prophetic visions offer hope beyond judgment and exile.",
     why: "God's purpose is not merely to judge sin but to restore relationship and renew His people. These promises point forward to the hope fulfilled through Jesus Christ.",
     preAnalyzed: {
@@ -656,7 +663,6 @@ const NARRATIVE_STORIES: ContentItem[] = [
   },
   {
     id: "NAR-08", section: "NARRATIVE", title: "8. Jesus Christ", ref: "Matthew 1-2 | Luke 1-2 | John 1:1-18 | Matthew 5-7 | Luke 10:25-37 | John 13-17 | Matthew 26-28 | Luke 22-24 | John 19-20",
-    imageUrl: getSacredIllustrationUri("NAR-08", "Jesus Christ"),
     body: "Jesus enters human history through the incarnation. He teaches about God's Kingdom, heals the sick, dies on the cross, rises from the dead, and commissions His disciples.",
     why: "Jesus is the central figure of the biblical narrative. He reveals God's character, addresses sin, and inaugurates the Kingdom of God.",
     preAnalyzed: {
@@ -667,7 +673,6 @@ const NARRATIVE_STORIES: ContentItem[] = [
   },
   {
     id: "NAR-09", section: "NARRATIVE", title: "9. Church", ref: "Acts 2 | Acts 6-7 | Acts 9 | Acts 10-11 | Acts 15 | Acts 20:17-38 | Romans 12 | 1 Corinthians 12-13 | Ephesians 4-6 | 1 Peter 5",
-    imageUrl: getSacredIllustrationUri("NAR-09", "The Church"),
     body: "After Jesus' resurrection and ascension, the Holy Spirit comes at Pentecost. The Church emerges as a community devoted to worship, teaching, fellowship, service, and mission.",
     why: "God's redemptive work continues through a Spirit-empowered community. The Church is called to embody Kingdom values and proclaim the gospel to the world.",
     preAnalyzed: {
@@ -678,7 +683,6 @@ const NARRATIVE_STORIES: ContentItem[] = [
   },
   {
     id: "NAR-10", section: "NARRATIVE", title: "10. New Creation", ref: "Revelation 21-22 | Romans 8:18-25 | 2 Peter 3:10-13",
-    imageUrl: getSacredIllustrationUri("NAR-10", "New Creation"),
     body: "Scripture culminates in the promise of a new heaven and a new earth. God makes His dwelling with humanity. Death, mourning, crying, and pain are removed.",
     why: "The Christian hope is not simply escape from the world, but the renewal of creation and eternal fellowship with God.",
     preAnalyzed: {
@@ -1127,17 +1131,25 @@ export default function App() {
   const [isFetchingText, setIsFetchingText] = useState<boolean>(false);
   const [textError, setTextError] = useState<string | null>(null);
 
-  // State for displaying relevant biblical artwork from https://bible.art/
+  // State and cache for displaying relevant biblical artwork from https://bible.art/
   const [bibleArt, setBibleArt] = useState<{
     imageUrl: string;
     title: string;
     artist?: string;
     pageUrl: string;
-  } | null>(MASTER_CONTENT[0].imageUrl ? {
-    imageUrl: MASTER_CONTENT[0].imageUrl,
-    title: MASTER_CONTENT[0].title.replace(/^[0-9.]+\s*/, '').trim(),
-    pageUrl: '#'
-  } : null);
+  } | null>(null);
+  const [artCache, setArtCache] = useState<Record<string, {
+    imageUrl: string;
+    title: string;
+    artist?: string;
+    pageUrl: string;
+  }>>({});
+  const artCacheRef = useRef<Record<string, {
+    imageUrl: string;
+    title: string;
+    artist?: string;
+    pageUrl: string;
+  }>>({});
   const [isFetchingArt, setIsFetchingArt] = useState<boolean>(false);
 
   // State for golden wave background effect
@@ -1188,21 +1200,19 @@ export default function App() {
     setActiveWordContext(null);
     setIsContextDropdownOpen(false);
     setDropdownFilter('');
-    
-    // Automatically set the predefined art if present, otherwise clear it
-    if (story.imageUrl) {
-      setBibleArt({
-        imageUrl: story.imageUrl,
-        title: story.title.replace(/^[0-9.]+\s*/, '').trim(),
-        pageUrl: '#'
-      });
+
+    const cached = artCacheRef.current[story.id];
+    if (cached) {
+      setBibleArt(cached);
+    } else if (story.section === 'NARRATIVE') {
+      fetchBibleArt(story);
     } else {
       setBibleArt(null);
     }
   };
 
   const handleDailyPericope = () => {
-    if (!interactive || !pageContainerRef.current) return;
+    if (!pageContainerRef.current) return;
     const pericopes = MASTER_CONTENT.filter(s => s.section === 'PERICOPES');
     const today = new Date();
     // Use day of year to deterministically pick a daily reading
@@ -1214,61 +1224,76 @@ export default function App() {
     handleStoryChange(pericopes[dailyIndex]);
   };
 
-  const fetchBibleArt = async (story: ContentItem) => {
-    // If the story has a predefined image (like the Grand Narrative sections), use it immediately
-    if (story.imageUrl) {
-      setBibleArt({
-        imageUrl: story.imageUrl,
-        title: story.title.replace(/^[0-9.]+\s*/, '').trim(),
-        pageUrl: '#'
-      });
+  const fetchBibleArt = async (story: ContentItem, isBackgroundPrefetch = false) => {
+    const existing = artCacheRef.current[story.id];
+    if (existing) {
+      if (!isBackgroundPrefetch) setBibleArt(existing);
       return;
     }
 
-    setIsFetchingArt(true);
+    if (!isBackgroundPrefetch) setIsFetchingArt(true);
     try {
       const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
-      const searchTerm = encodeURIComponent(`${cleanTitle} biblical art painting`);
-      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=1&gsrsearch=${searchTerm}&prop=pageimages&pithumbsize=600`;
-      
+      const customQuery = NARRATIVE_ART_SEARCH_TERMS[story.id] || `${cleanTitle} biblical art painting`;
+      const searchTerm = encodeURIComponent(customQuery);
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=4&gsrsearch=${searchTerm}&prop=pageimages&pithumbsize=700`;
+
       const response = await fetch(searchUrl);
       if (!response.ok) throw new Error("Image search API failed");
-      
+
       const data = await response.json();
       const pages = data.query?.pages;
-      
-      let imageUrl = null;
+
+      let imageUrl: string | null = null;
       let pageTitle = cleanTitle;
-      
+
       if (pages) {
-        const firstPage: any = Object.values(pages)[0];
-        if (firstPage?.thumbnail?.source) {
-           imageUrl = firstPage.thumbnail.source;
-           pageTitle = firstPage.title;
+        const pageWithThumb: any = Object.values(pages).find((p: any) => p?.thumbnail?.source);
+        if (pageWithThumb?.thumbnail?.source) {
+          imageUrl = pageWithThumb.thumbnail.source;
+          pageTitle = pageWithThumb.title;
         }
       }
 
       if (imageUrl) {
-        setBibleArt({
-          imageUrl: imageUrl,
+        const resolvedArt = {
+          imageUrl,
           title: `Historical Art: ${pageTitle}`,
           pageUrl: 'https://bible.art/'
-        });
+        };
+        artCacheRef.current[story.id] = resolvedArt;
+        setArtCache(prev => ({ ...prev, [story.id]: resolvedArt }));
+        if (!isBackgroundPrefetch) setBibleArt(resolvedArt);
       } else {
         throw new Error("No image found in search");
       }
     } catch (err: any) {
-      // Graceful self-contained SVG fallback to avoid broken external URLs
       const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
-      setBibleArt({
+      const fallbackArt = {
         imageUrl: getSacredIllustrationUri(story.id, cleanTitle),
         title: `Sacred Art: ${cleanTitle}`,
         pageUrl: 'https://bible.art/'
-      });
+      };
+      artCacheRef.current[story.id] = fallbackArt;
+      setArtCache(prev => ({ ...prev, [story.id]: fallbackArt }));
+      if (!isBackgroundPrefetch) setBibleArt(fallbackArt);
     } finally {
-      setIsFetchingArt(false);
+      if (!isBackgroundPrefetch) setIsFetchingArt(false);
     }
   };
+
+  // Automatically fetch and prefetch Bible.art historical paintings for Grand Narrative and adjacent stories
+  React.useEffect(() => {
+    if (selectedStory.section === 'NARRATIVE' || selectedStory.preAnalyzed) {
+      fetchBibleArt(selectedStory, false);
+    }
+    if (nextStory && (nextStory.section === 'NARRATIVE' || nextStory.preAnalyzed)) {
+      fetchBibleArt(nextStory, true);
+    }
+    if (prevStory && (prevStory.section === 'NARRATIVE' || prevStory.preAnalyzed)) {
+      fetchBibleArt(prevStory, true);
+    }
+  }, [selectedStory.id, nextStory?.id, prevStory?.id]);
 
   const handleSectionChange = (section: StorySection) => {
     setActiveSection(section);
@@ -1748,7 +1773,7 @@ Format your response clearly using these exact headings:
 
   const renderPageContent = (story: ContentItem, isBacksideCopy = false, isTargetPage = false) => {
     const isActive = story.id === selectedStory.id;
-    const showAnalysis = isActive ? (story.preAnalyzed ? story.preAnalyzed : analysisResult) : null;
+    const showAnalysis = isActive ? (story.preAnalyzed ? story.preAnalyzed : analysisResult) : (story.preAnalyzed || null);
     const showPassage = isActive ? passageText : null;
     const showLoading = isActive ? isLoading : false;
     const showFetchingText = isActive ? isFetchingText : false;
@@ -1795,9 +1820,16 @@ Format your response clearly using these exact headings:
         )
       : filteredStories;
 
+    const storyArt = isActive
+      ? (bibleArt || artCache[story.id])
+      : artCache[story.id];
+    const heroArtUrl = storyArt?.imageUrl || story.imageUrl || (story.section === 'NARRATIVE' ? getSacredIllustrationUri(story.id, story.title.replace(/^[0-9.]+\s*/, '').trim()) : undefined);
+    const heroArtTitle = storyArt?.title || `Historical Art: ${story.title.replace(/^[0-9.]+\s*/, '').trim()}`;
+    const heroArtPageUrl = storyArt?.pageUrl || (story.section === 'NARRATIVE' ? 'https://bible.art/' : undefined);
+
     return (
       <div className="w-full max-w-[356px] mx-auto flex flex-col gap-3.5 h-full reading-font">
-        <aside className="w-full flex flex-col gap-2.5 shrink-0 relative z-30">
+        <aside className="w-full flex flex-col gap-2.5 shrink-0 relative z-40">
           
           <div className="flex bg-[#fdfaf2] border border-[#c5a059] rounded-md p-0.5 shadow-sm">
             {SECTIONS.map(section => (
@@ -1966,18 +1998,41 @@ Format your response clearly using these exact headings:
             if (isContextDropdownOpen) setIsContextDropdownOpen(false);
           }}
         >
+          {/* Consistent Hero Artwork above Title & Reference on both active and underlying target pages */}
+          {heroArtUrl && !showLoading && (!showFetchingText || showPassage) && (
+            <div className="mb-4 bg-[#fdfaf2] p-2.5 rounded border border-[#c5a059]/60 shadow-sm flex flex-col items-center text-center shrink-0">
+              <div className="w-full aspect-[16/9] overflow-hidden rounded-sm border border-stone-200 bg-stone-900 flex items-center justify-center">
+                <img
+                  src={heroArtUrl}
+                  alt={heroArtTitle}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = getSacredIllustrationUri(story.id, story.title.replace(/^[0-9.]+\s*/, '').trim());
+                  }}
+                />
+              </div>
+              <p className="text-[11px] font-bold text-[#4a3b32] mt-1.5 line-clamp-1">
+                {heroArtTitle}
+              </p>
+              {heroArtPageUrl && heroArtPageUrl !== '#' && (
+                <a
+                  href={heroArtPageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[9px] uppercase tracking-widest text-[#8b0000] hover:underline mt-0.5 font-sans"
+                >
+                  {storyArt?.artist ? `${storyArt.artist} • ` : ''}View on Bible.art ↗
+                </a>
+              )}
+            </div>
+          )}
+
           {!showAnalysis && !showLoading && !showPassage && !showFetchingText && !showTextError && !showAppError && (
             <div className="flex-1 flex flex-col items-center text-center p-2">
-              <h3 className="text-base font-bold text-[#4a3b32] mb-1">
+              <h3 className="text-base font-bold text-[#4a3b32] mb-1 uppercase tracking-widest">
                 {highlightBiblicalTerms(story.title, isHighlightMode, handleWordClick)}
               </h3>
               <span className="text-[10px] uppercase tracking-widest text-[#c5a059] font-bold mb-1 block w-full">{story.ref}</span>
-              
-              {story.imageUrl && (
-                <div className="w-full aspect-[16/9] mb-4 overflow-hidden rounded-sm border border-[#c5a059]/40 shadow-sm bg-stone-900 shrink-0">
-                  <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
-                </div>
-              )}
               
               <a
                 href={bibleGatewayLink}
@@ -2017,34 +2072,6 @@ Format your response clearly using these exact headings:
                   <p className="text-xs italic">{showTextError}</p>
                 </div>
               </div>
-            </div>
-          )}
-
-          {isActive && (bibleArt || story.imageUrl) && !showLoading && (!showFetchingText || showPassage) && (
-            <div className="mb-4 bg-[#fdfaf2] p-2.5 rounded border border-[#c5a059]/60 shadow-sm flex flex-col items-center text-center">
-              <div className="w-full aspect-[16/9] overflow-hidden rounded-sm border border-stone-200 bg-stone-900 flex items-center justify-center">
-                <img
-                  src={(bibleArt?.imageUrl || story.imageUrl)!}
-                  alt={bibleArt?.title || story.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = getSacredIllustrationUri(story.id, story.title.replace(/^[0-9.]+\s*/, '').trim());
-                  }}
-                />
-              </div>
-              <p className="text-[11px] font-bold text-[#4a3b32] mt-1.5 line-clamp-1">
-                {bibleArt?.title || story.title.replace(/^[0-9.]+\s*/, '').trim()}
-              </p>
-              {bibleArt && bibleArt.pageUrl !== '#' && (
-                <a
-                  href={bibleArt.pageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[9px] uppercase tracking-widest text-[#8b0000] hover:underline mt-0.5 font-sans"
-                >
-                  {bibleArt.artist ? `${bibleArt.artist} • ` : ''}View on Bible.art ↗
-                </a>
-              )}
             </div>
           )}
 
@@ -2480,30 +2507,58 @@ Format your response clearly using these exact headings:
                </span>
             </div>
 
+            {/* Apple Books-style Ambient & Contact Shadow cast onto the underlying page beneath the turning sheet */}
+            {curlGeo.isCurling && (
+              <div className="grid-layer pointer-events-none z-[5] relative overflow-hidden">
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: '1400px',
+                    height: '1400px',
+                    left: `${curlGeo.creaseX}px`,
+                    top: `${curlGeo.creaseY}px`,
+                    transform: `translate(-50%, -50%) rotate(${curlGeo.normalAngleDeg}deg)`,
+                    background: curlState?.isBackSwipe
+                      ? 'linear-gradient(to left, rgba(20,12,6,0) 49.6%, rgba(20,12,6,0.42) 50.2%, rgba(28,16,8,0.24) 52.8%, rgba(28,16,8,0.09) 57.5%, rgba(28,16,8,0) 66%)'
+                      : 'linear-gradient(to right, rgba(20,12,6,0) 49.6%, rgba(20,12,6,0.42) 50.2%, rgba(28,16,8,0.24) 52.8%, rgba(28,16,8,0.09) 57.5%, rgba(28,16,8,0) 66%)',
+                  }}
+                />
+              </div>
+            )}
+
             {/* Current Page (Front Flat Portion clipped dynamically along the crease line) */}
             <div 
-              className="grid-layer bg-[#fffcf5] px-4 py-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden select-none z-10"
+              className="grid-layer relative overflow-hidden select-none z-10"
               style={{
-                clipPath: curlGeo.frontClip,
                 pointerEvents: curlGeo.isCurling ? 'none' : 'auto',
+                filter: curlGeo.isCurling
+                  ? 'drop-shadow(0px 8px 18px rgba(24, 14, 8, 0.26)) drop-shadow(0px 2px 4px rgba(24, 14, 8, 0.18))'
+                  : 'none',
               }}
             >
-              {renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, false, false)}
-              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
-                {curlState?.isBackSwipe
-                  ? ((currentIndex - 1 + filteredStories.length) % filteredStories.length) + 1 
-                  : (currentIndex + 1)}
-              </span>
+              <div
+                className="w-full h-full bg-[#fffcf5] px-4 py-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden"
+                style={{
+                  clipPath: curlGeo.frontClip,
+                }}
+              >
+                {renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, false, false)}
+                <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
+                  {curlState?.isBackSwipe
+                    ? ((currentIndex - 1 + filteredStories.length) % filteredStories.length) + 1 
+                    : (currentIndex + 1)}
+                </span>
+              </div>
             </div>
 
-            {/* 3D Curled Backside Flap + Cast Shadow */}
+            {/* 3D Curled Backside Flap + Multi-Layered Apple Books Cast Shadow */}
             {curlGeo.isCurling && (
               <div
                 className="grid-layer pointer-events-none z-20 relative overflow-hidden"
                 style={{
                   filter: curlState?.isBackSwipe
-                    ? 'drop-shadow(8px 6px 14px rgba(0,0,0,0.36)) drop-shadow(2px 1px 3px rgba(0,0,0,0.22))'
-                    : 'drop-shadow(-8px 6px 14px rgba(0,0,0,0.36)) drop-shadow(-2px 1px 3px rgba(0,0,0,0.22))',
+                    ? 'drop-shadow(18px 12px 26px rgba(18,10,5,0.46)) drop-shadow(6px 3px 10px rgba(18,10,5,0.3)) drop-shadow(1px 1px 2px rgba(18,10,5,0.25))'
+                    : 'drop-shadow(-18px 12px 26px rgba(18,10,5,0.46)) drop-shadow(-6px 3px 10px rgba(18,10,5,0.3)) drop-shadow(-1px 1px 2px rgba(18,10,5,0.25))',
                 }}
               >
                 <div
@@ -2522,6 +2577,7 @@ Format your response clearly using these exact headings:
                     {renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, true, false)}
                   </div>
 
+                  {/* Specular paper cylinder highlight & inner fold crease shading */}
                   <div
                     className="absolute pointer-events-none"
                     style={{
@@ -2531,34 +2587,36 @@ Format your response clearly using these exact headings:
                       top: `${curlGeo.creaseY}px`,
                       transform: `translate(-50%, -50%) rotate(${curlGeo.normalAngleDeg}deg)`,
                       background: curlState?.isBackSwipe
-                        ? 'linear-gradient(to right, rgba(255,253,248,0.75) 50%, rgba(235,222,196,0.35) 52.5%, rgba(0,0,0,0.14) 56%, rgba(0,0,0,0) 64%)'
-                        : 'linear-gradient(to left, rgba(255,253,248,0.75) 50%, rgba(235,222,196,0.35) 52.5%, rgba(0,0,0,0.14) 56%, rgba(0,0,0,0) 64%)',
+                        ? 'linear-gradient(to right, rgba(40,24,12,0.18) 49.8%, rgba(255,253,248,0.88) 51.2%, rgba(235,222,196,0.4) 54%, rgba(28,16,8,0.18) 58.5%, rgba(0,0,0,0) 66%)'
+                        : 'linear-gradient(to left, rgba(40,24,12,0.18) 49.8%, rgba(255,253,248,0.88) 51.2%, rgba(235,222,196,0.4) 54%, rgba(28,16,8,0.18) 58.5%, rgba(0,0,0,0) 66%)',
                     }}
                   />
                 </div>
               </div>
             )}
 
-            {/* Left Edge Swiping Zone (Swipe Right to go to Previous Story) */}
+            {/* Left Edge Swiping Zone (Restricted strictly below the Analyze / Read Text / Dove button row) */}
             <div
-              className="absolute top-0 left-0 w-12 h-full cursor-grab active:cursor-grabbing z-30 bg-gradient-to-r from-black/10 to-transparent opacity-50 hover:opacity-100 transition-opacity flex items-center justify-start pl-1.5 touch-none"
+              style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
+              className="absolute bottom-0 left-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-gradient-to-r from-black/10 to-transparent opacity-50 hover:opacity-100 transition-opacity flex items-center justify-start pl-1.5 touch-none rounded-tr-md"
               onPointerDown={(e) => handlePointerDown(e, true)}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
-              title="Drag from left edge to swipe back to previous story"
+              title="Drag or tap below header from left edge to turn back"
             >
               <div className="w-1 h-12 bg-stone-400/50 rounded-full"></div>
             </div>
 
-            {/* Right Edge Swiping Zone (Swipe Left to go to Next Story) */}
+            {/* Right Edge Swiping Zone (Restricted strictly below the Analyze / Read Text / Dove button row) */}
             <div
-              className="absolute top-0 right-0 w-12 h-full cursor-grab active:cursor-grabbing z-30 bg-gradient-to-l from-black/10 to-transparent opacity-50 hover:opacity-100 transition-opacity flex items-center justify-end pr-1.5 touch-none"
+              style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
+              className="absolute bottom-0 right-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-gradient-to-l from-black/10 to-transparent opacity-50 hover:opacity-100 transition-opacity flex items-center justify-end pr-1.5 touch-none rounded-tl-md"
               onPointerDown={(e) => handlePointerDown(e, false)}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
-              title="Drag from right edge to swipe forward to next story"
+              title="Drag or tap below header from right edge to turn forward"
             >
               <div className="w-1 h-12 bg-stone-400/50 rounded-full"></div>
             </div>
