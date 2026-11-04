@@ -140,6 +140,8 @@ const BIBLICAL_LEXICON: Record<string, LexiconEntry> = {
   "Cornelius": { term: "Cornelius", category: "Person", shortDef: "Webster 1828: A horn; devout Roman centurion baptized by Peter.", significance: "Marks the historic breakthrough confirming that Gentiles receive the Spirit on equal footing." },
   "Silas": { term: "Silas (Silvanus)", category: "Person", shortDef: "Webster 1828: Woody, forest; missionary companion of Paul.", significance: "Models joyful resilience and partnership in gospel ministry during persecution." },
   "Rome": { term: "Rome", category: "Place", shortDef: "Webster 1828: Strength, power; imperial capital of the classical Western world.", significance: "Paul's journey to Rome demonstrates that the gospel advances even into the heart of empire." },
+  
+  // Expanded Core Biblical & Leadership Lexicon Terms
   "Stewardship": { term: "Stewardship", category: "Concept & Artifact", shortDef: "Webster 1828: The office, duties, or management of a steward; the responsible overseeing and care of another's property, resources, or household.", significance: "Establishes that leaders and believers own nothing absolute, but are accountable to God for managing time, talents, and resources faithfully." },
   "Righteousness": { term: "Righteousness (Tzedakah / Dikaiosyne)", category: "Concept & Artifact", shortDef: "Webster 1828: Purity of heart and rectitude of life; conformity of heart and life to the divine law.", significance: "The moral perfection required by God, imputed to believers through faith in Christ and expressed in upright living." },
   "Redemption": { term: "Redemption (Golel / Apyltrosis)", category: "Concept & Artifact", shortDef: "Webster 1828: Repurchase of captured goods or freedom; deliverance from sin, penalty, or bondage by the payment of a ransom.", significance: "The heart of the gospel story—Christ paying the ultimate price to liberate humanity from the slavery of sin." },
@@ -172,6 +174,7 @@ const findLexiconEntry = (word: string): LexiconEntry | undefined => {
   return matchedKey ? BIBLICAL_LEXICON[matchedKey] : undefined;
 };
 
+// Fallback Webster 1828 Dictionary definition generator for any arbitrary word tapped by the user
 const getKjvDictionaryEntry = (word: string): LexiconEntry => {
   const cleanWord = word.replace(/[^a-zA-Z]/g, '');
   const existing = findLexiconEntry(cleanWord);
@@ -716,7 +719,6 @@ export default function App() {
     const rawDx = e.clientX - startX;
     const rawDy = e.clientY - startY;
 
-    // Rubber-band fluid resistance using hyperbolic tangent
     const maxPull = 26;
     const dx = Math.tanh(rawDx / 95) * maxPull;
     const dy = Math.tanh(rawDy / 95) * maxPull;
@@ -724,7 +726,6 @@ export default function App() {
     const absX = Math.min(1, Math.abs(rawDx) / 170);
     const absY = Math.min(1, Math.abs(rawDy) / 170);
 
-    // Subtle liquid distension: stretches along pull axis, compresses slightly on perpendicular axis
     const scaleX = 1 + absX * 0.052 - absY * 0.022;
     const scaleY = 1 + absY * 0.052 - absX * 0.022;
 
@@ -876,7 +877,6 @@ export default function App() {
       setGranularAnalysis(json.data);
       setGranularCache(prev => ({ ...prev, [cacheKey]: json.data }));
     } catch (err) {
-      // Intelligent offline/fallback synthesis tailored to each of the 4 concentric scopes
       const lex = getKjvDictionaryEntry(targetWord);
       const cleanTitle = selectedStory.title.replace(/^[0-9.]+\s*/, '').trim();
       let fallback: GranularAnalysisResult;
@@ -1345,6 +1345,7 @@ export default function App() {
       const rawDt = Math.min(0.032, Math.max(0.001, (now - lastTime) / 1000));
       lastTime = now;
 
+      // Sub-step spring integration for locked 60/120fps stability
       const subSteps = 2;
       const dt = rawDt / subSteps;
       for (let i = 0; i < subSteps; i++) {
@@ -2863,6 +2864,7 @@ export default function App() {
             className="w-full h-full relative flex-1 min-h-0 grid-stack overflow-hidden"
           >
             
+            {/* Underlying Target Page */}
             <div
               style={{
                 paddingTop: 'calc(max(0.5rem, var(--safe-top)) + 1.25rem)',
@@ -2879,6 +2881,7 @@ export default function App() {
                </span>
             </div>
 
+            {/* Crease Shadow */}
             {curlGeo.isCurling && (
               <div className="grid-layer pointer-events-none z-[5] relative overflow-hidden">
                 <div
@@ -2897,6 +2900,7 @@ export default function App() {
               </div>
             )}
 
+            {/* Current Page */}
             <div 
               className="grid-layer relative overflow-hidden select-none z-10"
               style={{
@@ -2937,6 +2941,7 @@ export default function App() {
               </div>
             </div>
 
+            {/* Backside Flap */}
             {curlGeo.isCurling && (
               <div className="grid-layer pointer-events-none z-20 relative overflow-hidden">
                 <div
@@ -2975,6 +2980,7 @@ export default function App() {
               </div>
             )}
 
+            {/* Left Edge Swiping Zone */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
               className="absolute bottom-0 left-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
@@ -2985,6 +2991,7 @@ export default function App() {
               title="Drag or tap from left edge to turn back"
             />
 
+            {/* Right Edge Swiping Zone */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
               className="absolute bottom-0 right-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
