@@ -646,6 +646,137 @@ export default function App() {
   const [isAnalyzingScope, setIsAnalyzingScope] = useState<boolean>(false);
   const [granularCache, setGranularCache] = useState<Record<string, GranularAnalysisResult>>({});
 
+  // Interactive Liquid Glass Tactile Distortion & Specular Physics State
+  const [glassDrag, setGlassDrag] = useState<{
+    isPressed: boolean;
+    dx: number;
+    dy: number;
+    scaleX: number;
+    scaleY: number;
+    rotateX: number;
+    rotateY: number;
+    skewX: number;
+    skewY: number;
+    glareX: number;
+    glareY: number;
+  }>({
+    isPressed: false,
+    dx: 0,
+    dy: 0,
+    scaleX: 1,
+    scaleY: 1,
+    rotateX: 0,
+    rotateY: 0,
+    skewX: 0,
+    skewY: 0,
+    glareX: 35,
+    glareY: 0,
+  });
+
+  const glassDragOriginRef = useRef<{
+    startX: number;
+    startY: number;
+    rectWidth: number;
+    rectHeight: number;
+    rectLeft: number;
+    rectTop: number;
+  } | null>(null);
+
+  const handleGlassPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('button, input, a, details, summary')) {
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    glassDragOriginRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      rectWidth: rect.width || 320,
+      rectHeight: rect.height || 200,
+      rectLeft: rect.left,
+      rectTop: rect.top,
+    };
+    const relX = ((e.clientX - rect.left) / (rect.width || 320)) * 100;
+    const relY = ((e.clientY - rect.top) / (rect.height || 200)) * 100;
+
+    setGlassDrag({
+      isPressed: true,
+      dx: 0,
+      dy: 0,
+      scaleX: 1.018,
+      scaleY: 0.986,
+      rotateX: ((50 - relY) / 50) * 3.5,
+      rotateY: ((relX - 50) / 50) * 3.5,
+      skewX: 0,
+      skewY: 0,
+      glareX: relX,
+      glareY: relY,
+    });
+  };
+
+  const handleGlassPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!glassDragOriginRef.current) return;
+    const { startX, startY, rectWidth, rectHeight, rectLeft, rectTop } = glassDragOriginRef.current;
+    const rawDx = e.clientX - startX;
+    const rawDy = e.clientY - startY;
+
+    const maxPull = 26;
+    const dx = Math.tanh(rawDx / 95) * maxPull;
+    const dy = Math.tanh(rawDy / 95) * maxPull;
+
+    const absX = Math.min(1, Math.abs(rawDx) / 170);
+    const absY = Math.min(1, Math.abs(rawDy) / 170);
+
+    const scaleX = 1 + absX * 0.052 - absY * 0.022;
+    const scaleY = 1 + absY * 0.052 - absX * 0.022;
+
+    const skewX = Math.tanh((rawDx * (rawDy >= 0 ? 1 : -1)) / 260) * 2.2;
+    const skewY = Math.tanh((rawDy * (rawDx >= 0 ? 1 : -1)) / 260) * 1.6;
+
+    const rotateY = Math.tanh(rawDx / 110) * 7.5;
+    const rotateX = -Math.tanh(rawDy / 110) * 7.5;
+
+    const glareX = Math.max(0, Math.min(100, ((e.clientX - rectLeft) / rectWidth) * 100));
+    const glareY = Math.max(0, Math.min(100, ((e.clientY - rectTop) / rectHeight) * 100));
+
+    setGlassDrag({
+      isPressed: true,
+      dx,
+      dy,
+      scaleX,
+      scaleY,
+      rotateX,
+      rotateY,
+      skewX,
+      skewY,
+      glareX,
+      glareY,
+    });
+  };
+
+  const handleGlassPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!glassDragOriginRef.current) return;
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {}
+    glassDragOriginRef.current = null;
+    setGlassDrag({
+      isPressed: false,
+      dx: 0,
+      dy: 0,
+      scaleX: 1,
+      scaleY: 1,
+      rotateX: 0,
+      rotateY: 0,
+      skewX: 0,
+      skewY: 0,
+      glareX: 35,
+      glareY: 0,
+    });
+  };
+
   // Bookmarks & Top-Right Red Ribbon Drawer State
   const [bookmarks, setBookmarks] = useState<BookmarkedSentence[]>([]);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState<boolean>(false);
@@ -2881,83 +3012,119 @@ export default function App() {
 
             {/* High-Transparency Liquid Glass Sentence Focus Popup */}
             <div
-              className={`absolute inset-0 z-40 flex items-center justify-center px-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              className={`absolute inset-0 z-40 flex items-center justify-center px-4 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                 activeSentence
                   ? 'pointer-events-auto bg-transparent opacity-100'
                   : 'pointer-events-none opacity-0'
               }`}
+              style={{ perspective: '1100px' }}
               onClick={(e) => {
                 e.stopPropagation();
                 setActiveSentence(null);
               }}
             >
+              {/* Outer Wrapper: Apple-style fluid spring morph from tapped word coordinates */}
               <div
                 onClick={(e) => e.stopPropagation()}
-                className={`relative w-full max-w-[330px] overflow-hidden p-4 text-[#24130c] transition-[transform,opacity,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                className={`w-full max-w-[330px] will-change-transform transition-[transform,opacity,filter] duration-[560ms] ease-[cubic-bezier(0.32,1.25,0.37,1.02)] ${
                   activeSentence
-                    ? 'scale-100 opacity-100 rounded-[26px]'
-                    : 'scale-[0.18] opacity-0 rounded-[48px]'
+                    ? 'scale-100 translate-y-0 opacity-100 blur-0'
+                    : 'scale-[0.12] translate-y-3 opacity-0 blur-[6px]'
                 }`}
                 style={{
                   transformOrigin: `${popupOrigin.x} ${popupOrigin.y}`,
-                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.10) 100%)',
-                  backdropFilter: 'blur(9px) saturate(155%) brightness(105%)',
-                  WebkitBackdropFilter: 'blur(9px) saturate(155%) brightness(105%)',
-                  border: '1px solid rgba(255, 255, 255, 0.52)',
-                  boxShadow: `
-                    0 14px 36px rgba(36, 19, 12, 0.16),
-                    0 3px 10px rgba(36, 19, 12, 0.08),
-                    inset 0 1px 1.5px rgba(255, 255, 255, 0.8),
-                    inset 0 -1px 2px rgba(197, 160, 89, 0.2),
-                    inset 0 10px 20px rgba(255, 255, 255, 0.14)
-                  `,
                 }}
               >
-                {/* Refractive Light Overlay (Mimics curved glass reflection while keeping underlying shapes & colors visible) */}
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_35%_0%,rgba(255,255,255,0.55)_0%,transparent_60%)] opacity-55" />
+                {/* Inner Interactive Liquid Glass Lens: Tactile press & drag distension */}
+                <div
+                  onPointerDown={handleGlassPointerDown}
+                  onPointerMove={handleGlassPointerMove}
+                  onPointerUp={handleGlassPointerUp}
+                  onPointerCancel={handleGlassPointerUp}
+                  className="relative w-full overflow-hidden p-4 text-[#24130c] cursor-grab active:cursor-grabbing touch-none select-none will-change-transform"
+                  style={{
+                    borderRadius: glassDrag.isPressed
+                      ? `${26 + Math.round(glassDrag.dy * 0.18)}px ${26 - Math.round(glassDrag.dx * 0.18)}px ${26 - Math.round(glassDrag.dy * 0.18)}px ${26 + Math.round(glassDrag.dx * 0.18)}px`
+                      : '26px',
+                    transform: `translate3d(${glassDrag.dx.toFixed(2)}px, ${glassDrag.dy.toFixed(2)}px, 0) rotateX(${glassDrag.rotateX.toFixed(2)}deg) rotateY(${glassDrag.rotateY.toFixed(2)}deg) scale3d(${glassDrag.scaleX.toFixed(4)}, ${glassDrag.scaleY.toFixed(4)}, 1) skew(${glassDrag.skewX.toFixed(2)}deg, ${glassDrag.skewY.toFixed(2)}deg)`,
+                    transition: glassDrag.isPressed
+                      ? 'transform 45ms linear, border-radius 90ms linear, box-shadow 120ms ease-out'
+                      : 'transform 680ms cubic-bezier(0.22, 1.35, 0.36, 1), border-radius 680ms cubic-bezier(0.22, 1.35, 0.36, 1), box-shadow 500ms ease-out',
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.11) 100%)',
+                    backdropFilter: glassDrag.isPressed
+                      ? 'blur(11px) saturate(175%) brightness(107%)'
+                      : 'blur(9px) saturate(155%) brightness(105%)',
+                    WebkitBackdropFilter: glassDrag.isPressed
+                      ? 'blur(11px) saturate(175%) brightness(107%)'
+                      : 'blur(9px) saturate(155%) brightness(105%)',
+                    border: '1px solid rgba(255, 255, 255, 0.56)',
+                    boxShadow: glassDrag.isPressed
+                      ? `
+                        ${(-glassDrag.dx * 0.45).toFixed(1)}px ${(18 - glassDrag.dy * 0.45).toFixed(1)}px 42px rgba(36, 19, 12, 0.22),
+                        0 4px 14px rgba(36, 19, 12, 0.10),
+                        inset 0 1.5px 2px rgba(255, 255, 255, 0.92),
+                        inset 0 -1.5px 3px rgba(197, 160, 89, 0.28),
+                        inset 0 12px 24px rgba(255, 255, 255, 0.22)
+                      `
+                      : `
+                        0 14px 36px rgba(36, 19, 12, 0.16),
+                        0 3px 10px rgba(36, 19, 12, 0.08),
+                        inset 0 1px 1.5px rgba(255, 255, 255, 0.8),
+                        inset 0 -1px 2px rgba(197, 160, 89, 0.2),
+                        inset 0 10px 20px rgba(255, 255, 255, 0.14)
+                      `,
+                  }}
+                >
+                  {/* Dynamic Refractive Light Overlay that follows finger/cursor pull */}
+                  <div
+                    className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+                    style={{
+                      opacity: glassDrag.isPressed ? 0.78 : 0.55,
+                      background: `radial-gradient(circle at ${glassDrag.glareX.toFixed(1)}% ${glassDrag.glareY.toFixed(1)}%, rgba(255,255,255,0.68) 0%, rgba(255,255,255,0.18) 34%, transparent 65%)`,
+                    }}
+                  />
 
-                <div className="relative z-10 flex flex-col">
-                  <div className="flex items-center justify-between gap-2 border-b border-[#4a3b32]/15 pb-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full text-[#8b0000] ui-font truncate"
+                  <div className="relative z-10 flex flex-col">
+                    <div className="flex items-center justify-between gap-2 border-b border-[#4a3b32]/15 pb-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full text-[#8b0000] ui-font truncate"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%)',
+                            backdropFilter: 'blur(8px)',
+                            WebkitBackdropFilter: 'blur(8px)',
+                            border: '1px solid rgba(255, 255, 255, 0.55)',
+                          }}
+                        >
+                          {selectedStory.ref}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setActiveSentence(null)}
+                        className="h-6 w-6 rounded-full flex items-center justify-center text-xs text-[#382117] active:scale-95 transition-all ui-font shrink-0"
                         style={{
                           background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%)',
                           backdropFilter: 'blur(8px)',
                           WebkitBackdropFilter: 'blur(8px)',
                           border: '1px solid rgba(255, 255, 255, 0.55)',
                         }}
+                        aria-label="Close sentence focus"
                       >
-                        {selectedStory.ref}
-                      </span>
+                        ✕
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setActiveSentence(null)}
-                      className="h-6 w-6 rounded-full flex items-center justify-center text-xs text-[#382117] active:scale-95 transition-all ui-font shrink-0"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%)',
-                        backdropFilter: 'blur(8px)',
-                        WebkitBackdropFilter: 'blur(8px)',
-                        border: '1px solid rgba(255, 255, 255, 0.55)',
-                      }}
-                      aria-label="Close sentence focus"
+
+                    <p className="mt-3 text-[15px] leading-relaxed font-semibold text-[#1f100a] drop-shadow-[0_1px_2px_rgba(255,255,255,0.85)] reading-font italic">
+                      "{displaySentence.trim()}"
+                    </p>
+
+                    <div
+                      className={`grid transition-[grid-template-rows,opacity,margin-top] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                        sentenceToolView !== 'NONE'
+                          ? 'grid-rows-[1fr] opacity-100 mt-3'
+                          : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
+                      }`}
                     >
-                      ✕
-                    </button>
-                  </div>
-
-                  <p className="mt-3 text-[15px] leading-relaxed font-semibold text-[#1f100a] drop-shadow-[0_1px_2px_rgba(255,255,255,0.85)] reading-font italic">
-                    "{displaySentence.trim()}"
-                  </p>
-
-                  {/* Smoothly Expanding & Contracting Dynamic Content Container */}
-                  <div
-                    className={`grid transition-[grid-template-rows,opacity,margin-top] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                      sentenceToolView !== 'NONE'
-                        ? 'grid-rows-[1fr] opacity-100 mt-3'
-                        : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
-                    }`}
-                  >
                     <div className="overflow-hidden">
                       <div
                         className="rounded-2xl p-3 text-xs text-[#1f100a] max-h-52 overflow-y-auto no-scrollbar reading-font transition-all duration-300"
@@ -3287,6 +3454,7 @@ export default function App() {
                   </div>
                 </div>
               </div>
+            </div>
             </div>
 
           </div>
