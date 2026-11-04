@@ -140,8 +140,6 @@ const BIBLICAL_LEXICON: Record<string, LexiconEntry> = {
   "Cornelius": { term: "Cornelius", category: "Person", shortDef: "Webster 1828: A horn; devout Roman centurion baptized by Peter.", significance: "Marks the historic breakthrough confirming that Gentiles receive the Spirit on equal footing." },
   "Silas": { term: "Silas (Silvanus)", category: "Person", shortDef: "Webster 1828: Woody, forest; missionary companion of Paul.", significance: "Models joyful resilience and partnership in gospel ministry during persecution." },
   "Rome": { term: "Rome", category: "Place", shortDef: "Webster 1828: Strength, power; imperial capital of the classical Western world.", significance: "Paul's journey to Rome demonstrates that the gospel advances even into the heart of empire." },
-  
-  // Expanded Core Biblical & Leadership Lexicon Terms
   "Stewardship": { term: "Stewardship", category: "Concept & Artifact", shortDef: "Webster 1828: The office, duties, or management of a steward; the responsible overseeing and care of another's property, resources, or household.", significance: "Establishes that leaders and believers own nothing absolute, but are accountable to God for managing time, talents, and resources faithfully." },
   "Righteousness": { term: "Righteousness (Tzedakah / Dikaiosyne)", category: "Concept & Artifact", shortDef: "Webster 1828: Purity of heart and rectitude of life; conformity of heart and life to the divine law.", significance: "The moral perfection required by God, imputed to believers through faith in Christ and expressed in upright living." },
   "Redemption": { term: "Redemption (Golel / Apyltrosis)", category: "Concept & Artifact", shortDef: "Webster 1828: Repurchase of captured goods or freedom; deliverance from sin, penalty, or bondage by the payment of a ransom.", significance: "The heart of the gospel story—Christ paying the ultimate price to liberate humanity from the slavery of sin." },
@@ -174,7 +172,6 @@ const findLexiconEntry = (word: string): LexiconEntry | undefined => {
   return matchedKey ? BIBLICAL_LEXICON[matchedKey] : undefined;
 };
 
-// Fallback Webster 1828 Dictionary definition generator for any arbitrary word tapped by the user
 const getKjvDictionaryEntry = (word: string): LexiconEntry => {
   const cleanWord = word.replace(/[^a-zA-Z]/g, '');
   const existing = findLexiconEntry(cleanWord);
@@ -634,8 +631,7 @@ export default function App() {
   const [boldedWordToken, setBoldedWordToken] = useState<string | null>(null);
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
   const [displaySentence, setDisplaySentence] = useState<string>("");
-  const [sentenceToolView, setSentenceToolView] = useState<'NONE' | 'WORD' | 'PASSAGE' | 'NARRATIVE' | 'CHAPTER' | 'SEARCH'>('NONE');
-  const [wordLookupEntry, setWordLookupEntry] = useState<{ entry: LexiconEntry } | null>(null);
+  const [sentenceToolView, setSentenceToolView] = useState<'NONE' | 'WORD' | 'PASSAGE' | 'NARRATIVE' | 'CHAPTER' | 'SEARCH' | 'CROSS_REF'>('NONE');
   const [chapterLookupText, setChapterLookupText] = useState<string | null>(null);
   const [isFetchingChapter, setIsFetchingChapter] = useState<boolean>(false);
   const [popupOrigin, setPopupOrigin] = useState<{ x: string; y: string }>({ x: '50%', y: '50%' });
@@ -720,6 +716,7 @@ export default function App() {
     const rawDx = e.clientX - startX;
     const rawDy = e.clientY - startY;
 
+    // Rubber-band fluid resistance using hyperbolic tangent
     const maxPull = 26;
     const dx = Math.tanh(rawDx / 95) * maxPull;
     const dy = Math.tanh(rawDy / 95) * maxPull;
@@ -727,6 +724,7 @@ export default function App() {
     const absX = Math.min(1, Math.abs(rawDx) / 170);
     const absY = Math.min(1, Math.abs(rawDy) / 170);
 
+    // Subtle liquid distension: stretches along pull axis, compresses slightly on perpendicular axis
     const scaleX = 1 + absX * 0.052 - absY * 0.022;
     const scaleY = 1 + absY * 0.052 - absX * 0.022;
 
@@ -841,10 +839,6 @@ export default function App() {
 
     setSentenceToolView(viewType);
 
-    if (scopeType === 'WORD_IN_SENTENCE') {
-      setWordLookupEntry({ entry: getKjvDictionaryEntry(targetWord) });
-    }
-
     if (granularCache[cacheKey]) {
       setGranularAnalysis(granularCache[cacheKey]);
       return;
@@ -882,6 +876,7 @@ export default function App() {
       setGranularAnalysis(json.data);
       setGranularCache(prev => ({ ...prev, [cacheKey]: json.data }));
     } catch (err) {
+      // Intelligent offline/fallback synthesis tailored to each of the 4 concentric scopes
       const lex = getKjvDictionaryEntry(targetWord);
       const cleanTitle = selectedStory.title.replace(/^[0-9.]+\s*/, '').trim();
       let fallback: GranularAnalysisResult;
@@ -931,75 +926,10 @@ export default function App() {
     }
   };
 
-  const handleChapterLookup = async (story: ContentItem) => {
-    setSentenceToolView('CHAPTER');
-    setIsFetchingChapter(true);
-    setChapterLookupText(null);
-    try {
-      let rawRef = story.ref.split(/[|;&]/)[0].trim();
-      rawRef = rawRef.split(',')[0].trim();
-      rawRef = rawRef.replace(/^The\s+Book\s+of\s+/i, '').replace(/^Book\s+of\s+/i, '').trim();
-      rawRef = rawRef.replace(/\s*\(.*?\)\s*/g, '').trim();
-      if (/^Psalms$/i.test(rawRef)) rawRef = 'Psalm 23';
-
-      const match = rawRef.match(/^([1-3]?\s*[A-Za-z]+(?:\s+of\s+[A-Za-z]+)?)\s*(\d+)?/);
-      let bookCode = 'JHN';
-      let chapterNum = 1;
-      if (match && match[1]) {
-        const bookName = match[1].trim().toLowerCase();
-        chapterNum = match[2] ? parseInt(match[2], 10) : 1;
-        if (bookName.includes('gen')) bookCode = 'GEN';
-        else if (bookName.includes('psalm')) bookCode = 'PSA';
-        else if (bookName.includes('matt')) bookCode = 'MAT';
-        else if (bookName.includes('john')) bookCode = 'JHN';
-        else if (bookName.includes('rom')) bookCode = 'ROM';
-        else if (bookName.includes('exod')) bookCode = 'EXO';
-      }
-
-      const res = await fetch(`https://helloao.org/api/eng_kjv/${bookCode}/${chapterNum}.json`);
-      if (!res.ok) throw new Error(`Could not load chapter from helloao.org`);
-      const data = await res.json();
-      
-      const extractHelloAoText = (contentArray: any[]): string => {
-        let text = "";
-        for (const item of contentArray) {
-          if (item.type === 'verse' && item.text) {
-            text += `[${item.number}] ${item.text} `;
-          } else if (item.content && Array.isArray(item.content)) {
-            text += extractHelloAoText(item.content);
-          }
-        }
-        return text;
-      };
-
-      if (data.chapter && data.chapter.content) {
-        const fullText = extractHelloAoText(data.chapter.content).trim();
-        setChapterLookupText(
-          fullText ? `${story.ref} (KJV via helloao.org)\n\n${fullText}` : `Chapter Summary (${story.ref}): ${story.body} — ${story.why}`
-        );
-      } else {
-        throw new Error("No chapter content array found.");
-      }
-    } catch (err: any) {
-      try {
-        let rawRef = story.ref.split(/[|;&]/)[0].trim().split(',')[0].trim();
-        const response = await fetch(`https://bible-api.com/${encodeURIComponent(rawRef)}?translation=kjv`);
-        const data = await response.json();
-        setChapterLookupText(
-          data.text ? `${data.reference || story.ref} (KJV)\n\n${data.text.replace(/\s+/g, ' ').trim()}` : `Chapter Summary (${story.ref}): ${story.body} — ${story.why}`
-        );
-      } catch (innerErr) {
-        setChapterLookupText(`Chapter Summary (${story.ref}): ${story.body} — ${story.why}`);
-      }
-    } finally {
-      setIsFetchingChapter(false);
-    }
-  };
-
   const handleCrossReferenceClick = async (ref: string, e: React.MouseEvent) => {
     e.stopPropagation();
     captureTapOrigin(e.clientX, e.clientY);
-    setSentenceToolView('CHAPTER');
+    setSentenceToolView('CROSS_REF');
     setIsFetchingChapter(true);
     setChapterLookupText(null);
     setDisplaySentence(`Scripture Reference: ${ref}`);
@@ -1149,7 +1079,6 @@ export default function App() {
     setTextError(null);
     setBoldedWordToken(null);
     setActiveSentence(null);
-    setWordLookupEntry(null);
     setIsContextDropdownOpen(false);
     setDropdownFilter('');
 
@@ -1408,26 +1337,30 @@ export default function App() {
     let curY = fromY;
     let velX = initialVelocityPxPerMs * 1000;
     let velY = 0;
-    const stiffness = 290;
-    const damping = 28;
+    const stiffness = 340;
+    const damping = 32;
     let lastTime = performance.now();
 
     const step = (now: number) => {
-      const dt = Math.min(0.032, Math.max(0.001, (now - lastTime) / 1000));
+      const rawDt = Math.min(0.032, Math.max(0.001, (now - lastTime) / 1000));
       lastTime = now;
 
-      const forceX = -stiffness * (curX - toX) - damping * velX;
-      const forceY = -stiffness * (curY - toY) - damping * velY;
+      const subSteps = 2;
+      const dt = rawDt / subSteps;
+      for (let i = 0; i < subSteps; i++) {
+        const forceX = -stiffness * (curX - toX) - damping * velX;
+        const forceY = -stiffness * (curY - toY) - damping * velY;
 
-      velX += forceX * dt;
-      velY += forceY * dt;
-      curX += velX * dt;
-      curY += velY * dt;
+        velX += forceX * dt;
+        velY += forceY * dt;
+        curX += velX * dt;
+        curY += velY * dt;
+      }
 
       const distRemaining = Math.hypot(toX - curX, toY - curY);
       const speed = Math.hypot(velX, velY);
 
-      if (distRemaining > 0.75 || speed > 12) {
+      if (distRemaining > 0.5 || speed > 8) {
         setCurlState({
           pointerX: curX,
           pointerY: curY,
@@ -1730,7 +1663,6 @@ export default function App() {
                       setBoldedWordToken(trimmedWord);
                       setDisplaySentence(sentence);
                       setActiveSentence(sentence);
-                      setWordLookupEntry({ entry });
                       handleGranularScopeAnalysis('WORD', 'WORD_IN_SENTENCE', trimmedWord, sentence);
                     }}
                     className="text-[#8b0000] font-bold underline decoration-[#8b0000]/60 decoration-dotted underline-offset-2 cursor-pointer hover:bg-[#8b0000]/15 px-0.5 rounded transition-colors"
@@ -1753,8 +1685,6 @@ export default function App() {
                     setActiveSentence(sentence);
 
                     if (isBolded) {
-                      const entry = getKjvDictionaryEntry(trimmedWord);
-                      setWordLookupEntry({ entry });
                       handleGranularScopeAnalysis('WORD', 'WORD_IN_SENTENCE', trimmedWord, sentence);
                     } else {
                       setSentenceToolView('NONE');
@@ -1813,7 +1743,7 @@ export default function App() {
 
     return (
       <div className="w-full max-w-[356px] mx-auto flex flex-col gap-3.5 h-full reading-font">
-        <aside className="w-full flex flex-col gap-2.5 shrink-0 relative z-40">
+        <aside className="w-full flex flex-col gap-2.5 shrink-0 relative z-20">
           
           <div className="flex bg-[#fdfaf2] border border-[#c5a059] rounded-md p-0.5 shadow-sm">
             {SECTIONS.map(section => (
@@ -1822,7 +1752,7 @@ export default function App() {
                 onClick={interactive ? () => handleSectionChange(section.id) : undefined}
                 title={section.label}
                 aria-label={section.label}
-                className={`flex-1 flex items-center justify-center py-2 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] overflow-hidden active:scale-[0.99] active:opacity-60 ${
+                className={`flex-1 flex items-center justify-center py-2 apple-gpu-btn overflow-hidden ${
                   activeSection === section.id 
                     ? 'bg-[#c5a059] text-[#fffcf5] shadow-sm rounded-[4px] scale-[1.01]' 
                     : 'text-[#4a3b32] hover:bg-stone-200/50 rounded-[4px]'
@@ -1836,7 +1766,7 @@ export default function App() {
           {activeSection === 'PERICOPES' && (
             <button
               onClick={interactive ? handleDailyPericope : undefined}
-              className="w-full bg-[#fdfaf2] border border-[#c5a059] text-[#4a3b32] text-[11px] font-bold uppercase tracking-widest py-2 px-4 hover:bg-[#c5a059] hover:text-white active:scale-[0.99] active:opacity-60 transition-all flex items-center justify-center gap-2 shadow-sm rounded-md ui-font"
+              className="w-full bg-[#fdfaf2] border border-[#c5a059] text-[#4a3b32] text-[11px] font-bold uppercase tracking-widest py-2 px-4 hover:bg-[#c5a059] hover:text-white apple-gpu-btn flex items-center justify-center gap-2 shadow-sm rounded-md ui-font"
             >
               <span>✦</span> Daily Pericope Generator
             </button>
@@ -1858,7 +1788,7 @@ export default function App() {
                 e.stopPropagation();
                 setIsContextDropdownOpen(prev => !prev);
               } : undefined}
-              className={`w-full py-2 px-3 rounded-md border text-left flex items-center justify-between gap-2 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-sm active:opacity-60 ui-font ${
+              className={`w-full py-2 px-3 rounded-md border text-left flex items-center justify-between gap-2 apple-gpu-btn shadow-sm ui-font ${
                 isContextDropdownOpen && interactive
                   ? 'bg-[#fdfaf2] border-[#8b0000] ring-2 ring-[#c5a059]/35'
                   : 'bg-[#fdfaf2]/90 border-[#c5a059]/70 hover:border-[#c5a059]'
@@ -1872,7 +1802,7 @@ export default function App() {
                   {story.ref}
                 </div>
               </div>
-              <span className={`w-6 h-6 rounded-full bg-[#c5a059]/15 text-[#4a3b32] flex items-center justify-center shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isContextDropdownOpen && interactive ? 'rotate-180 bg-[#c5a059] text-white' : ''}`}>
+              <span className={`w-6 h-6 rounded-full bg-[#c5a059]/15 text-[#4a3b32] flex items-center justify-center shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${isContextDropdownOpen && interactive ? 'rotate-180 bg-[#c5a059] text-white' : ''}`}>
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.3" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -1882,10 +1812,10 @@ export default function App() {
             {interactive && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className={`absolute left-0 right-0 top-full z-50 grid transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] origin-top ${
+                className={`absolute left-0 right-0 top-full z-50 grid transition-[grid-template-rows,opacity,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] origin-top will-change-[grid-template-rows,opacity,transform] ${
                   isContextDropdownOpen
-                    ? 'grid-rows-[1fr] opacity-100 mt-1.5 scale-y-100'
-                    : 'grid-rows-[0fr] opacity-0 pointer-events-none mt-0 scale-y-95'
+                    ? 'grid-rows-[1fr] opacity-100 mt-1.5 translate-y-0 scale-100'
+                    : 'grid-rows-[0fr] opacity-0 pointer-events-none mt-0 -translate-y-1 scale-[0.98]'
                 }`}
               >
                 <div className="overflow-hidden">
@@ -1942,7 +1872,7 @@ export default function App() {
             <button
               onClick={interactive ? () => fetchAnalysis(story) : undefined}
               disabled={showLoading || showFetchingText}
-              className="flex-1 bg-[#8b0000] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#660000] active:scale-[0.98] active:opacity-60 transition-all disabled:opacity-50 shadow-sm rounded-md flex items-center justify-center gap-1.5"
+              className="flex-1 bg-[#8b0000] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#660000] apple-gpu-btn disabled:opacity-50 shadow-sm rounded-md flex items-center justify-center gap-1.5"
             >
               {showLoading ? (
                 <>
@@ -1959,7 +1889,7 @@ export default function App() {
             <button
               onClick={interactive ? () => fetchPassageText(story) : undefined}
               disabled={showFetchingText || showLoading}
-              className="flex-1 bg-[#4a3b32] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#382117] active:scale-[0.98] active:opacity-60 transition-all disabled:opacity-50 shadow-sm rounded-md"
+              className="flex-1 bg-[#4a3b32] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#382117] apple-gpu-btn disabled:opacity-50 shadow-sm rounded-md"
             >
               {showFetchingText ? "Loading..." : "Read Text"}
             </button>
@@ -1969,7 +1899,7 @@ export default function App() {
               } : undefined}
               title={isHighlightMode ? "Disable Webster's 1828 Biblical Key Terms Scanner" : "Scan & Highlight Names, Places, and Key Terms with Webster's 1828 definitions"}
               aria-label="Scan and highlight biblical terms"
-              className={`w-10 shrink-0 flex items-center justify-center rounded-md border transition-all active:scale-95 active:opacity-60 shadow-sm ${
+              className={`w-10 shrink-0 flex items-center justify-center rounded-md border apple-gpu-btn shadow-sm ${
                 isHighlightMode
                   ? 'bg-[#8b0000] text-[#fdfaf2] border-[#8b0000] ring-2 ring-[#c5a059]/60'
                   : 'bg-[#fdfaf2] text-[#4a3b32] border-[#c5a059] hover:bg-[#c5a059]/20'
@@ -1981,6 +1911,7 @@ export default function App() {
         </aside>
 
         <section
+          key={`section-${story.id}-${isBacksideCopy}-${isTargetPage}`}
           className="w-full relative flex-1 min-h-[240px] flex flex-col overflow-y-auto overscroll-contain pb-5 no-scrollbar"
           onClick={() => {
             if (boldedWordToken) setBoldedWordToken(null);
@@ -2493,22 +2424,56 @@ export default function App() {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* 60fps Hardware-Accelerated Apple Fluid Animations */
+        .apple-gpu-btn {
+          transform: translate3d(0, 0, 0);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          will-change: transform, opacity;
+          transition:
+            transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 200ms cubic-bezier(0.22, 1, 0.36, 1),
+            background-color 220ms ease-out,
+            border-color 220ms ease-out,
+            color 220ms ease-out;
+        }
+        .apple-gpu-btn:active {
+          transform: translate3d(0, 0, 0) scale(0.965);
+          opacity: 0.72;
+          transition:
+            transform 85ms cubic-bezier(0.32, 0.72, 0, 1),
+            opacity 85ms ease-out;
+        }
+
+        @keyframes apple-fade-slide-up {
+          0% {
+            opacity: 0;
+            transform: translate3d(0, 6px, 0) scale(0.99);
+          }
+          100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+        }
+        .animate-fade-in {
+          animation: apple-fade-slide-up 340ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          will-change: transform, opacity;
+        }
         
         @keyframes popover-spring {
           0% {
             opacity: 0;
-            transform: scale(0.6);
-          }
-          60% {
-            transform: scale(1.05);
+            transform: translate3d(0, -6px, 0) scale(0.84);
           }
           100% {
             opacity: 1;
-            transform: scale(1);
+            transform: translate3d(0, 0, 0) scale(1);
           }
         }
         .animate-popover-spring {
-          animation: popover-spring 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          animation: popover-spring 380ms cubic-bezier(0.22, 1.25, 0.36, 1) forwards;
+          will-change: transform, opacity;
         }
         
         @property --shimmer-r {
@@ -2609,8 +2574,9 @@ export default function App() {
           width: 100%;
           height: 100%;
           transform-origin: left center;
-          transition: transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+          transition: transform 920ms cubic-bezier(0.32, 0.72, 0, 1);
           transform-style: preserve-3d;
+          will-change: transform;
           z-index: 50;
           cursor: pointer;
           border-radius: 4px 12px 12px 4px;
@@ -2897,7 +2863,6 @@ export default function App() {
             className="w-full h-full relative flex-1 min-h-0 grid-stack overflow-hidden"
           >
             
-            {/* Underlying Target Page */}
             <div
               style={{
                 paddingTop: 'calc(max(0.5rem, var(--safe-top)) + 1.25rem)',
@@ -2914,7 +2879,6 @@ export default function App() {
                </span>
             </div>
 
-            {/* Crease Shadow */}
             {curlGeo.isCurling && (
               <div className="grid-layer pointer-events-none z-[5] relative overflow-hidden">
                 <div
@@ -2933,7 +2897,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Current Page */}
             <div 
               className="grid-layer relative overflow-hidden select-none z-10"
               style={{
@@ -2974,7 +2937,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Backside Flap */}
             {curlGeo.isCurling && (
               <div className="grid-layer pointer-events-none z-20 relative overflow-hidden">
                 <div
@@ -3013,7 +2975,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Left Edge Swiping Zone */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
               className="absolute bottom-0 left-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
@@ -3024,7 +2985,6 @@ export default function App() {
               title="Drag or tap from left edge to turn back"
             />
 
-            {/* Right Edge Swiping Zone */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
               className="absolute bottom-0 right-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
@@ -3037,7 +2997,7 @@ export default function App() {
 
             {/* High-Transparency Liquid Glass Sentence Focus Popup */}
             <div
-              className={`absolute inset-0 z-40 flex items-center justify-center px-4 transition-opacity duration-300 ease-out ${
+              className={`absolute inset-0 z-40 flex items-center justify-center px-4 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                 activeSentence
                   ? 'pointer-events-auto bg-transparent opacity-100'
                   : 'pointer-events-none opacity-0'
@@ -3056,53 +3016,47 @@ export default function App() {
                   transformOrigin: `${popupOrigin.x} ${popupOrigin.y}`,
                   transform: activeSentence
                     ? 'translate3d(0, 0, 0) scale(1)'
-                    : 'translate3d(0, 8px, 0) scale(0.24)',
+                    : 'translate3d(0, 6px, 0) scale(0.45)',
                   opacity: activeSentence ? 1 : 0,
                   transition: activeSentence
-                    ? 'transform 440ms cubic-bezier(0.22, 1.28, 0.36, 1), opacity 220ms ease-out'
-                    : 'transform 260ms cubic-bezier(0.32, 0, 0.67, 0), opacity 180ms ease-in',
+                    ? 'transform 420ms cubic-bezier(0.22, 1.26, 0.36, 1), opacity 200ms cubic-bezier(0.22, 1, 0.36, 1)'
+                    : 'transform 240ms cubic-bezier(0.32, 0.72, 0, 1), opacity 160ms ease-out',
                   willChange: 'transform, opacity',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
                 }}
               >
-                {/* Inner Interactive Liquid Glass Lens: Tactile press & drag distension */}
+                {/* Inner Interactive Liquid Glass Lens: Pure GPU transform on drag, spring on release */}
                 <div
                   onPointerDown={handleGlassPointerDown}
                   onPointerMove={handleGlassPointerMove}
                   onPointerUp={handleGlassPointerUp}
                   onPointerCancel={handleGlassPointerUp}
-                  className="relative w-full overflow-hidden p-4 text-[#24130c] cursor-grab active:cursor-grabbing touch-none select-none will-change-transform"
+                  className="relative w-full overflow-hidden p-4 text-[#24130c] cursor-grab active:cursor-grabbing touch-none select-none rounded-[26px]"
                   style={{
-                    borderRadius: glassDrag.isPressed
-                      ? `${26 + Math.round(glassDrag.dy * 0.18)}px ${26 - Math.round(glassDrag.dx * 0.18)}px ${26 - Math.round(glassDrag.dy * 0.18)}px ${26 + Math.round(glassDrag.dx * 0.18)}px`
-                      : '26px',
                     transform: `translate3d(${glassDrag.dx.toFixed(2)}px, ${glassDrag.dy.toFixed(2)}px, 0) rotateX(${glassDrag.rotateX.toFixed(2)}deg) rotateY(${glassDrag.rotateY.toFixed(2)}deg) scale3d(${glassDrag.scaleX.toFixed(4)}, ${glassDrag.scaleY.toFixed(4)}, 1) skew(${glassDrag.skewX.toFixed(2)}deg, ${glassDrag.skewY.toFixed(2)}deg)`,
                     transition: glassDrag.isPressed
-                      ? 'transform 45ms linear, border-radius 90ms linear, box-shadow 120ms ease-out'
-                      : 'transform 620ms cubic-bezier(0.22, 1.35, 0.36, 1), border-radius 620ms cubic-bezier(0.22, 1.35, 0.36, 1), box-shadow 450ms ease-out',
+                      ? 'none'
+                      : 'transform 560ms cubic-bezier(0.22, 1.32, 0.36, 1)',
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
                     background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.09) 60%, rgba(255, 255, 255, 0.16) 100%)',
                     backdropFilter: 'blur(12px) saturate(175%) brightness(105%)',
                     WebkitBackdropFilter: 'blur(12px) saturate(175%) brightness(105%)',
                     border: '1px solid rgba(255, 255, 255, 0.68)',
-                    boxShadow: glassDrag.isPressed
-                      ? `
-                        ${(-glassDrag.dx * 0.45).toFixed(1)}px ${(18 - glassDrag.dy * 0.45).toFixed(1)}px 42px rgba(36, 19, 12, 0.22),
-                        0 4px 14px rgba(36, 19, 12, 0.10),
-                        inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
-                        inset 0 -1.5px 3px rgba(197, 160, 89, 0.32),
-                        inset 0 12px 24px rgba(255, 255, 255, 0.28)
-                      `
-                      : `
-                        0 16px 40px rgba(36, 19, 12, 0.18),
-                        0 4px 12px rgba(36, 19, 12, 0.08),
-                        inset 0 1.5px 2px rgba(255, 255, 255, 0.9),
-                        inset 0 -1px 2px rgba(197, 160, 89, 0.22),
-                        inset 0 12px 24px rgba(255, 255, 255, 0.2)
-                      `,
+                    boxShadow: `
+                      0 16px 40px rgba(36, 19, 12, 0.18),
+                      0 4px 12px rgba(36, 19, 12, 0.08),
+                      inset 0 1.5px 2px rgba(255, 255, 255, 0.9),
+                      inset 0 -1px 2px rgba(197, 160, 89, 0.22),
+                      inset 0 12px 24px rgba(255, 255, 255, 0.2)
+                    `,
                   }}
                 >
                   {/* Dynamic Refractive Light Overlay that follows finger/cursor pull */}
                   <div
-                    className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+                    className="pointer-events-none absolute inset-0 transition-opacity duration-200"
                     style={{
                       opacity: glassDrag.isPressed ? 0.85 : 0.65,
                       background: `radial-gradient(circle at ${glassDrag.glareX.toFixed(1)}% ${glassDrag.glareY.toFixed(1)}%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.22) 38%, transparent 68%)`,
@@ -3124,7 +3078,7 @@ export default function App() {
                       </div>
                       <button
                         onClick={() => setActiveSentence(null)}
-                        className="h-6 w-6 rounded-full flex items-center justify-center text-xs text-[#382117] active:scale-95 transition-all ui-font shrink-0"
+                        className="h-6 w-6 rounded-full flex items-center justify-center text-xs text-[#382117] apple-gpu-btn ui-font shrink-0"
                         style={{
                           background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.2) 100%)',
                           border: '1px solid rgba(255, 255, 255, 0.7)',
@@ -3140,7 +3094,7 @@ export default function App() {
                     </p>
 
                     <div
-                      className={`grid transition-[grid-template-rows,opacity,margin-top] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      className={`grid transition-[grid-template-rows,opacity,margin-top] duration-380 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[grid-template-rows,opacity] ${
                         sentenceToolView !== 'NONE'
                           ? 'grid-rows-[1fr] opacity-100 mt-3'
                           : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
@@ -3181,12 +3135,6 @@ export default function App() {
                                 </div>
                               ) : granularAnalysis ? (
                                 <div className="space-y-1.5">
-                                  <div className="text-xs font-bold text-[#382117]">
-                                    {granularAnalysis.focalElement}
-                                  </div>
-                                  <p className="leading-relaxed text-[11.5px] text-[#1f100a]">
-                                    {granularAnalysis.contextualMeaning}
-                                  </p>
                                   <p className="italic text-[11px] text-[#8b0000]/95 leading-relaxed">
                                     <strong>Insight:</strong> {granularAnalysis.practicalInsight}
                                   </p>
@@ -3260,6 +3208,28 @@ export default function App() {
                                   </div>
                                 );
                               })()}
+                            </div>
+                          )}
+
+                          {sentenceToolView === 'CROSS_REF' && (
+                            <div className="animate-fade-in space-y-2">
+                              <div className="flex items-center justify-between gap-2 border-b border-[#4a3b32]/15 pb-1">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
+                                  Cross Reference Lookup
+                                </span>
+                              </div>
+                              {isFetchingChapter ? (
+                                <div className="py-4 flex flex-col items-center justify-center gap-2 text-center">
+                                  <span className="w-4 h-4 rounded-full border-2 border-[#8b0000]/30 border-t-[#8b0000] animate-spin" />
+                                  <p className="italic text-[11px] text-stone-600 animate-pulse py-2">
+                                    Loading passage from King James Scripture...
+                                  </p>
+                                </div>
+                              ) : (
+                                <p className="leading-relaxed whitespace-pre-line text-[11.5px] text-[#1f100a]">
+                                  {chapterLookupText}
+                                </p>
+                              )}
                             </div>
                           )}
                         </div>
