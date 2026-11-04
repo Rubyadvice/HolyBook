@@ -779,7 +779,8 @@ export default function App() {
 
   // Bookmarks & Top-Right Red Ribbon Drawer State
   const [bookmarks, setBookmarks] = useState<BookmarkedSentence[]>([]);
-  const [isBookmarksOpen, setIsBookmarksOpen] = useState<boolean>(false);
+  const [isRibbonMenuOpen, setIsRibbonMenuOpen] = useState<boolean>(false);
+  const [ribbonView, setRibbonView] = useState<'MENU' | 'BOOKMARKS'>('MENU');
 
   const captureTapOrigin = (clientX: number, clientY: number) => {
     const rect = pageContainerRef.current?.getBoundingClientRect();
@@ -2739,15 +2740,15 @@ export default function App() {
           <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-l from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-r-[12px] shadow-[-2px_0_5px_rgba(0,0,0,0.1)]"></div>
           <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-t from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-br-[12px]"></div>
 
-          {/* Red Bookmark Ribbon Strung Over the Top Right Corner */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setIsBookmarksOpen(prev => !prev);
+              setRibbonView('MENU');
+              setIsRibbonMenuOpen(prev => !prev);
             }}
-            title={`Saved Bookmarks (${bookmarks.length})`}
-            aria-label="Open Saved Sentence Bookmarks"
+            title="Options & Bookmarks"
+            aria-label="Open Options Menu"
             className="absolute -top-0.5 right-4 sm:right-5 z-50 group focus:outline-none active:scale-95 transition-transform"
           >
             <div className="relative flex flex-col items-center">
@@ -2784,12 +2785,11 @@ export default function App() {
             </div>
           </button>
 
-          {/* Bookmarks Drawer Overlay when clicking the Top-Right Red Ribbon */}
-          {isBookmarksOpen && (
+          {isRibbonMenuOpen && (
             <div
               onClick={(e) => {
                 e.stopPropagation();
-                setIsBookmarksOpen(false);
+                setIsRibbonMenuOpen(false);
               }}
               className="absolute inset-0 z-50 bg-black/25 backdrop-blur-[2px] flex items-start justify-end p-4 pt-14"
             >
@@ -2798,71 +2798,111 @@ export default function App() {
                 className="w-full max-w-[320px] max-h-[75%] bg-[#fdfaf2] border-2 border-[#c5a059] rounded-xl shadow-[0_18px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden animate-popover-spring"
                 style={{ transformOrigin: 'top right' }}
               >
-                <div className="px-4 py-2.5 bg-[#8b0000] text-[#fdfaf2] flex items-center justify-between border-b border-[#c5a059]">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-[#e3c178]" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M6 2h12a2 2 0 0 1 2 2v18l-8-4-8 4V4a2 2 0 0 1 2-2z" />
-                    </svg>
-                    <span className="text-xs font-bold uppercase tracking-widest ui-font">
-                      Ribbon Bookmarks ({bookmarks.length})
-                    </span>
+                {ribbonView === 'MENU' ? (
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3 ui-font">
+                    <button
+                      onClick={() => setRibbonView('BOOKMARKS')}
+                      className="w-full p-4 bg-white/70 rounded-xl shadow-sm border border-stone-200 text-[#8b0000] font-bold uppercase tracking-widest text-sm flex items-center justify-between hover:bg-white active:scale-[0.98] transition-all"
+                    >
+                      <span>Bookmarks</span>
+                      {bookmarks.length > 0 && (
+                        <span className="text-xs bg-[#8b0000]/10 text-[#8b0000] px-2.5 py-1 rounded-full">{bookmarks.length}</span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!document.fullscreenElement) {
+                          document.documentElement.requestFullscreen().catch(e => console.error(e));
+                        } else {
+                          if (document.exitFullscreen) {
+                            document.exitFullscreen().catch(e => console.error(e));
+                          }
+                        }
+                        setIsRibbonMenuOpen(false);
+                      }}
+                      className="w-full p-4 bg-white/70 rounded-xl shadow-sm border border-stone-200 text-[#4a3b32] font-bold uppercase tracking-widest text-sm flex items-center justify-between hover:bg-white active:scale-[0.98] transition-all"
+                    >
+                      <span>Fullscreen Mode</span>
+                      <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setIsBookmarksOpen(false)}
-                    className="text-xs font-bold text-[#fdfaf2]/80 hover:text-white px-1.5 py-0.5"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-3 space-y-2.5 divide-y divide-[#e6d9c3]/70 no-scrollbar">
-                  {bookmarks.length === 0 ? (
-                    <div className="py-8 px-3 text-center text-xs text-stone-500 italic reading-font">
-                      No bookmarked sentences yet. Tap any sentence on the page and press the bookmark icon to save it to your crimson ribbon.
-                    </div>
-                  ) : (
-                    bookmarks.map((bm) => (
-                      <div key={bm.id} className="pt-2.5 first:pt-0 flex flex-col gap-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <button
-                            onClick={() => {
-                              const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
-                              if (target) {
-                                setActiveSection(target.section);
-                                handleStoryChange(target);
-                              }
-                              setIsBookmarksOpen(false);
-                            }}
-                            className="text-[10px] font-bold uppercase tracking-wider text-[#8b0000] hover:underline ui-font text-left truncate"
-                          >
-                            {bm.storyTitle} • {bm.storyRef}
-                          </button>
-                          <button
-                            onClick={() => setBookmarks(prev => prev.filter(item => item.id !== bm.id))}
-                            className="text-[10px] text-stone-400 hover:text-[#8b0000] px-1 ui-font"
-                            title="Remove bookmark"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                        <p
-                          onClick={() => {
-                            const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
-                            if (target) {
-                              setActiveSection(target.section);
-                              handleStoryChange(target);
-                              setTimeout(() => setActiveSentence(bm.sentence), 60);
-                            }
-                            setIsBookmarksOpen(false);
-                          }}
-                          className="text-xs italic text-[#2c1810] leading-relaxed cursor-pointer hover:bg-[#c5a059]/15 p-1.5 rounded transition-colors reading-font"
+                ) : (
+                  <>
+                    <div className="px-4 py-2.5 bg-[#8b0000] text-[#fdfaf2] flex items-center justify-between border-b border-[#c5a059]">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setRibbonView('MENU')}
+                          className="text-[#e3c178] hover:text-white mr-1 active:scale-95 transition-transform"
+                          title="Back to Options"
                         >
-                          "{bm.sentence}"
-                        </p>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <span className="text-xs font-bold uppercase tracking-widest ui-font">
+                          Saved Bookmarks ({bookmarks.length})
+                        </span>
                       </div>
-                    ))
-                  )}
-                </div>
+                      <button
+                        onClick={() => setIsRibbonMenuOpen(false)}
+                        className="text-xs font-bold text-[#fdfaf2]/80 hover:text-white px-1.5 py-0.5"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-3 space-y-2.5 divide-y divide-[#e6d9c3]/70 no-scrollbar">
+                      {bookmarks.length === 0 ? (
+                        <div className="py-8 px-3 text-center text-xs text-stone-500 italic reading-font">
+                          No bookmarked sentences yet. Tap any sentence on the page and press the bookmark icon to save it to your crimson ribbon.
+                        </div>
+                      ) : (
+                        bookmarks.map((bm) => (
+                          <div key={bm.id} className="pt-2.5 first:pt-0 flex flex-col gap-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <button
+                                onClick={() => {
+                                  const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
+                                  if (target) {
+                                    setActiveSection(target.section);
+                                    handleStoryChange(target);
+                                  }
+                                  setIsRibbonMenuOpen(false);
+                                }}
+                                className="text-[10px] font-bold uppercase tracking-wider text-[#8b0000] hover:underline ui-font text-left truncate"
+                              >
+                                {bm.storyTitle} • {bm.storyRef}
+                              </button>
+                              <button
+                                onClick={() => setBookmarks(prev => prev.filter(item => item.id !== bm.id))}
+                                className="text-[10px] text-stone-400 hover:text-[#8b0000] px-1 ui-font"
+                                title="Remove bookmark"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                            <p
+                              onClick={() => {
+                                const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
+                                if (target) {
+                                  setActiveSection(target.section);
+                                  handleStoryChange(target);
+                                  setTimeout(() => setActiveSentence(bm.sentence), 60);
+                                }
+                                setIsRibbonMenuOpen(false);
+                              }}
+                              className="text-xs italic text-[#2c1810] leading-relaxed cursor-pointer hover:bg-[#c5a059]/15 p-1.5 rounded transition-colors reading-font"
+                            >
+                              "{bm.sentence}"
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -3050,28 +3090,28 @@ export default function App() {
                     transition: glassDrag.isPressed
                       ? 'transform 45ms linear, border-radius 90ms linear, box-shadow 120ms ease-out'
                       : 'transform 680ms cubic-bezier(0.22, 1.35, 0.36, 1), border-radius 680ms cubic-bezier(0.22, 1.35, 0.36, 1), box-shadow 500ms ease-out',
-                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.11) 100%)',
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 60%, rgba(255, 255, 255, 0.15) 100%)',
                     backdropFilter: glassDrag.isPressed
-                      ? 'blur(11px) saturate(175%) brightness(107%)'
-                      : 'blur(9px) saturate(155%) brightness(105%)',
+                      ? 'blur(14px) saturate(190%) brightness(108%)'
+                      : 'blur(12px) saturate(170%) brightness(105%)',
                     WebkitBackdropFilter: glassDrag.isPressed
-                      ? 'blur(11px) saturate(175%) brightness(107%)'
-                      : 'blur(9px) saturate(155%) brightness(105%)',
-                    border: '1px solid rgba(255, 255, 255, 0.56)',
+                      ? 'blur(14px) saturate(190%) brightness(108%)'
+                      : 'blur(12px) saturate(170%) brightness(105%)',
+                    border: '1px solid rgba(255, 255, 255, 0.65)',
                     boxShadow: glassDrag.isPressed
                       ? `
                         ${(-glassDrag.dx * 0.45).toFixed(1)}px ${(18 - glassDrag.dy * 0.45).toFixed(1)}px 42px rgba(36, 19, 12, 0.22),
                         0 4px 14px rgba(36, 19, 12, 0.10),
-                        inset 0 1.5px 2px rgba(255, 255, 255, 0.92),
-                        inset 0 -1.5px 3px rgba(197, 160, 89, 0.28),
-                        inset 0 12px 24px rgba(255, 255, 255, 0.22)
+                        inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+                        inset 0 -1.5px 3px rgba(197, 160, 89, 0.32),
+                        inset 0 12px 24px rgba(255, 255, 255, 0.28)
                       `
                       : `
-                        0 14px 36px rgba(36, 19, 12, 0.16),
-                        0 3px 10px rgba(36, 19, 12, 0.08),
-                        inset 0 1px 1.5px rgba(255, 255, 255, 0.8),
-                        inset 0 -1px 2px rgba(197, 160, 89, 0.2),
-                        inset 0 10px 20px rgba(255, 255, 255, 0.14)
+                        0 16px 40px rgba(36, 19, 12, 0.18),
+                        0 4px 12px rgba(36, 19, 12, 0.08),
+                        inset 0 1.5px 2px rgba(255, 255, 255, 0.9),
+                        inset 0 -1px 2px rgba(197, 160, 89, 0.22),
+                        inset 0 12px 24px rgba(255, 255, 255, 0.2)
                       `,
                   }}
                 >
@@ -3079,8 +3119,8 @@ export default function App() {
                   <div
                     className="pointer-events-none absolute inset-0 transition-opacity duration-300"
                     style={{
-                      opacity: glassDrag.isPressed ? 0.78 : 0.55,
-                      background: `radial-gradient(circle at ${glassDrag.glareX.toFixed(1)}% ${glassDrag.glareY.toFixed(1)}%, rgba(255,255,255,0.68) 0%, rgba(255,255,255,0.18) 34%, transparent 65%)`,
+                      opacity: glassDrag.isPressed ? 0.85 : 0.65,
+                      background: `radial-gradient(circle at ${glassDrag.glareX.toFixed(1)}% ${glassDrag.glareY.toFixed(1)}%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.22) 38%, transparent 68%)`,
                     }}
                   />
 
@@ -3090,10 +3130,10 @@ export default function App() {
                         <span
                           className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full text-[#8b0000] ui-font truncate"
                           style={{
-                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%)',
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.14) 100%)',
                             backdropFilter: 'blur(8px)',
                             WebkitBackdropFilter: 'blur(8px)',
-                            border: '1px solid rgba(255, 255, 255, 0.55)',
+                            border: '1px solid rgba(255, 255, 255, 0.65)',
                           }}
                         >
                           {selectedStory.ref}
@@ -3103,10 +3143,10 @@ export default function App() {
                         onClick={() => setActiveSentence(null)}
                         className="h-6 w-6 rounded-full flex items-center justify-center text-xs text-[#382117] active:scale-95 transition-all ui-font shrink-0"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%)',
+                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.14) 100%)',
                           backdropFilter: 'blur(8px)',
                           WebkitBackdropFilter: 'blur(8px)',
-                          border: '1px solid rgba(255, 255, 255, 0.55)',
+                          border: '1px solid rgba(255, 255, 255, 0.65)',
                         }}
                         aria-label="Close sentence focus"
                       >
@@ -3125,336 +3165,338 @@ export default function App() {
                           : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
                       }`}
                     >
-                    <div className="overflow-hidden">
-                      <div
-                        className="rounded-2xl p-3 text-xs text-[#1f100a] max-h-52 overflow-y-auto no-scrollbar reading-font transition-all duration-300"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.10) 100%)',
-                          backdropFilter: 'blur(10px)',
-                          WebkitBackdropFilter: 'blur(10px)',
-                          border: '1px solid rgba(255, 255, 255, 0.52)',
-                          boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.6)',
-                        }}
-                      >
-                        {(sentenceToolView === 'WORD' ||
-                          sentenceToolView === 'PASSAGE' ||
-                          sentenceToolView === 'CHAPTER' ||
-                          sentenceToolView === 'NARRATIVE') && (
-                          <div className="animate-fade-in space-y-2">
-                            <div className="flex items-center justify-between gap-2 border-b border-[#4a3b32]/15 pb-1">
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
-                                {sentenceToolView === 'WORD' && '1 • Word in Sentence Context'}
-                                {sentenceToolView === 'PASSAGE' && '2 • Sentence in Verse Context'}
-                                {sentenceToolView === 'CHAPTER' && '3 • Verse in Passage Context'}
-                                {sentenceToolView === 'NARRATIVE' && '4 • Passage in Bible Context'}
-                              </span>
-                              <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#8b0000]/10 text-[#8b0000] ui-font">
-                                ✦ AI Scholar
-                              </span>
-                            </div>
-
-                            {isAnalyzingScope ? (
-                              <div className="py-4 flex flex-col items-center justify-center gap-2 text-center">
-                                <span className="w-4 h-4 rounded-full border-2 border-[#8b0000]/30 border-t-[#8b0000] animate-spin" />
-                                <p className="text-[11px] italic text-stone-700 animate-pulse">
-                                  Analyzing {sentenceToolView === 'WORD' ? `"${getPrimaryWordFromSentence(displaySentence)}" in sentence` : sentenceToolView === 'PASSAGE' ? 'sentence in verse' : sentenceToolView === 'CHAPTER' ? 'verse in passage' : 'passage in the Bible'}...
-                                </p>
+                      <div className="overflow-hidden">
+                        <div
+                          className="rounded-2xl p-3 text-xs text-[#1f100a] max-h-52 overflow-y-auto no-scrollbar reading-font transition-all duration-300"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255, 255, 255, 0.55)',
+                            boxShadow: 'inset 0 1px 1.5px rgba(255, 255, 255, 0.75)',
+                          }}
+                        >
+                          {(sentenceToolView === 'WORD' ||
+                            sentenceToolView === 'PASSAGE' ||
+                            sentenceToolView === 'CHAPTER' ||
+                            sentenceToolView === 'NARRATIVE') && (
+                            <div className="animate-fade-in space-y-2">
+                              <div className="flex items-center justify-between gap-2 border-b border-[#4a3b32]/15 pb-1">
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
+                                  {sentenceToolView === 'WORD' && '1 • Word in Sentence Context'}
+                                  {sentenceToolView === 'PASSAGE' && '2 • Sentence in Verse Context'}
+                                  {sentenceToolView === 'CHAPTER' && '3 • Verse in Passage Context'}
+                                  {sentenceToolView === 'NARRATIVE' && '4 • Passage in Bible Context'}
+                                </span>
+                                <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#8b0000]/10 text-[#8b0000] ui-font">
+                                  ✦ AI Scholar
+                                </span>
                               </div>
-                            ) : granularAnalysis ? (
-                              <div className="space-y-1.5">
-                                <div className="text-xs font-bold text-[#382117]">
-                                  {granularAnalysis.focalElement}
+
+                              {isAnalyzingScope ? (
+                                <div className="py-4 flex flex-col items-center justify-center gap-2 text-center">
+                                  <span className="w-4 h-4 rounded-full border-2 border-[#8b0000]/30 border-t-[#8b0000] animate-spin" />
+                                  <p className="text-[11px] italic text-stone-700 animate-pulse">
+                                    Analyzing {sentenceToolView === 'WORD' ? `"${getPrimaryWordFromSentence(displaySentence)}" in sentence` : sentenceToolView === 'PASSAGE' ? 'sentence in verse' : sentenceToolView === 'CHAPTER' ? 'verse in passage' : 'passage in the Bible'}...
+                                  </p>
                                 </div>
-                                <p className="leading-relaxed text-[11.5px] text-[#1f100a]">
-                                  <strong>Contextual Analysis:</strong> {granularAnalysis.contextualMeaning}
-                                </p>
-                                <p className="leading-relaxed text-[11px] text-[#382117]/90">
-                                  <strong>Linguistic & Literary Note:</strong> {granularAnalysis.linguisticOrLiteraryNote}
-                                </p>
-                                <p className="italic text-[11px] text-[#8b0000]/95 leading-relaxed">
-                                  <strong>Insight:</strong> {granularAnalysis.practicalInsight}
-                                </p>
-                                {granularAnalysis.crossReferences && granularAnalysis.crossReferences.length > 0 && (
-                                  <div className="pt-1 flex flex-wrap items-center gap-1 ui-font">
-                                    <span className="text-[9px] font-bold uppercase text-stone-600">Refs:</span>
-                                    {granularAnalysis.crossReferences.map((refStr, idx) => (
-                                      <span
-                                        key={idx}
-                                        className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/40 border border-white/60 text-[#8b0000]"
-                                      >
-                                        {refStr}
-                                      </span>
-                                    ))}
+                              ) : granularAnalysis ? (
+                                <div className="space-y-1.5">
+                                  <div className="text-xs font-bold text-[#382117]">
+                                    {granularAnalysis.focalElement}
                                   </div>
-                                )}
-                              </div>
-                            ) : null}
-                          </div>
-                        )}
-
-                        {sentenceToolView === 'SEARCH' && (
-                          <div className="animate-fade-in space-y-2">
-                            <div className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
-                              Webster's 1828 & Scripture Search
-                            </div>
-                            <input
-                              type="text"
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              placeholder="Search term or passage..."
-                              className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/45 border border-white/60 text-[#24130c] placeholder:text-stone-500 focus:outline-none focus:border-[#8b0000] ui-font"
-                            />
-                            {(() => {
-                              const q = (searchQuery.trim() || getPrimaryWordFromSentence(displaySentence)).trim();
-                              const lexEntry = getKjvDictionaryEntry(q);
-                              const matchingPassages = MASTER_CONTENT.filter(
-                                item =>
-                                  item.title.toLowerCase().includes(q.toLowerCase()) ||
-                                  item.body.toLowerCase().includes(q.toLowerCase()) ||
-                                  item.why.toLowerCase().includes(q.toLowerCase())
-                              ).slice(0, 3);
-
-                              return (
-                                <div className="space-y-1.5 pt-0.5">
-                                  <div className="p-2 rounded-lg bg-white/30 border border-white/40">
-                                    <div className="font-bold text-[#382117] text-[11px]">{lexEntry.term}</div>
-                                    <div className="text-[11px] leading-snug text-[#24130c] mt-0.5">{lexEntry.shortDef}</div>
-                                  </div>
-                                  {matchingPassages.length > 0 && (
-                                    <div className="space-y-1">
-                                      <div className="text-[9px] font-bold uppercase tracking-wider text-stone-600 ui-font">
-                                        Related Passages
-                                      </div>
-                                      {matchingPassages.map(mp => (
-                                        <button
-                                          key={mp.id}
-                                          type="button"
-                                          onClick={() => {
-                                            setActiveSection(mp.section);
-                                            handleStoryChange(mp);
-                                          }}
-                                          className="w-full text-left px-2 py-1 rounded bg-white/25 hover:bg-white/45 transition-colors flex items-center justify-between gap-2 ui-font"
+                                  <p className="leading-relaxed text-[11.5px] text-[#1f100a]">
+                                    <strong>Contextual Analysis:</strong> {granularAnalysis.contextualMeaning}
+                                  </p>
+                                  <p className="leading-relaxed text-[11px] text-[#382117]/90">
+                                    <strong>Linguistic & Literary Note:</strong> {granularAnalysis.linguisticOrLiteraryNote}
+                                  </p>
+                                  <p className="italic text-[11px] text-[#8b0000]/95 leading-relaxed">
+                                    <strong>Insight:</strong> {granularAnalysis.practicalInsight}
+                                  </p>
+                                  {granularAnalysis.crossReferences && granularAnalysis.crossReferences.length > 0 && (
+                                    <div className="pt-1 flex flex-wrap items-center gap-1 ui-font">
+                                      <span className="text-[9px] font-bold uppercase text-stone-600">Refs:</span>
+                                      {granularAnalysis.crossReferences.map((refStr, idx) => (
+                                        <span
+                                          key={idx}
+                                          className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/40 border border-white/60 text-[#8b0000]"
                                         >
-                                          <span className="text-[10px] font-bold text-[#382117] truncate">{mp.title}</span>
-                                          <span className="text-[9px] text-[#8b0000] shrink-0">{mp.ref}</span>
-                                        </button>
+                                          {refStr}
+                                        </span>
                                       ))}
                                     </div>
                                   )}
                                 </div>
-                              );
-                            })()}
-                          </div>
-                        )}
+                              ) : null}
+                            </div>
+                          )}
+
+                          {sentenceToolView === 'SEARCH' && (
+                            <div className="animate-fade-in space-y-2">
+                              <div className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
+                                Webster's 1828 & Scripture Search
+                              </div>
+                              <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search term or passage..."
+                                className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/45 border border-white/60 text-[#24130c] placeholder:text-stone-500 focus:outline-none focus:border-[#8b0000] ui-font"
+                              />
+                              {(() => {
+                                const q = (searchQuery.trim() || getPrimaryWordFromSentence(displaySentence)).trim();
+                                const lexEntry = getKjvDictionaryEntry(q);
+                                const matchingPassages = MASTER_CONTENT.filter(
+                                  item =>
+                                    item.title.toLowerCase().includes(q.toLowerCase()) ||
+                                    item.body.toLowerCase().includes(q.toLowerCase()) ||
+                                    item.why.toLowerCase().includes(q.toLowerCase())
+                                ).slice(0, 3);
+
+                                return (
+                                  <div className="space-y-1.5 pt-0.5">
+                                    <div className="p-2 rounded-lg bg-white/30 border border-white/40">
+                                      <div className="font-bold text-[#382117] text-[11px]">{lexEntry.term}</div>
+                                      <div className="text-[11px] leading-snug text-[#24130c] mt-0.5">{lexEntry.shortDef}</div>
+                                    </div>
+                                    {matchingPassages.length > 0 && (
+                                      <div className="space-y-1">
+                                        <div className="text-[9px] font-bold uppercase tracking-wider text-stone-600 ui-font">
+                                          Related Passages
+                                        </div>
+                                        {matchingPassages.map(mp => (
+                                          <button
+                                            key={mp.id}
+                                            type="button"
+                                            onClick={() => {
+                                              setActiveSection(mp.section);
+                                              handleStoryChange(mp);
+                                            }}
+                                            className="w-full text-left px-2 py-1 rounded bg-white/25 hover:bg-white/45 transition-colors flex items-center justify-between gap-2 ui-font"
+                                          >
+                                            <span className="text-[10px] font-bold text-[#382117] truncate">{mp.title}</span>
+                                            <span className="text-[9px] text-[#8b0000] shrink-0">{mp.ref}</span>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Two Separate Liquid Glass Pills Row: [Word, Passage, Chapter, Narrative] + [Search, Bookmark] */}
-                  <div className="mt-3.5 flex items-center justify-between gap-2 ui-font select-none">
-                    {/* Pill 1: Word (aA), Passage (List), Chapter (Paper), Broader Narrative (Bookmark in Square) */}
-                    <div
-                      className="flex items-center gap-1 rounded-full px-2 py-1"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 100%)',
-                        backdropFilter: 'blur(12px) saturate(160%)',
-                        WebkitBackdropFilter: 'blur(12px) saturate(160%)',
-                        border: '1px solid rgba(255, 255, 255, 0.55)',
-                        boxShadow: `
-                          0 6px 18px rgba(36, 19, 12, 0.12),
-                          inset 0 1px 1px rgba(255, 255, 255, 0.75),
-                          inset 0 -1px 1px rgba(197, 160, 89, 0.18)
-                        `,
-                      }}
-                    >
-                      {/* 1. "aA": Word in the context of the sentence */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (sentenceToolView === 'WORD') {
-                            setSentenceToolView('NONE');
-                            return;
-                          }
-                          handleGranularScopeAnalysis('WORD', 'WORD_IN_SENTENCE');
+                    {/* Two Separate Liquid Glass Pills Row: [Word, Passage, Chapter, Narrative] + [Search, Bookmark] */}
+                    <div className="mt-3.5 flex items-center justify-between gap-2 ui-font select-none">
+                      {/* Pill 1: Word (aA), Passage (List), Chapter (Paper), Broader Narrative (Bookmark in Square) */}
+                      <div
+                        className="flex items-center gap-1 rounded-full px-2 py-1 relative z-10"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.75) 100%)',
+                          backdropFilter: 'blur(16px) saturate(180%)',
+                          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                          border: '1px solid rgba(255, 255, 255, 0.9)',
+                          boxShadow: `
+                            0 12px 28px rgba(36, 19, 12, 0.16),
+                            0 4px 12px rgba(36, 19, 12, 0.08),
+                            inset 0 1px 2px rgba(255, 255, 255, 1),
+                            inset 0 -1px 1.5px rgba(197, 160, 89, 0.15)
+                          `,
                         }}
-                        title="1) Analyze Word in the Context of the Sentence"
-                        aria-label="Analyze Word in the Context of the Sentence"
-                        className={`h-8 w-9 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                          sentenceToolView === 'WORD'
-                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                            : 'text-[#24130c] hover:bg-white/25'
-                        }`}
                       >
-                        <svg className="w-[20px] h-[18px]" viewBox="0 0 26 24" fill="currentColor">
-                          <text x="1" y="17.5" fontSize="11.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">a</text>
-                          <text x="9.5" y="17.5" fontSize="15.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">A</text>
-                        </svg>
-                      </button>
+                        {/* 1. "aA": Word in the context of the sentence */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (sentenceToolView === 'WORD') {
+                              setSentenceToolView('NONE');
+                              return;
+                            }
+                            handleGranularScopeAnalysis('WORD', 'WORD_IN_SENTENCE');
+                          }}
+                          title="1) Analyze Word in the Context of the Sentence"
+                          aria-label="Analyze Word in the Context of the Sentence"
+                          className={`h-8 w-9 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'WORD'
+                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-white/25'
+                          }`}
+                        >
+                          <svg className="w-[20px] h-[18px]" viewBox="0 0 26 24" fill="currentColor">
+                            <text x="1" y="17.5" fontSize="11.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">a</text>
+                            <text x="9.5" y="17.5" fontSize="15.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">A</text>
+                          </svg>
+                        </button>
 
-                      {/* 2. Bullet List: Sentence in the context of the verse */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (sentenceToolView === 'PASSAGE') {
-                            setSentenceToolView('NONE');
-                            return;
-                          }
-                          handleGranularScopeAnalysis('PASSAGE', 'SENTENCE_IN_VERSE');
+                        {/* 2. Bullet List: Sentence in the context of the verse */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (sentenceToolView === 'PASSAGE') {
+                              setSentenceToolView('NONE');
+                              return;
+                            }
+                            handleGranularScopeAnalysis('PASSAGE', 'SENTENCE_IN_VERSE');
+                          }}
+                          title="2) Analyze Sentence in the Context of the Verse"
+                          aria-label="Analyze Sentence in the Context of the Verse"
+                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'PASSAGE'
+                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-white/25'
+                          }`}
+                        >
+                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="4.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                            <circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none" />
+                            <circle cx="4.5" cy="17.5" r="1" fill="currentColor" stroke="none" />
+                            <line x1="9" y1="6.5" x2="19.5" y2="6.5" />
+                            <line x1="9" y1="12" x2="19.5" y2="12" />
+                            <line x1="9" y1="17.5" x2="19.5" y2="17.5" />
+                          </svg>
+                        </button>
+
+                        {/* 3. Paper Icon: Verse in the context of the passage */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (sentenceToolView === 'CHAPTER') {
+                              setSentenceToolView('NONE');
+                              return;
+                            }
+                            handleGranularScopeAnalysis('CHAPTER', 'VERSE_IN_PASSAGE');
+                          }}
+                          title="3) Analyze Verse in the Context of the Passage"
+                          aria-label="Analyze Verse in the Context of the Passage"
+                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'CHAPTER'
+                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-white/25'
+                          }`}
+                        >
+                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="4" y="4" width="16" height="16" rx="2.5" />
+                            <path d="M4 8h16" strokeWidth="2.5" />
+                            <line x1="7.5" y1="12" x2="16.5" y2="12" strokeWidth="1.8" strokeLinecap="round" />
+                            <line x1="7.5" y1="15" x2="16.5" y2="15" strokeWidth="1.8" strokeLinecap="round" />
+                            <line x1="7.5" y1="18" x2="12.5" y2="18" strokeWidth="1.8" strokeLinecap="round" />
+                          </svg>
+                        </button>
+
+                        {/* 4. Bookmark in Square: Passage in the context of the Bible */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (sentenceToolView === 'NARRATIVE') {
+                              setSentenceToolView('NONE');
+                              return;
+                            }
+                            handleGranularScopeAnalysis('NARRATIVE', 'PASSAGE_IN_BIBLE');
+                          }}
+                          title="4) Analyze Passage in the Context of the Bible"
+                          aria-label="Analyze Passage in the Context of the Bible"
+                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'NARRATIVE'
+                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-white/25'
+                          }`}
+                        >
+                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
+                            <path d="M13.5 4.5v7l2.25-1.6L18 11.5v-7" fill="currentColor" stroke="none" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Pill 2: Search (Magnifying Glass) & Bookmark (Ribbon) */}
+                      <div
+                        className="flex items-center gap-1 rounded-full px-2 py-1 relative z-10"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.75) 100%)',
+                          backdropFilter: 'blur(16px) saturate(180%)',
+                          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                          border: '1px solid rgba(255, 255, 255, 0.9)',
+                          boxShadow: `
+                            0 12px 28px rgba(36, 19, 12, 0.16),
+                            0 4px 12px rgba(36, 19, 12, 0.08),
+                            inset 0 1px 2px rgba(255, 255, 255, 1),
+                            inset 0 -1px 1.5px rgba(197, 160, 89, 0.15)
+                          `,
                         }}
-                        title="2) Analyze Sentence in the Context of the Verse"
-                        aria-label="Analyze Sentence in the Context of the Verse"
-                        className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                          sentenceToolView === 'PASSAGE'
-                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                            : 'text-[#24130c] hover:bg-white/25'
-                        }`}
                       >
-                        <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="4.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-                          <circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none" />
-                          <circle cx="4.5" cy="17.5" r="1" fill="currentColor" stroke="none" />
-                          <line x1="9" y1="6.5" x2="19.5" y2="6.5" />
-                          <line x1="9" y1="12" x2="19.5" y2="12" />
-                          <line x1="9" y1="17.5" x2="19.5" y2="17.5" />
-                        </svg>
-                      </button>
+                        {/* 5. Magnifying Glass: In-App Concordance & Lexicon Search */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (sentenceToolView === 'SEARCH') {
+                              setSentenceToolView('NONE');
+                            } else {
+                              setSearchQuery(getPrimaryWordFromSentence(displaySentence));
+                              setSentenceToolView('SEARCH');
+                            }
+                          }}
+                          title="Search Lexicon & Passages"
+                          aria-label="Search Lexicon and Passages"
+                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'SEARCH'
+                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-white/25'
+                          }`}
+                        >
+                          <svg className="w-[17px] h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="10.5" cy="10.5" r="6.5" />
+                            <line x1="15.5" y1="15.5" x2="20.5" y2="20.5" />
+                          </svg>
+                        </button>
 
-                      {/* 3. Paper Icon: Verse in the context of the passage */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (sentenceToolView === 'CHAPTER') {
-                            setSentenceToolView('NONE');
-                            return;
-                          }
-                          handleGranularScopeAnalysis('CHAPTER', 'VERSE_IN_PASSAGE');
-                        }}
-                        title="3) Analyze Verse in the Context of the Passage"
-                        aria-label="Analyze Verse in the Context of the Passage"
-                        className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                          sentenceToolView === 'CHAPTER'
-                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                            : 'text-[#24130c] hover:bg-white/25'
-                        }`}
-                      >
-                        <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="4" y="4" width="16" height="16" rx="2.5" />
-                          <path d="M4 8h16" strokeWidth="2.5" />
-                          <line x1="7.5" y1="12" x2="16.5" y2="12" strokeWidth="1.8" strokeLinecap="round" />
-                          <line x1="7.5" y1="15" x2="16.5" y2="15" strokeWidth="1.8" strokeLinecap="round" />
-                          <line x1="7.5" y1="18" x2="12.5" y2="18" strokeWidth="1.8" strokeLinecap="round" />
-                        </svg>
-                      </button>
-
-                      {/* 4. Bookmark in Square: Passage in the context of the Bible */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (sentenceToolView === 'NARRATIVE') {
-                            setSentenceToolView('NONE');
-                            return;
-                          }
-                          handleGranularScopeAnalysis('NARRATIVE', 'PASSAGE_IN_BIBLE');
-                        }}
-                        title="4) Analyze Passage in the Context of the Bible"
-                        aria-label="Analyze Passage in the Context of the Bible"
-                        className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                          sentenceToolView === 'NARRATIVE'
-                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                            : 'text-[#24130c] hover:bg-white/25'
-                        }`}
-                      >
-                        <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
-                          <path d="M13.5 4.5v7l2.25-1.6L18 11.5v-7" fill="currentColor" stroke="none" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Pill 2: Search (Magnifying Glass) & Bookmark (Ribbon) */}
-                    <div
-                      className="flex items-center gap-1 rounded-full px-2 py-1"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 100%)',
-                        backdropFilter: 'blur(12px) saturate(160%)',
-                        WebkitBackdropFilter: 'blur(12px) saturate(160%)',
-                        border: '1px solid rgba(255, 255, 255, 0.55)',
-                        boxShadow: `
-                          0 6px 18px rgba(36, 19, 12, 0.12),
-                          inset 0 1px 1px rgba(255, 255, 255, 0.75),
-                          inset 0 -1px 1px rgba(197, 160, 89, 0.18)
-                        `,
-                      }}
-                    >
-                      {/* 5. Magnifying Glass: In-App Concordance & Lexicon Search */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (sentenceToolView === 'SEARCH') {
-                            setSentenceToolView('NONE');
-                          } else {
-                            setSearchQuery(getPrimaryWordFromSentence(displaySentence));
-                            setSentenceToolView('SEARCH');
-                          }
-                        }}
-                        title="Search Lexicon & Passages"
-                        aria-label="Search Lexicon and Passages"
-                        className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                          sentenceToolView === 'SEARCH'
-                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                            : 'text-[#24130c] hover:bg-white/25'
-                        }`}
-                      >
-                        <svg className="w-[17px] h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="10.5" cy="10.5" r="6.5" />
-                          <line x1="15.5" y1="15.5" x2="20.5" y2="20.5" />
-                        </svg>
-                      </button>
-
-                      {/* 6. Bookmark Icon: Save Sentence to Top-Right Red Ribbon */}
-                      {(() => {
-                        const isSaved = bookmarks.some(
-                          b => b.sentence === displaySentence.trim() && b.storyId === selectedStory.id
-                        );
-                        return (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleSentenceBookmark(displaySentence);
-                            }}
-                            title={isSaved ? "Remove Sentence from Ribbon Bookmarks" : "Bookmark Sentence to Red Ribbon"}
-                            aria-label="Bookmark Sentence"
-                            className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                              isSaved
-                                ? 'bg-[#8b0000]/20 text-[#8b0000] shadow-inner'
-                                : 'text-[#24130c] hover:bg-white/25'
-                            }`}
-                          >
-                            <svg
-                              className="w-[17px] h-[17px]"
-                              viewBox="0 0 24 24"
-                              fill={isSaved ? 'currentColor' : 'none'}
-                              stroke="currentColor"
-                              strokeWidth="2.1"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                        {/* 6. Bookmark Icon: Save Sentence to Top-Right Red Ribbon */}
+                        {(() => {
+                          const isSaved = bookmarks.some(
+                            b => b.sentence === displaySentence.trim() && b.storyId === selectedStory.id
+                          );
+                          return (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleSentenceBookmark(displaySentence);
+                              }}
+                              title={isSaved ? "Remove Sentence from Ribbon Bookmarks" : "Bookmark Sentence to Red Ribbon"}
+                              aria-label="Bookmark Sentence"
+                              className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                                isSaved
+                                  ? 'bg-[#8b0000]/20 text-[#8b0000] shadow-inner'
+                                  : 'text-[#24130c] hover:bg-white/25'
+                              }`}
                             >
-                              <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z" />
-                            </svg>
-                          </button>
-                        );
-                      })()}
+                              <svg
+                                className="w-[17px] h-[17px]"
+                                viewBox="0 0 24 24"
+                                fill={isSaved ? 'currentColor' : 'none'}
+                                stroke="currentColor"
+                                strokeWidth="2.1"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z" />
+                              </svg>
+                            </button>
+                          );
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
             </div>
 
           </div>
