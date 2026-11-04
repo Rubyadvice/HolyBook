@@ -981,7 +981,6 @@ export default function App() {
         throw new Error("No chapter content array found.");
       }
     } catch (err: any) {
-      // Fallback to bible-api if helloao fails
       try {
         let rawRef = story.ref.split(/[|;&]/)[0].trim().split(',')[0].trim();
         const response = await fetch(`https://bible-api.com/${encodeURIComponent(rawRef)}?translation=kjv`);
@@ -1262,13 +1261,11 @@ export default function App() {
     fetchBibleArt(story);
 
     try {
-      // First ensure passage text is available for genuine analysis
       let activeText = overrideText !== undefined ? overrideText : passageText;
       if (!activeText) {
         activeText = await fetchPassageText(story);
       }
 
-      // Live POST request to Vercel Serverless Gemini 3.8 Flash Biblical Analysis Engine
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1298,7 +1295,6 @@ export default function App() {
       setIsAiGrounded(Boolean(json.groundedWithRag));
     } catch (err: any) {
       console.warn('Falling back to local scholarship foundation:', err.message);
-      // Graceful fallback to rich canonical study synthesis if offline or credentials unconfigured
       const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
       setAnalysisResult({
         overview: `A canonical analysis of ${story.ref} (${cleanTitle}), examining its literary structure, original setting, and enduring theological principles.`,
@@ -1691,11 +1687,9 @@ export default function App() {
     const storyIdx = filteredStories.findIndex(s => s.id === story.id);
     const displayIndex = storyIdx !== -1 ? storyIdx + 1 : currentIndex + 1;
 
-    // Two-tap interactive text tokenizer helper
     const renderInteractiveText = (rawText: string) => {
       if (!rawText) return rawText;
 
-      // Tokenize into sentences first to allow Liquid Glass sentence tapping
       const sentences = rawText.match(/[^.?!]+[.?!]+(?:\s+|$)|[^.?!]+$/g) || [rawText];
 
       return sentences.map((sentence, sIdx) => {
@@ -1724,7 +1718,6 @@ export default function App() {
               const isLexiconMatched = Boolean(findLexiconEntry(trimmedWord));
               const isBolded = boldedWordToken?.toLowerCase() === trimmedWord.toLowerCase();
 
-              // If Dove lexicon scanner is active and it's a known biblical term, open the Liquid Glass dialogue directly to the Word Lookup view
               if (isHighlightMode && isLexiconMatched) {
                 const entry = findLexiconEntry(trimmedWord)!;
                 return (
@@ -1748,7 +1741,6 @@ export default function App() {
                 );
               }
 
-              // Single unified Liquid Glass focus with inline word bolding
               return (
                 <span
                   key={i}
@@ -2156,7 +2148,6 @@ export default function App() {
                 )}
               </div>
 
-              {/* Multi-Section Study Navigation Tabs */}
               <div className="flex bg-[#fdfaf2] border border-[#c5a059]/60 rounded-md p-0.5 shadow-sm text-[10px] font-bold uppercase tracking-wider ui-font overflow-x-auto no-scrollbar">
                 <button
                   type="button"
@@ -2215,7 +2206,6 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Tab 1: Classic OIA Core View */}
               {activeStudyTab === 'CORE' && (
                 <div className="space-y-3 animate-fade-in">
                   {showAnalysis.overview && (
@@ -2250,7 +2240,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Tab 2: Beginner's Guide View */}
               {activeStudyTab === 'BEGINNER' && (
                 <div className="space-y-3 animate-fade-in">
                   <div className="bg-[#fdfaf2] p-4 rounded border border-[#c5a059]/40 shadow-sm">
@@ -2288,7 +2277,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Tab 3: Historical & Cultural Context */}
               {activeStudyTab === 'HISTORY' && (
                 <div className="space-y-3 animate-fade-in">
                   <div className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm">
@@ -2320,7 +2308,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Tab 4: Theology & Scripture Cross-References */}
               {activeStudyTab === 'THEOLOGY' && (
                 <div className="space-y-3 animate-fade-in">
                   <div className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm">
@@ -2370,7 +2357,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Tab 5: Reflection Questions */}
               {activeStudyTab === 'QUESTIONS' && (
                 <div className="space-y-3 animate-fade-in">
                   <div className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm">
@@ -2395,7 +2381,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Verified Grounding Citations Drawer */}
               {activeCitations.length > 0 && (
                 <div className="pt-2 border-t border-[#c5a059]/30 text-[10px] text-stone-500 ui-font">
                   <span className="font-bold text-[#8b0000] uppercase tracking-widest block mb-1">
@@ -2973,7 +2958,7 @@ export default function App() {
 
                 {curlGeo.isCurling && (
                   <div
-                    className="absolute pointer-events-none z-30"
+                    className="absolute pointer-events-none z-[45]"
                     style={{
                       width: '4000px',
                       height: '4000px',
@@ -3052,7 +3037,7 @@ export default function App() {
 
             {/* High-Transparency Liquid Glass Sentence Focus Popup */}
             <div
-              className={`absolute inset-0 z-40 flex items-center justify-center px-4 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              className={`absolute inset-0 z-40 flex items-center justify-center px-4 transition-opacity duration-300 ease-out ${
                 activeSentence
                   ? 'pointer-events-auto bg-transparent opacity-100'
                   : 'pointer-events-none opacity-0'
@@ -3063,16 +3048,20 @@ export default function App() {
                 setActiveSentence(null);
               }}
             >
-              {/* Outer Wrapper: Apple-style fluid spring morph from tapped word coordinates */}
+              {/* Outer Wrapper: Hardware-accelerated 60fps Apple spring morph from tapped word coordinates */}
               <div
                 onClick={(e) => e.stopPropagation()}
-                className={`w-full max-w-[330px] will-change-transform transition-[transform,opacity,filter] duration-[560ms] ease-[cubic-bezier(0.32,1.25,0.37,1.02)] ${
-                  activeSentence
-                    ? 'scale-100 translate-y-0 opacity-100 blur-0'
-                    : 'scale-[0.12] translate-y-3 opacity-0 blur-[6px]'
-                }`}
+                className="w-full max-w-[330px]"
                 style={{
                   transformOrigin: `${popupOrigin.x} ${popupOrigin.y}`,
+                  transform: activeSentence
+                    ? 'translate3d(0, 0, 0) scale(1)'
+                    : 'translate3d(0, 8px, 0) scale(0.24)',
+                  opacity: activeSentence ? 1 : 0,
+                  transition: activeSentence
+                    ? 'transform 440ms cubic-bezier(0.22, 1.28, 0.36, 1), opacity 220ms ease-out'
+                    : 'transform 260ms cubic-bezier(0.32, 0, 0.67, 0), opacity 180ms ease-in',
+                  willChange: 'transform, opacity',
                 }}
               >
                 {/* Inner Interactive Liquid Glass Lens: Tactile press & drag distension */}
@@ -3089,15 +3078,11 @@ export default function App() {
                     transform: `translate3d(${glassDrag.dx.toFixed(2)}px, ${glassDrag.dy.toFixed(2)}px, 0) rotateX(${glassDrag.rotateX.toFixed(2)}deg) rotateY(${glassDrag.rotateY.toFixed(2)}deg) scale3d(${glassDrag.scaleX.toFixed(4)}, ${glassDrag.scaleY.toFixed(4)}, 1) skew(${glassDrag.skewX.toFixed(2)}deg, ${glassDrag.skewY.toFixed(2)}deg)`,
                     transition: glassDrag.isPressed
                       ? 'transform 45ms linear, border-radius 90ms linear, box-shadow 120ms ease-out'
-                      : 'transform 680ms cubic-bezier(0.22, 1.35, 0.36, 1), border-radius 680ms cubic-bezier(0.22, 1.35, 0.36, 1), box-shadow 500ms ease-out',
-                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 60%, rgba(255, 255, 255, 0.15) 100%)',
-                    backdropFilter: glassDrag.isPressed
-                      ? 'blur(14px) saturate(190%) brightness(108%)'
-                      : 'blur(12px) saturate(170%) brightness(105%)',
-                    WebkitBackdropFilter: glassDrag.isPressed
-                      ? 'blur(14px) saturate(190%) brightness(108%)'
-                      : 'blur(12px) saturate(170%) brightness(105%)',
-                    border: '1px solid rgba(255, 255, 255, 0.65)',
+                      : 'transform 620ms cubic-bezier(0.22, 1.35, 0.36, 1), border-radius 620ms cubic-bezier(0.22, 1.35, 0.36, 1), box-shadow 450ms ease-out',
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.09) 60%, rgba(255, 255, 255, 0.16) 100%)',
+                    backdropFilter: 'blur(12px) saturate(175%) brightness(105%)',
+                    WebkitBackdropFilter: 'blur(12px) saturate(175%) brightness(105%)',
+                    border: '1px solid rgba(255, 255, 255, 0.68)',
                     boxShadow: glassDrag.isPressed
                       ? `
                         ${(-glassDrag.dx * 0.45).toFixed(1)}px ${(18 - glassDrag.dy * 0.45).toFixed(1)}px 42px rgba(36, 19, 12, 0.22),
@@ -3130,10 +3115,8 @@ export default function App() {
                         <span
                           className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full text-[#8b0000] ui-font truncate"
                           style={{
-                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.14) 100%)',
-                            backdropFilter: 'blur(8px)',
-                            WebkitBackdropFilter: 'blur(8px)',
-                            border: '1px solid rgba(255, 255, 255, 0.65)',
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.2) 100%)',
+                            border: '1px solid rgba(255, 255, 255, 0.7)',
                           }}
                         >
                           {selectedStory.ref}
@@ -3143,10 +3126,8 @@ export default function App() {
                         onClick={() => setActiveSentence(null)}
                         className="h-6 w-6 rounded-full flex items-center justify-center text-xs text-[#382117] active:scale-95 transition-all ui-font shrink-0"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.14) 100%)',
-                          backdropFilter: 'blur(8px)',
-                          WebkitBackdropFilter: 'blur(8px)',
-                          border: '1px solid rgba(255, 255, 255, 0.65)',
+                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.2) 100%)',
+                          border: '1px solid rgba(255, 255, 255, 0.7)',
                         }}
                         aria-label="Close sentence focus"
                       >
@@ -3159,7 +3140,7 @@ export default function App() {
                     </p>
 
                     <div
-                      className={`grid transition-[grid-template-rows,opacity,margin-top] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      className={`grid transition-[grid-template-rows,opacity,margin-top] duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                         sentenceToolView !== 'NONE'
                           ? 'grid-rows-[1fr] opacity-100 mt-3'
                           : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
@@ -3169,10 +3150,8 @@ export default function App() {
                         <div
                           className="rounded-2xl p-3 text-xs text-[#1f100a] max-h-52 overflow-y-auto no-scrollbar reading-font transition-all duration-300"
                           style={{
-                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%)',
-                            backdropFilter: 'blur(10px)',
-                            WebkitBackdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(255, 255, 255, 0.55)',
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.14) 100%)',
+                            border: '1px solid rgba(255, 255, 255, 0.6)',
                             boxShadow: 'inset 0 1px 1.5px rgba(255, 255, 255, 0.75)',
                           }}
                         >
@@ -3206,10 +3185,7 @@ export default function App() {
                                     {granularAnalysis.focalElement}
                                   </div>
                                   <p className="leading-relaxed text-[11.5px] text-[#1f100a]">
-                                    <strong>Contextual Analysis:</strong> {granularAnalysis.contextualMeaning}
-                                  </p>
-                                  <p className="leading-relaxed text-[11px] text-[#382117]/90">
-                                    <strong>Linguistic & Literary Note:</strong> {granularAnalysis.linguisticOrLiteraryNote}
+                                    {granularAnalysis.contextualMeaning}
                                   </p>
                                   <p className="italic text-[11px] text-[#8b0000]/95 leading-relaxed">
                                     <strong>Insight:</strong> {granularAnalysis.practicalInsight}
@@ -3296,13 +3272,11 @@ export default function App() {
                       <div
                         className="flex items-center gap-1 rounded-full px-2 py-1 relative z-10"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.75) 100%)',
-                          backdropFilter: 'blur(16px) saturate(180%)',
-                          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-                          border: '1px solid rgba(255, 255, 255, 0.9)',
+                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.72) 100%)',
+                          border: '1px solid rgba(255, 255, 255, 0.95)',
                           boxShadow: `
-                            0 12px 28px rgba(36, 19, 12, 0.16),
-                            0 4px 12px rgba(36, 19, 12, 0.08),
+                            0 10px 24px rgba(36, 19, 12, 0.16),
+                            0 3px 8px rgba(36, 19, 12, 0.08),
                             inset 0 1px 2px rgba(255, 255, 255, 1),
                             inset 0 -1px 1.5px rgba(197, 160, 89, 0.15)
                           `,
@@ -3420,13 +3394,11 @@ export default function App() {
                       <div
                         className="flex items-center gap-1 rounded-full px-2 py-1 relative z-10"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.75) 100%)',
-                          backdropFilter: 'blur(16px) saturate(180%)',
-                          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-                          border: '1px solid rgba(255, 255, 255, 0.9)',
+                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.72) 100%)',
+                          border: '1px solid rgba(255, 255, 255, 0.95)',
                           boxShadow: `
-                            0 12px 28px rgba(36, 19, 12, 0.16),
-                            0 4px 12px rgba(36, 19, 12, 0.08),
+                            0 10px 24px rgba(36, 19, 12, 0.16),
+                            0 3px 8px rgba(36, 19, 12, 0.08),
                             inset 0 1px 2px rgba(255, 255, 255, 1),
                             inset 0 -1px 1.5px rgba(197, 160, 89, 0.15)
                           `,
