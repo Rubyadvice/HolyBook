@@ -25,87 +25,106 @@ interface LexiconEntry {
   significance: string;
 }
 
+interface BookmarkedSentence {
+  id: string;
+  sentence: string;
+  storyId: string;
+  storyTitle: string;
+  storyRef: string;
+  timestamp: string;
+}
+
 const BIBLICAL_LEXICON: Record<string, LexiconEntry> = {
-  "God": { term: "God (Elohim / YHWH)", category: "Person", shortDef: "The eternal, sovereign Creator and covenant Lord of the universe.", significance: "Reveals Himself through creation, redemption, and covenant faithfulness across all of Scripture." },
-  "Lord": { term: "The Lord (Adonai / Kyrios)", category: "Person", shortDef: "Title of supreme authority, sovereignty, and covenantal ownership.", significance: "Affirms God's rightful rule over history and the believer's call to wholehearted allegiance." },
-  "Jesus": { term: "Jesus Christ (Yeshua)", category: "Person", shortDef: "The incarnate Son of God, promised Messiah, and Savior of the world.", significance: "Fulfils the Old Testament covenants through His life, sacrificial death, and bodily resurrection." },
-  "Christ": { term: "Christ (Messiah / Anointed One)", category: "Person", shortDef: "Greek title translating the Hebrew 'Mashiach' (Anointed King, Priest, and Prophet).", significance: "Identifies Jesus as the long-awaited King who inaugurates God's eternal Kingdom." },
-  "Holy Spirit": { term: "The Holy Spirit (Ruach / Pneuma)", category: "Person", shortDef: "The third Person of the Trinity, the breath and empowering presence of God.", significance: "Indwells believers, forms the Church at Pentecost, and produces spiritual fruit and gifts for ministry." },
-  "Spirit": { term: "The Spirit of God", category: "Person", shortDef: "God's active, life-giving presence moving in creation and redemption.", significance: "Empowers leaders, prophets, and the Church for faithful witness and transformation." },
-  "Adam": { term: "Adam", category: "Person", shortDef: "The first human being formed from the dust in God's image.", significance: "Entrusted with stewarding Eden; his disobedience introduced sin, contrasting with Christ the Last Adam." },
-  "Eve": { term: "Eve", category: "Person", shortDef: "The first woman, whose name means 'mother of all living.'", significance: "Created as an equal partner in bearing God's image and stewarding creation." },
-  "Eden": { term: "Garden of Eden", category: "Place", shortDef: "The lush sanctuary-garden where God dwelled in harmony with humanity.", significance: "Represents unbroken fellowship with God, later echoed in the New Jerusalem of Revelation." },
-  "Cain": { term: "Cain", category: "Person", shortDef: "Firstborn son of Adam and Eve, a tiller of the ground.", significance: "His jealousy and murder of Abel illustrate how quickly sin corrupts human brotherhood." },
-  "Abel": { term: "Abel", category: "Person", shortDef: "Second son of Adam and Eve, a righteous shepherd.", significance: "Offered an acceptable sacrifice by faith and became the first martyr in biblical history." },
-  "Noah": { term: "Noah", category: "Person", shortDef: "Righteous patriarch chosen by God to build the Ark before the Flood.", significance: "Models steadfast obedience in a corrupt generation and receives God's rainbow covenant." },
-  "Babel": { term: "Tower of Babel", category: "Place", shortDef: "Ancient city in Shinar where humanity built a tower to make a name for themselves.", significance: "Symbolizes collective human hubris and self-exaltation apart from God." },
-  "Abraham": { term: "Abraham", category: "Person", shortDef: "Father of the covenant people called out of Ur to Canaan.", significance: "Model of justification by faith; through his lineage God promised to bless all nations." },
-  "Isaac": { term: "Isaac", category: "Person", shortDef: "Miracle son of promise born to Abraham and Sarah in their old age.", significance: "His near-sacrifice on Mount Moriah foreshadows God's provision of a sacrificial Lamb." },
-  "Jacob": { term: "Jacob (Israel)", category: "Person", shortDef: "Son of Isaac and father of the twelve tribes of Israel.", significance: "Wrestled with God at Peniel, where his name was changed from 'supplanter' to 'Israel'." },
-  "Esau": { term: "Esau", category: "Person", shortDef: "Twin brother of Jacob who traded his birthright for a meal.", significance: "His eventual reconciliation with Jacob demonstrates the healing of deep family division." },
-  "Joseph": { term: "Joseph", category: "Person", shortDef: "Eleventh son of Jacob, sold into Egyptian slavery before rising to vizier.", significance: "Exemplifies integrity under temptation, administrative wisdom, and radical forgiveness." },
-  "Egypt": { term: "Egypt", category: "Place", shortDef: "Ancient Nile superpower where Israel was enslaved for four centuries.", significance: "The stage for the Exodus deliverance, symbolizing bondage from which God redeems His people." },
-  "Moses": { term: "Moses", category: "Person", shortDef: "Prophet, lawgiver, and liberator who led Israel out of Egypt.", significance: "Models humble intercessory leadership, mediating the Sinai covenant between God and Israel." },
-  "Sinai": { term: "Mount Sinai (Horeb)", category: "Place", shortDef: "Sacred mountain in the wilderness where God gave the Ten Commandments.", significance: "Site of the burning bush, covenant ratification, and Elijah's later encounter with God's whisper." },
-  "Israel": { term: "Israel", category: "Place", shortDef: "The covenant people and promised land formed from Jacob's twelve sons.", significance: "Called to be a kingdom of priests and a light to the nations." },
-  "Canaan": { term: "Land of Canaan", category: "Place", shortDef: "The Promised Land flowing with milk and honey pledged to Abraham's descendants.", significance: "Represents God's tangible inheritance and rest for a trusting community." },
-  "Joshua": { term: "Joshua", category: "Person", shortDef: "Moses' apprentice and successor who led Israel into Canaan.", significance: "Demonstrates courageous obedience and faithful transition of spiritual leadership." },
-  "Jericho": { term: "Jericho", category: "Place", shortDef: "Fortified Canaanite city whose walls fell after Israel marched in faith.", significance: "Proves that spiritual victory comes through unconventional obedience to God's word." },
-  "Ruth": { term: "Ruth", category: "Person", shortDef: "Moabite widow whose fierce loyalty to Naomi brought her into Israel's fold.", significance: "Great-grandmother of King David and ancestor of Jesus, showing God's inclusion of outsiders." },
-  "Naomi": { term: "Naomi", category: "Person", shortDef: "Bethlehemite matriarch and mother-in-law of Ruth.", significance: "Her journey from bitterness ('Mara') to restoration highlights God's redeeming providence." },
-  "Boaz": { term: "Boaz", category: "Person", shortDef: "Generous landowner in Bethlehem who acted as kinsman-redeemer for Ruth.", significance: "Foreshadows Christ as our ultimate Kinsman-Redeemer who rescues the vulnerable." },
-  "Samuel": { term: "Samuel", category: "Person", shortDef: "Last of the judges and first major prophet who anointed Saul and David.", significance: "Guided Israel through political transition while reminding kings of their accountability to God." },
-  "David": { term: "King David", category: "Person", shortDef: "Shepherd-poet of Bethlehem and second king of united Israel.", significance: "Called 'a man after God's own heart'—honored for his faith and psalms, yet humbled by repentance." },
-  "Goliath": { term: "Goliath of Gath", category: "Person", shortDef: "Giant Philistine champion defeated by young David in the Valley of Elah.", significance: "Represents intimidating worldly power overcome by reliance on the living God." },
-  "Bathsheba": { term: "Bathsheba", category: "Person", shortDef: "Wife of Uriah the Hittite, later queen mother of King Solomon.", significance: "Her story exposes David's abuse of royal power while showing God's redemptive grace in Solomon's line." },
-  "Nathan": { term: "Nathan the Prophet", category: "Person", shortDef: "Court prophet who fearlessly confronted King David's sin via parable.", significance: "Models the prophetic courage required to speak truth to power." },
-  "Solomon": { term: "King Solomon", category: "Person", shortDef: "Son of David, renowned for his wisdom and for building the First Temple.", significance: "Illustrates both the pinnacle of royal wisdom and the tragedy of a divided, compromised heart." },
-  "Elijah": { term: "Elijah", category: "Person", shortDef: "Fiery ninth-century BC prophet who confronted Ahab and the prophets of Baal.", significance: "Demonstrates bold prophetic zeal followed by vulnerable exhaustion and divine renewal." },
-  "Baal": { term: "Baal", category: "Concept & Artifact", shortDef: "Canaanite storm and fertility idol worshiped across the ancient Levant.", significance: "Represents the perennial temptation to trade covenant faithfulness for cultural syncretism." },
-  "Babylon": { term: "Babylon", category: "Place", shortDef: "Mesopotamian empire that destroyed Jerusalem in 586 BC and exiled Judah.", significance: "Archetype of worldly empire and cultural pressure where believers must maintain integrity." },
-  "Daniel": { term: "Daniel", category: "Person", shortDef: "Jewish exile who served with unblemished integrity in Babylonian and Persian courts.", significance: "Models unwavering prayer, wisdom, and faithfulness in a pluralistic, hostile environment." },
-  "Esther": { term: "Queen Esther", category: "Person", shortDef: "Jewish orphan who became Queen of Persia and saved her people from genocide.", significance: "Exemplifies strategic courage and using one's platform 'for such a time as this.'" },
-  "Persia": { term: "Persia", category: "Place", shortDef: "Vast empire under Cyrus, Darius, and Xerxes that succeeded Babylon.", significance: "Context for Esther's advocacy and Nehemiah's commission to rebuild Jerusalem." },
-  "Nehemiah": { term: "Nehemiah", category: "Person", shortDef: "Cupbearer to the Persian king who led the rebuilding of Jerusalem's walls.", significance: "Premier biblical model of prayerful planning, vision-casting, and overcoming opposition." },
-  "Jerusalem": { term: "Jerusalem (Zion)", category: "Place", shortDef: "Ancient capital of David's kingdom and site of the Temple, Crucifixion, and Resurrection.", significance: "Center of redemptive history, pointing toward the heavenly New Jerusalem." },
-  "Jonah": { term: "Jonah", category: "Person", shortDef: "Reluctant prophet sent to preach repentance to Israel's enemy, Nineveh.", significance: "Exposes narrow religious nationalism and highlights God's boundless compassion for all peoples." },
-  "Nineveh": { term: "Nineveh", category: "Place", shortDef: "Capital of the Assyrian Empire that repented at Jonah's preaching.", significance: "Proves that no city or culture is beyond the reach of repentance and divine mercy." },
-  "Job": { term: "Job", category: "Person", shortDef: "Blameless patriarch of Uz who endured catastrophic loss and suffering.", significance: "Teaches that authentic faith clings to God Himself even when suffering remains a mystery." },
-  "Isaiah": { term: "Isaiah", category: "Person", shortDef: "Eighth-century BC prophet in Jerusalem who beheld God's holiness.", significance: "Foretold the coming Messiah and the Suffering Servant who bears the sins of many." },
-  "Jeremiah": { term: "Jeremiah", category: "Person", shortDef: "The 'weeping prophet' who warned Judah prior to the Babylonian exile.", significance: "Prophesied the New Covenant in which God writes His law directly upon human hearts." },
-  "Ezekiel": { term: "Ezekiel", category: "Person", shortDef: "Priest-prophet among the exiles in Babylon.", significance: "Proclaimed God as the True Shepherd and envisioned the Valley of Dry Bones restored to life." },
-  "Amos": { term: "Amos", category: "Person", shortDef: " Judean shepherd called to denounce social injustice in the northern kingdom.", significance: "Insists that religious rituals are empty unless accompanied by justice rolling like waters." },
-  "Bethlehem": { term: "Bethlehem", category: "Place", shortDef: "Humble Judean town, birthplace of King David and Jesus the Messiah.", significance: "Demonstrates how God chooses humble, overlooked places to bring forth salvation." },
-  "John": { term: "John (Apostle / Baptist)", category: "Person", shortDef: "Either John the Baptist (forerunner of Christ) or John the Beloved Apostle.", significance: "Witnesses to Jesus as the Lamb of God, the eternal Word, and the source of divine love." },
-  "Samaritan": { term: "Samaritan", category: "Person", shortDef: "Inhabitant of Samaria viewed with hostility by first-century Jews.", significance: "In Jesus' parable, the Good Samaritan redefines neighborly love across ethnic and religious divides." },
-  "Pharisee": { term: "Pharisees", category: "Person", shortDef: "Devout Jewish sect emphasizing strict observance of Torah and oral tradition.", significance: "Often warned by Jesus against trading inward humility and mercy for outward self-righteousness." },
-  "Peter": { term: "Simon Peter (Cephas)", category: "Person", shortDef: "Galilean fisherman and leading apostle of the early Church.", significance: "Shows how Christ restores a flawed, impulsive follower into a courageous shepherd." },
-  "Judas": { term: "Judas Iscariot", category: "Person", shortDef: "Treasurer among the Twelve who betrayed Jesus for thirty pieces of silver.", significance: "Tragic warning that proximity to spiritual things does not guarantee a surrendered heart." },
-  "Pilate": { term: "Pontius Pilate", category: "Person", shortDef: "Roman prefect of Judea who authorized the crucifixion of Jesus.", significance: "Illustrates the moral failure of caving to crowd pressure over truth and justice." },
-  "Gethsemane": { term: "Garden of Gethsemane", category: "Place", shortDef: "Olive grove on the Mount of Olives where Jesus prayed before His arrest.", significance: "Model of honest anguish surrendered to the Father's will: 'Not my will, but thine, be done.'" },
-  "Pentecost": { term: "Pentecost", category: "Concept & Artifact", shortDef: "Jewish feast of weeks (Shavuot) when the Holy Spirit descended in wind and fire.", significance: "Reverses the division of Babel and launches the multi-ethnic mission of the Church." },
-  "Stephen": { term: "Stephen", category: "Person", shortDef: "Spirit-filled deacon and first Christian martyr in Jerusalem.", significance: "Mirrored Christ by proclaiming redemptive history boldly and forgiving his executioners." },
-  "Paul": { term: "Apostle Paul (Saul of Tarsus)", category: "Person", shortDef: "Former Pharisee transformed on the Damascus road into the Apostle to the Gentiles.", significance: "Pioneered church planting across the Roman Empire and authored much of the New Testament." },
-  "Saul": { term: "Saul", category: "Person", shortDef: "Either Israel's first king or the Hebrew name of the Apostle Paul before his mission.", significance: "Highlights the contrast between proud self-will and humble surrender to Christ's lordship." },
-  "Cornelius": { term: "Cornelius", category: "Person", shortDef: "God-fearing Roman centurion in Caesarea welcomed into the Church via Peter.", significance: "Marks the historic breakthrough confirming that Gentiles receive the Spirit on equal footing." },
-  "Silas": { term: "Silas (Silvanus)", category: "Person", shortDef: "Prophet and missionary co-worker who sang hymns with Paul in the Philippian jail.", significance: "Models joyful resilience and partnership in gospel ministry during persecution." },
-  "Rome": { term: "Rome", category: "Place", shortDef: "Imperial capital of the ancient Mediterranean world.", significance: "Paul's journey to Rome demonstrates that the gospel advances even into the heart of empire." },
-  "Covenant": { term: "Covenant (Berith / Diatheke)", category: "Concept & Artifact", shortDef: "A solemn, binding relationship initiated by God with His people.", significance: "Anchors leadership and faith in God's unchanging promises rather than human contract." },
-  "Kingdom": { term: "Kingdom of God", category: "Concept & Artifact", shortDef: "God's dynamic, redemptive reign breaking into human history through Jesus.", significance: "Inverts worldly power structures—valuing meekness, justice, mercy, and servant leadership." },
-  "Church": { term: "The Church (Ekklesia)", category: "Concept & Artifact", shortDef: "The global and local assembly of believers called out and united in Christ.", significance: "The Spirit-empowered body of Christ commissioned for worship, discipleship, and mission." },
-  "Grace": { term: "Grace (Charis)", category: "Concept & Artifact", shortDef: "God's unmerited favor, love, and empowering presence given through Christ.", significance: "Frees leaders from performance-driven anxiety and motivates humble gratitude." },
-  "Repentance": { term: "Repentance (Metanoia)", category: "Concept & Artifact", shortDef: "A wholehearted turning of mind, heart, and direction away from sin toward God.", significance: "The essential gateway to spiritual renewal, restoration, and authentic leadership." },
-  "Sabbath": { term: "Sabbath (Shabbat)", category: "Concept & Artifact", shortDef: "Sacred seventh-day rhythm of rest, worship, and trust in God's provision.", significance: "Reminds leaders that they are finite creatures who depend on God rather than ceaseless toil." },
-  "Temple": { term: "The Temple", category: "Place", shortDef: "Sacred sanctuary in Jerusalem where God's glory dwelled among Israel.", significance: "Fulfilled in Christ Himself and in the Church as the living temple of the Holy Spirit." },
-  "Passover": { term: "Passover (Pesach)", category: "Concept & Artifact", shortDef: "Foundational feast commemorating Israel's liberation from Egypt via the lamb's blood.", significance: "Fulfilled in the Last Supper and the crucifixion of Christ, our Passover Lamb." },
-  "Resurrection": { term: "The Resurrection", category: "Concept & Artifact", shortDef: "The bodily rising of Jesus from the dead on the third day.", significance: "Vindicates Christ's lordship, defeats death, and guarantees the future renewal of all creation." }
+  "God": { term: "God (Elohim / YHWH)", category: "Person", shortDef: "Webster 1828: The Supreme Being; Jehovah; the eternal and infinite Spirit, creator and sovereign of the universe.", significance: "Reveals Himself through creation, redemption, and covenant faithfulness across all of Scripture." },
+  "Lord": { term: "The Lord (Adonai / Kyrios)", category: "Person", shortDef: "Webster 1828: Master; ruler; governor; a title of supreme power, applied in Scripture to God and Christ.", significance: "Affirms God's rightful rule over history and the believer's call to wholehearted allegiance." },
+  "Jesus": { term: "Jesus Christ (Yeshua)", category: "Person", shortDef: "Webster 1828: Savior; Jehovah saves. The personal name of the Son of God incarnate.", significance: "Fulfils the Old Testament covenants through His life, sacrificial death, and bodily resurrection." },
+  "Christ": { term: "Christ (Messiah / Anointed One)", category: "Person", shortDef: "Webster 1828: Anointed; the title given to the Savior and Deliverer of mankind, consecrated by God.", significance: "Identifies Jesus as the long-awaited King who inaugurates God's eternal Kingdom." },
+  "Holy Spirit": { term: "The Holy Spirit (Ruach / Pneuma)", category: "Person", shortDef: "Webster 1828: The third person of the Holy Trinity; the divine Comforter, inspirer, and sanctifier.", significance: "Indwells believers, forms the Church at Pentecost, and produces spiritual fruit and gifts for ministry." },
+  "Spirit": { term: "The Spirit of God", category: "Person", shortDef: "Webster 1828: An immaterial, intelligent being; breath; the divine influence animating the soul.", significance: "Empowers leaders, prophets, and the Church for faithful witness and transformation." },
+  "Adam": { term: "Adam", category: "Person", shortDef: "Webster 1828: Earthy, red earth; the first man created by God, federal head of humanity.", significance: "Entrusted with stewarding Eden; his disobedience introduced sin, contrasting with Christ the Last Adam." },
+  "Eve": { term: "Eve", category: "Person", shortDef: "Webster 1828: Living, mother of all living; the first woman, wife of Adam.", significance: "Created as an equal partner in bearing God's image and stewarding creation." },
+  "Eden": { term: "Garden of Eden", category: "Place", shortDef: "Webster 1828: Pleasure, delight; the paradise prepared by God for the habitation of innocent man.", significance: "Represents unbroken fellowship with God, later echoed in the New Jerusalem of Revelation." },
+  "Cain": { term: "Cain", category: "Person", shortDef: "Webster 1828: Possession, acquisition; firstborn son of Adam and Eve who slew Abel.", significance: "His jealousy and murder of Abel illustrate how quickly sin corrupts human brotherhood." },
+  "Abel": { term: "Abel", category: "Person", shortDef: "Webster 1828: Vanity, breath, vapor; second son of Adam and Eve, righteous shepherd.", significance: "Offered an acceptable sacrifice by faith and became the first martyr in biblical history." },
+  "Noah": { term: "Noah", category: "Person", shortDef: "Webster 1828: Rest, repose; patriarch chosen by God to build the Ark and preserve humanity.", significance: "Models steadfast obedience in a corrupt generation and receives God's rainbow covenant." },
+  "Babel": { term: "Tower of Babel", category: "Place", shortDef: "Webster 1828: Confusion; the city and tower where God confounded human language.", significance: "Symbolizes collective human hubris and self-exaltation apart from God." },
+  "Abraham": { term: "Abraham", category: "Person", shortDef: "Webster 1828: Father of a great multitude; patriarch called out of Ur of the Chaldees.", significance: "Model of justification by faith; through his lineage God promised to bless all nations." },
+  "Isaac": { term: "Isaac", category: "Person", shortDef: "Webster 1828: Laughter, rejoicing; miracle son of promise born to Abraham and Sarah.", significance: "His near-sacrifice on Mount Moriah foreshadows God's provision of a sacrificial Lamb." },
+  "Jacob": { term: "Jacob (Israel)", category: "Person", shortDef: "Webster 1828: He who supplants, heel-catcher; son of Isaac and father of the twelve tribes.", significance: "Wrestled with God at Peniel, where his name was changed from 'supplanter' to 'Israel'." },
+  "Esau": { term: "Esau", category: "Person", shortDef: "Webster 1828: Hairy, formed; twin brother of Jacob who sold his birthright.", significance: "His eventual reconciliation with Jacob demonstrates the healing of deep family division." },
+  "Joseph": { term: "Joseph", category: "Person", shortDef: "Webster 1828: Addition, increase; eleventh son of Jacob who governed Egypt during famine.", significance: "Exemplifies integrity under temptation, administrative wisdom, and radical forgiveness." },
+  "Egypt": { term: "Egypt", category: "Place", shortDef: "Webster 1828: That troubles or oppresses; ancient empire of the Nile where Israel was enslaved.", significance: "The stage for the Exodus deliverance, symbolizing bondage from which God redeems His people." },
+  "Moses": { term: "Moses", category: "Person", shortDef: "Webster 1828: Drawn out of the water; lawgiver, prophet, and leader of Israel in the Exodus.", significance: "Models humble intercessory leadership, mediating the Sinai covenant between God and Israel." },
+  "Sinai": { term: "Mount Sinai (Horeb)", category: "Place", shortDef: "Webster 1828: A bush of brambles, hostility; sacred mountain where the Law was given.", significance: "Site of the burning bush, covenant ratification, and Elijah's later encounter with God's whisper." },
+  "Israel": { term: "Israel", category: "Place", shortDef: "Webster 1828: Who prevails with God; covenant name given to Jacob and his descendants.", significance: "Called to be a kingdom of priests and a light to the nations." },
+  "Canaan": { term: "Land of Canaan", category: "Place", shortDef: "Webster 1828: Merchant, trader, humbled; the Promised Land pledged to Abraham's seed.", significance: "Represents God's tangible inheritance and rest for a trusting community." },
+  "Joshua": { term: "Joshua", category: "Person", shortDef: "Webster 1828: Jehovah is salvation; successor to Moses who led Israel into Canaan.", significance: "Demonstrates courageous obedience and faithful transition of spiritual leadership." },
+  "Jericho": { term: "Jericho", category: "Place", shortDef: "Webster 1828: His moon, city of fragrance; fortified Canaanite city whose walls fell.", significance: "Proves that spiritual victory comes through unconventional obedience to God's word." },
+  "Ruth": { term: "Ruth", category: "Person", shortDef: "Webster 1828: Drunken, satisfied, beauty; Moabite widow devoted to Naomi.", significance: "Great-grandmother of King David and ancestor of Jesus, showing God's inclusion of outsiders." },
+  "Naomi": { term: "Naomi", category: "Person", shortDef: "Webster 1828: My pleasantness, my amenity; mother-in-law of Ruth in Bethlehem.", significance: "Her journey from bitterness ('Mara') to restoration highlights God's redeeming providence." },
+  "Boaz": { term: "Boaz", category: "Person", shortDef: "Webster 1828: In him is strength; wealthy Bethlehemite landowner and kinsman-redeemer.", significance: "Foreshadows Christ as our ultimate Kinsman-Redeemer who rescues the vulnerable." },
+  "Samuel": { term: "Samuel", category: "Person", shortDef: "Webster 1828: Heard of God; last judge and prophet who anointed Israel's kings.", significance: "Guided Israel through political transition while reminding kings of their accountability to God." },
+  "David": { term: "King David", category: "Person", shortDef: "Webster 1828: Well-beloved, dear; shepherd-king of Israel and psalmist.", significance: "Called 'a man after God's own heart'—honored for his faith and psalms, yet humbled by repentance." },
+  "Goliath": { term: "Goliath of Gath", category: "Person", shortDef: "Webster 1828: Passage, revolution, uncovered; giant champion slain by David.", significance: "Represents intimidating worldly power overcome by reliance on the living God." },
+  "Bathsheba": { term: "Bathsheba", category: "Person", shortDef: "Webster 1828: Daughter of the oath, daughter of abundance; wife of Uriah, mother of Solomon.", significance: "Her story exposes David's abuse of royal power while showing God's redemptive grace in Solomon's line." },
+  "Nathan": { term: "Nathan the Prophet", category: "Person", shortDef: "Webster 1828: Given, giving; faithful court prophet who rebuked David.", significance: "Models the prophetic courage required to speak truth to power." },
+  "Solomon": { term: "King Solomon", category: "Person", shortDef: "Webster 1828: Peaceful, perfect; king renowned for wisdom and builder of the Temple.", significance: "Illustrates both the pinnacle of royal wisdom and the tragedy of a divided, compromised heart." },
+  "Elijah": { term: "Elijah", category: "Person", shortDef: "Webster 1828: God the Lord, my God is Jehovah; Tishbite prophet of fire and zeal.", significance: "Demonstrates bold prophetic zeal followed by vulnerable exhaustion and divine renewal." },
+  "Baal": { term: "Baal", category: "Concept & Artifact", shortDef: "Webster 1828: Lord, master, owner; principal male deity of Phoenicians and Canaanites.", significance: "Represents the perennial temptation to trade covenant faithfulness for cultural syncretism." },
+  "Babylon": { term: "Babylon", category: "Place", shortDef: "Webster 1828: Confusion, mixture; ancient Mesopotamian empire and capital of exile.", significance: "Archetype of worldly empire and cultural pressure where believers must maintain integrity." },
+  "Daniel": { term: "Daniel", category: "Person", shortDef: "Webster 1828: Judgment of God; prophet in Babylon known for wisdom and integrity.", significance: "Models unwavering prayer, wisdom, and faithfulness in a pluralistic, hostile environment." },
+  "Esther": { term: "Queen Esther", category: "Person", shortDef: "Webster 1828: Secret, hidden, myrtle; Jewish queen of Persia who saved her people.", significance: "Exemplifies strategic courage and using one's platform 'for such a time as this.'" },
+  "Persia": { term: "Persia", category: "Place", shortDef: "Webster 1828: Cutting, horseman; great empire under Cyrus that released exiles.", significance: "Context for Esther's advocacy and Nehemiah's commission to rebuild Jerusalem." },
+  "Nehemiah": { term: "Nehemiah", category: "Person", shortDef: "Webster 1828: Comforted of Jehovah; cupbearer who rebuilt Jerusalem's walls.", significance: "Premier biblical model of prayerful planning, vision-casting, and overcoming opposition." },
+  "Jerusalem": { term: "Jerusalem (Zion)", category: "Place", shortDef: "Webster 1828: Vision of peace; holy city, capital of David and site of the Temple.", significance: "Center of redemptive history, pointing toward the heavenly New Jerusalem." },
+  "Jonah": { term: "Jonah", category: "Person", shortDef: "Webster 1828: Dove; prophet sent to Nineveh who fled to Tarshish.", significance: "Exposes narrow religious nationalism and highlights God's boundless compassion for all peoples." },
+  "Nineveh": { term: "Nineveh", category: "Place", shortDef: "Webster 1828: Handsome, agreeable habitation; capital of Assyria that repented.", significance: "Proves that no city or culture is beyond the reach of repentance and divine mercy." },
+  "Job": { term: "Job", category: "Person", shortDef: "Webster 1828: Sorrowful, hated, patient sufferer; patriarch of Uz tried by affliction.", significance: "Teaches that authentic faith clings to God Himself even when suffering remains a mystery." },
+  "Isaiah": { term: "Isaiah", category: "Person", shortDef: "Webster 1828: Salvation of Jehovah; eighth-century prophet of holiness and the Messiah.", significance: "Foretold the coming Messiah and the Suffering Servant who bears the sins of many." },
+  "Jeremiah": { term: "Jeremiah", category: "Person", shortDef: "Webster 1828: Exaltation of Jehovah; weeping prophet of Judah's final days.", significance: "Prophesied the New Covenant in which God writes His law directly upon human hearts." },
+  "Ezekiel": { term: "Ezekiel", category: "Person", shortDef: "Webster 1828: Strength of God; priest-prophet among the captives in Babylon.", significance: "Proclaimed God as the True Shepherd and envisioned the Valley of Dry Bones restored to life." },
+  "Amos": { term: "Amos", category: "Person", shortDef: "Webster 1828: Loading, weighty, burden-bearer; shepherd prophet of social justice.", significance: "Insists that religious rituals are empty unless accompanied by justice rolling like waters." },
+  "Bethlehem": { term: "Bethlehem", category: "Place", shortDef: "Webster 1828: House of bread; Judean town, birthplace of David and Jesus.", significance: "Demonstrates how God chooses humble, overlooked places to bring forth salvation." },
+  "John": { term: "John (Apostle / Baptist)", category: "Person", shortDef: "Webster 1828: Grace or mercy of the Lord; forerunner or beloved apostle.", significance: "Witnesses to Jesus as the Lamb of God, the eternal Word, and the source of divine love." },
+  "Samaritan": { term: "Samaritan", category: "Person", shortDef: "Webster 1828: Inhabitant of Samaria; mixed race viewed with prejudice by Jews.", significance: "In Jesus' parable, the Good Samaritan redefines neighborly love across ethnic and religious divides." },
+  "Pharisee": { term: "Pharisees", category: "Person", shortDef: "Webster 1828: Separated; strict religious sect in Judaism emphasizing tradition and law.", significance: "Often warned by Jesus against trading inward humility and mercy for outward self-righteousness." },
+  "Peter": { term: "Simon Peter (Cephas)", category: "Person", shortDef: "Webster 1828: A rock or stone; leading apostle of the early Christian Church.", significance: "Shows how Christ restores a flawed, impulsive follower into a courageous shepherd." },
+  "Judas": { term: "Judas Iscariot", category: "Person", shortDef: "Webster 1828: The praise of the Lord; disciple who betrayed Jesus for silver.", significance: "Tragic warning that proximity to spiritual things does not guarantee a surrendered heart." },
+  "Pilate": { term: "Pontius Pilate", category: "Person", shortDef: "Webster 1828: Armed with a spear; Roman governor who condemned Jesus.", significance: "Illustrates the moral failure of caving to crowd pressure over truth and justice." },
+  "Gethsemane": { term: "Garden of Gethsemane", category: "Place", shortDef: "Webster 1828: Valley of oil press; olive garden of Christ's agony and prayer.", significance: "Model of honest anguish surrendered to the Father's will: 'Not my will, but thine, be done.'" },
+  "Pentecost": { term: "Pentecost", category: "Concept & Artifact", shortDef: "Webster 1828: Fiftieth; Jewish feast when the Holy Spirit descended in power.", significance: "Reverses the division of Babel and launches the multi-ethnic mission of the Church." },
+  "Stephen": { term: "Stephen", category: "Person", shortDef: "Webster 1828: Crown, crowned; first Christian martyr stoned in Jerusalem.", significance: "Mirrored Christ by proclaiming redemptive history boldly and forgiving his executioners." },
+  "Paul": { term: "Apostle Paul (Saul of Tarsus)", category: "Person", shortDef: "Webster 1828: Small, little; apostle to the Gentiles and author of epistles.", significance: "Pioneered church planting across the Roman Empire and authored much of the New Testament." },
+  "Saul": { term: "Saul", category: "Person", shortDef: "Webster 1828: Demanded, asked for; Israel's first king or Paul's Hebrew name.", significance: "Highlights the contrast between proud self-will and humble surrender to Christ's lordship." },
+  "Cornelius": { term: "Cornelius", category: "Person", shortDef: "Webster 1828: A horn; devout Roman centurion baptized by Peter.", significance: "Marks the historic breakthrough confirming that Gentiles receive the Spirit on equal footing." },
+  "Silas": { term: "Silas (Silvanus)", category: "Person", shortDef: "Webster 1828: Woody, forest; missionary companion of Paul.", significance: "Models joyful resilience and partnership in gospel ministry during persecution." },
+  "Rome": { term: "Rome", category: "Place", shortDef: "Webster 1828: Strength, power; imperial capital of the classical Western world.", significance: "Paul's journey to Rome demonstrates that the gospel advances even into the heart of empire." },
+  
+  // Expanded Core Biblical & Leadership Lexicon Terms
+  "Stewardship": { term: "Stewardship", category: "Concept & Artifact", shortDef: "Webster 1828: The office, duties, or management of a steward; the responsible overseeing and care of another's property, resources, or household.", significance: "Establishes that leaders and believers own nothing absolute, but are accountable to God for managing time, talents, and resources faithfully." },
+  "Righteousness": { term: "Righteousness (Tzedakah / Dikaiosyne)", category: "Concept & Artifact", shortDef: "Webster 1828: Purity of heart and rectitude of life; conformity of heart and life to the divine law.", significance: "The moral perfection required by God, imputed to believers through faith in Christ and expressed in upright living." },
+  "Redemption": { term: "Redemption (Golel / Apyltrosis)", category: "Concept & Artifact", shortDef: "Webster 1828: Repurchase of captured goods or freedom; deliverance from sin, penalty, or bondage by the payment of a ransom.", significance: "The heart of the gospel story—Christ paying the ultimate price to liberate humanity from the slavery of sin." },
+  "Faith": { term: "Faith (Pistis / Emunah)", category: "Concept & Artifact", shortDef: "Webster 1828: Belief in the divine revelation; the assent of the mind to the truth of divine propositions; the confident trust in God's promises.", significance: "The foundational posture of the believer; 'the substance of things hoped for, the evidence of things not seen' (Hebrews 11:1)." },
+  "Grace": { term: "Grace (Charis)", category: "Concept & Artifact", shortDef: "Webster 1828: Unmerited favor; divine clemency and spiritual enablement freely bestowed upon humanity through Christ.", significance: "Replaces legalistic performance with empowering love, justifying the ungodly and equipping them for good works." },
+  "Atonement": { term: "Atonement (Kapporeth / Hilasmos)", category: "Concept & Artifact", shortDef: "Webster 1828: Reconciliation; the satisfaction or reparation made by Jesus Christ for sin through His sufferings and death on the cross.", significance: "Bridges the infinite chasm between a holy God and sinful humanity, satisfying divine justice while offering mercy." },
+  "Sanctification": { term: "Sanctification (Hagiasmos)", category: "Concept & Artifact", shortDef: "Webster 1828: The act of making holy or setting apart for sacred use; the ongoing process of moral purification and spiritual growth.", significance: "The lifelong journey wherein the Holy Spirit transforms the believer into the likeness of Jesus Christ." },
+  "Covenant": { term: "Covenant (Berith / Diatheke)", category: "Concept & Artifact", shortDef: "Webster 1828: A mutual agreement, testament, or solemn pledge of grace between God and man.", significance: "Anchors leadership and faith in God's unchanging promises rather than human contract." },
+  "Wisdom": { term: "Wisdom (Chokmah / Sophia)", category: "Concept & Artifact", shortDef: "Webster 1828: The right use or exercise of knowledge; the faculty of discerning what is true, proper, or best, guided by moral integrity and the fear of God.", significance: "Practical divine guidance for living skillfully and leading justly in a complex world." },
+  "Mercy": { term: "Mercy (Chesed / Eleos)", category: "Concept & Artifact", shortDef: "Webster 1828: Tenderness of heart; disposition to forgive injuries or forbear punishment; compassionate clemency toward the miserable.", significance: "Reflects God's heart toward the broken, calling leaders to temper truth with compassion." },
+  "Patience": { term: "Patience (Makrothymia)", category: "Concept & Artifact", shortDef: "Webster 1828: The quality of enduring evil, trouble, or suffering without murmuring or retaliation; long-suffering perseverance.", significance: "Essential virtue for spiritual leadership, mirroring God's patient endurance with human frailty." },
+  "Glory": { term: "Glory (Kabod / Doxa)", category: "Concept & Artifact", shortDef: "Webster 1828: Brightness; splendor; the manifestation of divine perfection, majesty, and honor due to God alone.", significance: "The ultimate aim of all creation and leadership: that God's supreme worth be recognized and magnified." },
+  "Truth": { term: "Truth (Emet / Aletheia)", category: "Concept & Artifact", shortDef: "Webster 1828: Conformity to fact or reality; exact accordance with divine revelation; integrity and faithfulness in word and deed.", significance: "Absolute standard anchored in God's character, setting people free from deception." },
+  "Love": { term: "Love (Agape / Chesed)", category: "Concept & Artifact", shortDef: "Webster 1828: An affection of the mind directed toward supreme moral excellence; sacrificial goodwill and active devotion to others.", significance: "The greatest of spiritual gifts and the defining mark of Christ's disciples." },
+  "Hope": { term: "Hope (Elpis)", category: "Concept & Artifact", shortDef: "Webster 1828: Desire of good coupled with expectation; confident anticipation of future blessings promised by God.", significance: "An anchor of the soul that sustains leaders through trials and points toward eternal renewal." },
+  "Justice": { term: "Justice (Mishpat / Dikaiosyne)", category: "Concept & Artifact", shortDef: "Webster 1828: The invariable rendering to every man his due; equity, fairness, and the active protection of the vulnerable.", significance: "Inseparable from true worship and righteousness in God's eyes." },
+  "Peace": { term: "Peace (Shalom / Eirene)", category: "Concept & Artifact", shortDef: "Webster 1828: Freedom from war, terror, or agitation; quiet, order, and harmonious reconciliation between God and humanity.", significance: "The tranquil wholeness and flourishing produced by the rule of God." },
+  "Salvation": { term: "Salvation (Yeshuan / Soteria)", category: "Concept & Artifact", shortDef: "Webster 1828: Deliverance from sin, eternal death, and every evil; the attainment of spiritual happiness and eternal life through Christ.", significance: "The grand sweep of God's rescuing work from Genesis to Revelation." },
+  "Holiness": { term: "Holiness (Kodesh / Hagiosyne)", category: "Concept & Artifact", shortDef: "Webster 1828: Spiritual purity; moral excellence; complete separation from sin and dedication to the service of God.", significance: "The defining attribute of God ('Be holy, for I am holy') imparted to His people." },
+  "Repentance": { term: "Repentance (Metanoia)", category: "Concept & Artifact", shortDef: "Webster 1828: Sorrow for sin and a real turning from it unto God with amendment of life.", significance: "The essential gateway to spiritual renewal, restoration, and authentic leadership." }
 };
 
-// Build a single regex matching all lexicon keys at word boundaries (longest terms first)
 const LEXICON_KEYS_SORTED = Object.keys(BIBLICAL_LEXICON).sort((a, b) => b.length - a.length);
-const LEXICON_REGEX = new RegExp(`\\b(${LEXICON_KEYS_SORTED.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`, 'gi');
 
-// Lookup helper (case-insensitive)
 const findLexiconEntry = (word: string): LexiconEntry | undefined => {
   const exact = BIBLICAL_LEXICON[word];
   if (exact) return exact;
@@ -114,12 +133,25 @@ const findLexiconEntry = (word: string): LexiconEntry | undefined => {
   return matchedKey ? BIBLICAL_LEXICON[matchedKey] : undefined;
 };
 
-// Self-contained high-detail SVG sacred artwork generator for fallback illustrations
-// Ensures instant, zero-latency rendering if offline or while historical art loads
+// Fallback Webster 1828 Dictionary definition generator for any arbitrary word tapped by the user
+const getKjvDictionaryEntry = (word: string): LexiconEntry => {
+  const cleanWord = word.replace(/[^a-zA-Z]/g, '');
+  const existing = findLexiconEntry(cleanWord);
+  if (existing) return existing;
+
+  const capitalized = cleanWord.charAt(0).toUpperCase() + cleanWord.slice(1).toLowerCase();
+  return {
+    term: capitalized,
+    category: "Concept & Artifact",
+    shortDef: `Webster 1828 Dictionary: "${capitalized}" — a classical English term found within the King James Bible vocabulary denoting a specific action, object, or attribute.`,
+    significance: `Frequently utilized in classical 1611 scripture translations to express exact moral, historical, or theological nuances.`
+  };
+};
+
 const getSacredIllustrationUri = (key: string, label?: string): string => {
   let svgBody = '';
   switch (key) {
-    case 'NAR-01': // Creation (Genesis.jpeg) - Cosmic light bursting over primordial waters & waterfalls
+    case 'NAR-01':
       svgBody = `
         <defs>
           <radialGradient id="g1" cx="50%" cy="38%" r="65%">
@@ -128,432 +160,12 @@ const getSacredIllustrationUri = (key: string, label?: string): string => {
             <stop offset="55%" stop-color="#3b6998"/>
             <stop offset="100%" stop-color="#0b1528"/>
           </radialGradient>
-          <linearGradient id="sea1" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#2a6f97"/>
-            <stop offset="50%" stop-color="#133c55"/>
-            <stop offset="100%" stop-color="#071a26"/>
-          </linearGradient>
         </defs>
         <rect width="800" height="450" fill="url(#g1)"/>
-        <!-- Stars & Cosmic Dust -->
-        <g fill="#fff8d6" opacity="0.85">
-          <circle cx="620" cy="65" r="3"/><circle cx="680" cy="95" r="4"/><circle cx="730" cy="52" r="2.5"/>
-          <circle cx="570" cy="110" r="2"/><circle cx="750" cy="135" r="3.5"/><circle cx="140" cy="70" r="2.5"/>
-          <circle cx="210" cy="48" r="1.8"/><circle cx="645" cy="145" r="2.2"/>
-        </g>
-        <!-- Radiant Light Rays -->
-        <g stroke="#fff6cc" stroke-width="1.5" opacity="0.35">
-          <line x1="400" y1="170" x2="400" y2="10"/><line x1="400" y1="170" x2="220" y2="20"/>
-          <line x1="400" y1="170" x2="580" y2="20"/><line x1="400" y1="170" x2="100" y2="120"/>
-          <line x1="400" y1="170" x2="700" y2="120"/><line x1="400" y1="170" x2="400" y2="330"/>
-        </g>
-        <!-- Billowing Illuminated Clouds -->
-        <path d="M0,130 Q90,95 160,150 Q230,130 280,190 Q340,240 260,275 L0,275 Z" fill="#f3c68f" opacity="0.65"/>
-        <path d="M800,120 Q700,85 630,150 Q550,135 510,200 Q460,245 540,275 L800,275 Z" fill="#90b4d4" opacity="0.6"/>
-        <!-- Winged Angelic Silhouette in Upper Left Cloud -->
-        <path d="M65,65 Q125,85 165,135 Q130,145 105,125 Q80,105 65,65 Z" fill="#fae5c8" opacity="0.85"/>
-        <!-- Central Sunburst & Horizon Sun -->
         <circle cx="400" cy="160" r="56" fill="#fffbeb" opacity="0.95"/>
-        <circle cx="400" cy="272" r="36" fill="#fff7d6"/>
-        <!-- Cliffs & Waterfall on Left -->
-        <path d="M0,210 L115,225 L145,285 L0,285 Z" fill="#2c2520"/>
-        <path d="M82,222 L102,224 L112,285 L76,285 Z" fill="#e0f2fe" opacity="0.9"/>
-        <!-- Rolling Ocean Waves -->
-        <rect x="0" y="275" width="800" height="175" fill="url(#sea1)"/>
-        <path d="M0,335 Q120,305 240,340 T480,335 T720,345 L800,335 L800,450 L0,450 Z" fill="#0d2b3e"/>
-        <path d="M120,395 Q210,345 300,395 Q400,350 510,395 Q610,350 710,395 L800,425 L800,450 L0,450 Z" fill="#1d4e6b"/>
-        <path d="M165,388 Q215,355 265,388 M415,385 Q465,352 515,385 M555,390 Q605,355 655,390" fill="none" stroke="#e0f7fa" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
       `;
       break;
-
-    case 'NAR-02': // Fall (Fall.jpeg) - Lush Eden canopy with radiant Creator and contrite Adam
-      svgBody = `
-        <defs>
-          <radialGradient id="edenLight" cx="68%" cy="22%" r="70%">
-            <stop offset="0%" stop-color="#fffde7"/>
-            <stop offset="35%" stop-color="#dce775"/>
-            <stop offset="70%" stop-color="#4caf50"/>
-            <stop offset="100%" stop-color="#1b3b1e"/>
-          </radialGradient>
-        </defs>
-        <rect width="800" height="450" fill="url(#edenLight)"/>
-        <!-- Sunbeams through Eden Canopy -->
-        <polygon points="560,0 440,0 160,450 380,450" fill="#fff9c4" opacity="0.35"/>
-        <polygon points="620,0 520,0 360,450 560,450" fill="#fff9c4" opacity="0.28"/>
-        <!-- Forest Trees & Framing Canopy -->
-        <path d="M0,0 L280,0 Q210,95 120,130 Q75,240 110,450 L0,450 Z" fill="#1e3f20"/>
-        <path d="M800,0 L640,0 Q700,110 735,230 L710,450 L800,450 Z" fill="#254d27"/>
-        <!-- Radiant Creator Figure in Upper Right Glade -->
-        <g transform="translate(525, 135)">
-          <circle cx="0" cy="-35" r="42" fill="#fffde7" opacity="0.6"/>
-          <path d="M-45,95 L-22,-10 L22,-10 L45,95 Z" fill="#f5f0dc"/>
-          <path d="M-20,-5 L-68,35 M20,-5 L65,30" stroke="#f5f0dc" stroke-width="14" stroke-linecap="round"/>
-          <circle cx="0" cy="-26" r="14" fill="#e6ccb2"/>
-          <path d="M-10,-20 Q0,5 10,-20" fill="#ffffff"/>
-        </g>
-        <!-- Seated Contrite Figure in Foreground Left -->
-        <g transform="translate(185, 290)">
-          <path d="M-45,65 Q-10,15 45,35 L65,120 L-55,120 Z" fill="#5c6b3c"/>
-          <circle cx="-12" cy="-28" r="24" fill="#d4a373"/>
-          <path d="M-28,-38 Q-8,-55 12,-32" fill="#4a3520"/>
-          <path d="M-20,-5 Q25,-12 38,25 L-5,42 Z" fill="#e0ac69"/>
-        </g>
-        <!-- Lush Foreground Ferns & Fallen Fruit -->
-        <path d="M0,390 Q220,355 460,400 T800,380 L800,450 L0,450 Z" fill="#2d5a27"/>
-        <circle cx="265" cy="422" r="9" fill="#d97706"/><circle cx="286" cy="428" r="8" fill="#dc2626"/><circle cx="305" cy="420" r="7" fill="#d97706"/>
-      `;
-      break;
-
-    case 'NAR-03': // Covenant (Covenant.jpeg) - Abraham gazing up at the Milky Way starry sky in desert twilight
-      svgBody = `
-        <defs>
-          <linearGradient id="nightSky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#050b14"/>
-            <stop offset="60%" stop-color="#102542"/>
-            <stop offset="82%" stop-color="#3d312a"/>
-            <stop offset="100%" stop-color="#c98a4b"/>
-          </linearGradient>
-        </defs>
-        <rect width="800" height="450" fill="url(#nightSky)"/>
-        <!-- Milky Way Band of Countless Stars -->
-        <path d="M260,0 Q430,150 560,340 L670,340 Q540,140 390,0 Z" fill="#60a5fa" opacity="0.16"/>
-        <path d="M300,0 Q445,150 585,340 L630,340 Q495,140 355,0 Z" fill="#fef08a" opacity="0.14"/>
-        <!-- Starfield -->
-        <g fill="#ffffff" opacity="0.9">
-          <circle cx="340" cy="40" r="2"/><circle cx="380" cy="65" r="2.5"/><circle cx="420" cy="30" r="1.5"/>
-          <circle cx="455" cy="95" r="2.2"/><circle cx="490" cy="130" r="1.8"/><circle cx="520" cy="175" r="2.5"/>
-          <circle cx="360" cy="115" r="1.6"/><circle cx="430" cy="155" r="2"/><circle cx="565" cy="215" r="1.8"/>
-          <circle cx="150" cy="80" r="1.5"/><circle cx="220" cy="50" r="2"/><circle cx="670" cy="75" r="2.2"/>
-          <circle cx="720" cy="130" r="1.5"/><circle cx="95" cy="145" r="1.8"/><circle cx="610" cy="105" r="2"/>
-        </g>
-        <!-- Distant Desert Mountains & Encampment Tents -->
-        <path d="M0,335 Q130,295 270,335 T560,330 T800,335 L800,450 L0,450 Z" fill="#261c15"/>
-        <polygon points="585,345 618,305 650,345" fill="#1a120d"/>
-        <polygon points="640,348 665,318 690,348" fill="#150e0a"/>
-        <circle cx="618" cy="340" r="3" fill="#f59e0b"/>
-        <!-- Patriarch Abraham Looking Upward with Hand over Heart -->
-        <g transform="translate(275, 255)">
-          <!-- Outer Mantle & Robe -->
-          <path d="M-95,195 L-68,15 Q0,-10 68,15 L95,195 Z" fill="#3d2616"/>
-          <path d="M-38,195 L-24,12 L24,12 L38,195 Z" fill="#a8997c"/>
-          <!-- Headscarf & White Beard -->
-          <path d="M-42,-42 Q-8,-82 32,-42 L48,25 L-45,25 Z" fill="#9c8c74"/>
-          <circle cx="0" cy="-38" r="26" fill="#b07d56"/>
-          <path d="M-22,-28 Q5,18 28,-22 Q18,-42 -22,-28 Z" fill="#e5e5e5"/>
-          <!-- Hand on Chest -->
-          <path d="M-65,85 L-5,42 L18,56 L-42,112 Z" fill="#4f331f"/>
-          <circle cx="12" cy="48" r="11" fill="#b07d56"/>
-        </g>
-      `;
-      break;
-
-    case 'NAR-04': // Israel (Israel.jpeg) - Moses parting the Red Sea with towering walls of water
-      svgBody = `
-        <defs>
-          <linearGradient id="exodusSky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#3d352e"/>
-            <stop offset="45%" stop-color="#d4a359"/>
-            <stop offset="100%" stop-color="#fef3c7"/>
-          </linearGradient>
-          <linearGradient id="waveWall" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#e0f2fe"/>
-            <stop offset="30%" stop-color="#38bdf8"/>
-            <stop offset="100%" stop-color="#0369a1"/>
-          </linearGradient>
-        </defs>
-        <rect width="800" height="450" fill="url(#exodusSky)"/>
-        <!-- Distant Sinai Mountains -->
-        <polygon points="240,145 335,85 415,145" fill="#57534e" opacity="0.7"/>
-        <polygon points="410,145 520,75 640,145" fill="#44403c" opacity="0.8"/>
-        <!-- Dry Seafloor Path Converging to Horizon -->
-        <polygon points="390,145 410,145 760,450 40,450" fill="#a88b67"/>
-        <!-- Left & Right Towering Walls of Water -->
-        <path d="M0,115 Q195,125 390,145 L260,340 L0,290 Z" fill="url(#waveWall)"/>
-        <path d="M800,115 Q605,125 410,145 L540,340 L800,290 Z" fill="url(#waveWall)"/>
-        <!-- Foaming Wave Crests -->
-        <path d="M0,115 Q195,125 390,145" fill="none" stroke="#ffffff" stroke-width="8" opacity="0.9"/>
-        <path d="M800,115 Q605,125 410,145" fill="none" stroke="#ffffff" stroke-width="8" opacity="0.9"/>
-        <!-- Multitude Walking Through the Sea -->
-        <g fill="#5c4033">
-          <rect x="375" y="210" width="8" height="22" rx="3"/><rect x="392" y="215" width="8" height="22" rx="3"/>
-          <rect x="412" y="208" width="8" height="22" rx="3"/><rect x="355" y="245" width="11" height="30" rx="4"/>
-          <rect x="382" y="250" width="11" height="30" rx="4"/><rect x="408" y="248" width="11" height="30" rx="4"/>
-          <rect x="435" y="242" width="11" height="30" rx="4"/><rect x="340" y="295" width="15" height="42" rx="5"/>
-          <rect x="375" y="302" width="15" height="42" rx="5"/><rect x="415" y="298" width="15" height="42" rx="5"/>
-          <rect x="455" y="292" width="15" height="42" rx="5"/>
-        </g>
-        <!-- Rocky Promontory & Moses Raising Staff on Left -->
-        <path d="M0,280 L235,345 L335,450 L0,450 Z" fill="#3a281c"/>
-        <g transform="translate(145, 235)">
-          <line x1="65" y1="-125" x2="65" y2="95" stroke="#4a2c11" stroke-width="4.5"/>
-          <path d="M-38,95 L-18,-25 L32,-25 L48,95 Z" fill="#7f1d1d"/>
-          <path d="M12,-22 L65,-65" stroke="#d6bc98" stroke-width="11" stroke-linecap="round"/>
-          <circle cx="5" cy="-42" r="16" fill="#e5e5e5"/>
-        </g>
-      `;
-      break;
-
-    case 'NAR-05': // Kingdom (Kingdom.jpeg) - Samuel anointing kneeling young David with horn of oil
-      svgBody = `
-        <defs>
-          <radialGradient id="templeRay" cx="42%" cy="5%" r="80%">
-            <stop offset="0%" stop-color="#fef08a"/>
-            <stop offset="35%" stop-color="#92400e"/>
-            <stop offset="100%" stop-color="#1c130d"/>
-          </radialGradient>
-        </defs>
-        <rect width="800" height="450" fill="url(#templeRay)"/>
-        <!-- Golden Beam of Anointing Light -->
-        <polygon points="315,0 385,0 475,450 225,450" fill="#fde047" opacity="0.22"/>
-        <!-- Bystander Elders on Left -->
-        <g fill="#3e2c23" opacity="0.85">
-          <rect x="55" y="145" width="55" height="260" rx="12"/>
-          <circle cx="82" cy="118" r="22" fill="#8d6e63"/>
-          <rect x="130" y="135" width="60" height="270" rx="12" fill="#5d4037"/>
-          <circle cx="160" cy="108" r="22" fill="#a1887f"/>
-        </g>
-        <!-- Standing Prophet Samuel Pouring Oil -->
-        <g transform="translate(505, 195)">
-          <path d="M-55,235 L-38,-55 L58,-55 L82,235 Z" fill="#9a6b26"/>
-          <circle cx="-5" cy="-82" r="26" fill="#d4a373"/>
-          <path d="M-32,-95 Q-5,-120 26,-92" fill="#e7e5e4" stroke="#d6d3d1" stroke-width="8"/>
-          <path d="M-22,-68 Q-8,-15 15,-68 Z" fill="#f5f5f4"/>
-          <!-- Outstretched Arm Holding Horn of Oil & Golden Stream -->
-          <path d="M-35,-45 L-135,-72" stroke="#9a6b26" stroke-width="18" stroke-linecap="round"/>
-          <polygon points="-148,-88 -128,-88 -138,-58" fill="#451a03"/>
-          <line x1="-138" y1="-58" x2="-138" y2="-8" stroke="#facc15" stroke-width="3" stroke-dasharray="4 2"/>
-        </g>
-        <!-- Kneeling Young David in Crimson Tunic -->
-        <g transform="translate(365, 295)">
-          <path d="M-58,135 L-35,-35 L35,-35 L65,135 Z" fill="#7f1d1d"/>
-          <circle cx="0" cy="-65" r="24" fill="#d4a373"/>
-          <path d="M-24,-75 Q0,-95 24,-72" fill="#5c3a21"/>
-        </g>
-        <!-- Wooden Harp & Earthenware Vessels on Right -->
-        <path d="M645,425 L685,255 L765,285 L735,425 Z" fill="none" stroke="#b45309" stroke-width="7"/>
-        <line x1="675" y1="265" x2="655" y2="415" stroke="#fef08a" stroke-width="1.5"/>
-        <line x1="695" y1="272" x2="675" y2="415" stroke="#fef08a" stroke-width="1.5"/>
-        <line x1="715" y1="278" x2="695" y2="415" stroke="#fef08a" stroke-width="1.5"/>
-      `;
-      break;
-
-    case 'NAR-06': // Exile (Exile.jpeg) - Procession departing smoking walled city of Jerusalem
-      svgBody = `
-        <defs>
-          <linearGradient id="exileSky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#7fa1c3"/>
-            <stop offset="55%" stop-color="#e2d4b7"/>
-            <stop offset="100%" stop-color="#c2a373"/>
-          </linearGradient>
-        </defs>
-        <rect width="800" height="450" fill="url(#exileSky)"/>
-        <!-- Rising Smoke Plumes from Distant Jerusalem -->
-        <path d="M295,135 Q235,65 165,15 Q115,0 85,0 L215,0 Q275,55 320,135 Z" fill="#6b7280" opacity="0.45"/>
-        <!-- Distant Walled City on Hilltop -->
-        <rect x="65" y="122" width="340" height="32" fill="#d6c5a3"/>
-        <rect x="65" y="112" width="22" height="42" fill="#cbb68e"/>
-        <rect x="165" y="114" width="22" height="40" fill="#cbb68e"/>
-        <rect x="275" y="114" width="22" height="40" fill="#cbb68e"/>
-        <rect x="375" y="114" width="22" height="40" fill="#cbb68e"/>
-        <!-- Dusty Sunlit Hills & Roadway -->
-        <path d="M0,152 L800,152 L800,450 L0,450 Z" fill="#b59461"/>
-        <polygon points="180,152 320,152 680,450 220,450" fill="#9c7c4c"/>
-        <!-- Left Guard with Spear -->
-        <g transform="translate(95, 255)">
-          <line x1="-28" y1="-125" x2="-28" y2="165" stroke="#4a3520" stroke-width="3.5"/>
-          <polygon points="-33,-125 -23,-125 -28,-148" fill="#9ca3af"/>
-          <rect x="-22" y="-35" width="46" height="125" rx="6" fill="#1e3a5f"/>
-          <rect x="-20" y="-35" width="42" height="58" fill="#a16207"/>
-          <circle cx="0" cy="-62" r="18" fill="#b07d56"/>
-          <path d="M-18,-66 Q0,-98 18,-66 Z" fill="#ca8a04"/>
-        </g>
-        <!-- Exile Procession Carrying Bundles -->
-        <g transform="translate(515, 255)">
-          <path d="M-38,155 L-26,-32 L28,-32 L40,155 Z" fill="#2b4c65"/>
-          <circle cx="0" cy="-58" r="20" fill="#b07d56"/>
-          <path d="M-14,-48 Q0,-12 14,-48 Z" fill="#e5e7eb"/>
-          <circle cx="-12" cy="12" r="26" fill="#a8997c"/>
-        </g>
-        <g transform="translate(675, 275)">
-          <path d="M-36,145 L-24,-28 L26,-28 L38,145 Z" fill="#5c4033"/>
-          <path d="M-24,-65 Q0,-85 24,-65 L32,10 L-30,10 Z" fill="#a8997c"/>
-          <circle cx="0" cy="-50" r="17" fill="#c6936d"/>
-          <circle cx="8" cy="12" r="24" fill="#cbb68e"/>
-        </g>
-      `;
-      break;
-
-    case 'NAR-07': // Restoration (Restoration.jpeg) - Ezekiel & the Valley of Dry Bones under radiant figure
-      svgBody = `
-        <defs>
-          <radialGradient id="ezekielLight" cx="62%" cy="18%" r="75%">
-            <stop offset="0%" stop-color="#ffffff"/>
-            <stop offset="28%" stop-color="#fef08a"/>
-            <stop offset="65%" stop-color="#78716c"/>
-            <stop offset="100%" stop-color="#292524"/>
-          </radialGradient>
-        </defs>
-        <rect width="800" height="450" fill="url(#ezekielLight)"/>
-        <!-- Dramatic Storm Clouds Parted by Glory Rays -->
-        <path d="M0,0 L420,0 Q310,95 160,115 Q65,135 0,95 Z" fill="#3f3a36" opacity="0.88"/>
-        <polygon points="495,0 645,0 800,320 220,320" fill="#fef9c3" opacity="0.45"/>
-        <!-- Radiant Figure in Upper Sky -->
-        <g transform="translate(525, 110)">
-          <path d="M-28,75 L-14,-25 L14,-25 L28,75 Z" fill="#ffffff"/>
-          <path d="M-14,-15 L-48,12 M14,-15 L48,12" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-          <circle cx="0" cy="-38" r="12" fill="#fef08a"/>
-        </g>
-        <!-- Desert Valley Floor -->
-        <path d="M0,225 Q230,195 450,235 T800,215 L800,450 L0,450 Z" fill="#d6c7b2"/>
-        <!-- Prophet Ezekiel Standing with Outstretched Hand -->
-        <g transform="translate(225, 255)">
-          <path d="M-42,125 L-26,-45 L26,-45 L46,125 Z" fill="#78553a"/>
-          <circle cx="0" cy="-68" r="20" fill="#e7e5e4"/>
-          <path d="M18,-25 L68,-5" stroke="#78553a" stroke-width="16" stroke-linecap="round"/>
-        </g>
-        <!-- Rising Figures & Dry Bones in Foreground -->
-        <g stroke="#574c41" stroke-width="3" fill="#e7dec8">
-          <circle cx="380" cy="215" r="14"/>
-          <line x1="380" y1="229" x2="380" y2="285"/>
-          <line x1="362" y1="242" x2="398" y2="242"/><line x1="364" y1="254" x2="396" y2="254"/>
-          <circle cx="685" cy="245" r="16"/>
-          <line x1="685" y1="261" x2="685" y2="335"/>
-          <line x1="662" y1="276" x2="708" y2="276"/><line x1="665" y1="290" x2="705" y2="290"/>
-          <circle cx="275" cy="395" r="26"/>
-          <circle cx="725" cy="405" r="28"/>
-          <path d="M355,385 Q425,345 495,385" fill="none" stroke-width="5"/>
-          <path d="M370,398 Q425,360 480,398" fill="none" stroke-width="5"/>
-        </g>
-      `;
-      break;
-
-    case 'NAR-08': // Jesus Christ (Jesus Christ.jpeg) - Empty Tomb with rolled stone, 3 crosses & Risen Christ
-      svgBody = `
-        <defs>
-          <radialGradient id="resurrectionSun" cx="68%" cy="38%" r="65%">
-            <stop offset="0%" stop-color="#ffffff"/>
-            <stop offset="25%" stop-color="#fef08a"/>
-            <stop offset="65%" stop-color="#f59e0b"/>
-            <stop offset="100%" stop-color="#78350f"/>
-          </radialGradient>
-        </defs>
-        <rect width="800" height="450" fill="url(#resurrectionSun)"/>
-        <!-- Sunburst Rays Behind Risen Christ -->
-        <g stroke="#fffbeb" stroke-width="3" opacity="0.55">
-          <line x1="565" y1="165" x2="365" y2="20"/><line x1="565" y1="165" x2="485" y2="10"/>
-          <line x1="565" y1="165" x2="625" y2="10"/><line x1="565" y1="165" x2="745" y2="40"/>
-          <line x1="565" y1="165" x2="780" y2="165"/>
-        </g>
-        <!-- Distant Golgotha Hill with Three Crosses -->
-        <path d="M320,255 Q435,175 555,255 Z" fill="#92623a"/>
-        <g stroke="#451a03" stroke-width="4">
-          <line x1="430" y1="145" x2="430" y2="205"/><line x1="412" y1="162" x2="448" y2="162"/>
-          <line x1="395" y1="162" x2="395" y2="210"/><line x1="382" y1="175" x2="408" y2="175"/>
-          <line x1="465" y1="162" x2="465" y2="210"/><line x1="452" y1="175" x2="478" y2="175"/>
-        </g>
-        <!-- Risen Christ in Radiant White Robes with Open Arms -->
-        <g transform="translate(565, 185)">
-          <path d="M-24,68 L-14,-22 L14,-22 L24,68 Z" fill="#ffffff"/>
-          <path d="M-14,-16 L-48,-5 M14,-16 L48,-5" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
-          <circle cx="0" cy="-34" r="10" fill="#d97706"/>
-        </g>
-        <!-- Sunlit Garden Path & Folded Linen Cloth on Stone Slab -->
-        <path d="M0,255 L800,255 L800,450 L0,450 Z" fill="#d4a359"/>
-        <rect x="85" y="295" width="340" height="65" fill="#8c6d46"/>
-        <path d="M95,295 Q215,275 335,298 L485,375 Q365,395 255,362 Z" fill="#f5f5f4"/>
-        <!-- Massive Rolled-Away Circular Stone on Left & Rock-Hewn Tomb Arch -->
-        <circle cx="135" cy="185" r="125" fill="#6b533b" stroke="#4a3728" stroke-width="6"/>
-        <path d="M0,0 L800,0 L800,450 L715,450 L725,135 Q565,-15 335,45 L295,195 L0,195 Z" fill="#4a3728"/>
-      `;
-      break;
-
-    case 'NAR-09': // Church (Church.jpeg) - Pentecost flames descending from heaven upon the gathered disciples
-      svgBody = `
-        <defs>
-          <radialGradient id="pentecostGlow" cx="50%" cy="18%" r="75%">
-            <stop offset="0%" stop-color="#fffbeb"/>
-            <stop offset="30%" stop-color="#fbbf24"/>
-            <stop offset="65%" stop-color="#1e293b"/>
-            <stop offset="100%" stop-color="#0f172a"/>
-          </radialGradient>
-        </defs>
-        <rect width="800" height="450" fill="url(#pentecostGlow)"/>
-        <!-- Ascended Christ & Heavenly Host in Upper Glory -->
-        <circle cx="400" cy="75" r="55" fill="#ffffff" opacity="0.85"/>
-        <path d="M375,135 L390,55 L410,55 L425,135 Z" fill="#be185d"/>
-        <circle cx="400" cy="40" r="11" fill="#fde68a"/>
-        <!-- Swooping Streams of Pentecost Fire Descending -->
-        <g fill="none" stroke="#f59e0b" stroke-width="16" stroke-linecap="round" opacity="0.85">
-          <path d="M350,125 Q180,175 135,255"/>
-          <path d="M375,135 Q275,185 265,255"/>
-          <path d="M400,140 Q395,195 395,255"/>
-          <path d="M425,135 Q525,185 535,255"/>
-          <path d="M450,125 Q620,175 665,255"/>
-        </g>
-        <g fill="none" stroke="#fef08a" stroke-width="7" stroke-linecap="round">
-          <path d="M350,125 Q180,175 135,255"/>
-          <path d="M375,135 Q275,185 265,255"/>
-          <path d="M400,140 Q395,195 395,255"/>
-          <path d="M425,135 Q525,185 535,255"/>
-          <path d="M450,125 Q620,175 665,255"/>
-        </g>
-        <!-- Gathered Disciples in Reverent Prayer -->
-        <g transform="translate(0, 255)">
-          <path d="M95,195 L112,35 L162,35 L178,195 Z" fill="#44403c"/><circle cx="137" cy="12" r="18" fill="#d6a87c"/>
-          <path d="M225,195 L242,45 L292,45 L308,195 Z" fill="#9a3412"/><circle cx="267" cy="22" r="18" fill="#d6a87c"/>
-          <path d="M348,195 L368,28 L422,28 L442,195 Z" fill="#1e3a8a"/><circle cx="395" cy="6" r="19" fill="#d6a87c"/>
-          <path d="M492,195 L508,38 L558,38 L575,195 Z" fill="#14532d"/><circle cx="533" cy="15" r="18" fill="#d6a87c"/>
-          <path d="M622,195 L638,35 L688,35 L705,195 Z" fill="#7c2d12"/><circle cx="663" cy="12" r="18" fill="#d6a87c"/>
-        </g>
-      `;
-      break;
-
-    case 'NAR-10': // New Creation (New Creation.jpeg) - Golden New Jerusalem, River of Life & redeemed community
-      svgBody = `
-        <defs>
-          <radialGradient id="newJerSky" cx="50%" cy="8%" r="75%">
-            <stop offset="0%" stop-color="#ffffff"/>
-            <stop offset="30%" stop-color="#fef08a"/>
-            <stop offset="75%" stop-color="#d97706"/>
-            <stop offset="100%" stop-color="#451a03"/>
-          </radialGradient>
-          <linearGradient id="riverLife" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#fef9c3"/>
-            <stop offset="40%" stop-color="#7dd3fc"/>
-            <stop offset="100%" stop-color="#0369a1"/>
-          </linearGradient>
-        </defs>
-        <rect width="800" height="450" fill="url(#newJerSky)"/>
-        <!-- Heavenly Sunbeams -->
-        <polygon points="365,0 435,0 640,225 160,225" fill="#ffffff" opacity="0.35"/>
-        <!-- Golden Domed New Jerusalem on the Horizon -->
-        <g fill="#d4a038" stroke="#926216" stroke-width="1.5">
-          <rect x="145" y="175" width="510" height="48"/>
-          <path d="M355,175 Q400,105 445,175 Z"/>
-          <path d="M265,175 Q290,135 315,175 Z"/>
-          <path d="M485,175 Q510,135 535,175 Z"/>
-          <rect x="235" y="135" width="16" height="40"/><rect x="549" y="135" width="16" height="40"/>
-          <path d="M385,223 L385,192 Q400,180 415,192 L415,223 Z" fill="#fffbeb"/>
-        </g>
-        <!-- Cascading River of Life & Cypress Trees -->
-        <path d="M0,223 L800,223 L800,450 L0,450 Z" fill="#3f6212"/>
-        <polygon points="382,223 418,223 645,450 155,450" fill="url(#riverLife)"/>
-        <line x1="255" y1="315" x2="545" y2="315" stroke="#ffffff" stroke-width="4" opacity="0.85"/>
-        <!-- Classical Golden Pillars & Redeemed Saints on Riverbank -->
-        <rect x="18" y="135" width="28" height="240" fill="#b48327"/>
-        <rect x="754" y="135" width="28" height="240" fill="#b48327"/>
-        <g transform="translate(0, 345)">
-          <circle cx="115" cy="15" r="14" fill="#d6a87c"/><path d="M90,105 L102,32 L128,32 L142,105 Z" fill="#1d4ed8"/>
-          <circle cx="205" cy="25" r="14" fill="#d6a87c"/><path d="M180,105 L192,42 L218,42 L232,105 Z" fill="#e5e7eb"/>
-          <circle cx="315" cy="32" r="14" fill="#d6a87c"/><path d="M288,105 L302,48 L328,48 L342,105 Z" fill="#b45309"/>
-          <circle cx="485" cy="32" r="14" fill="#d6a87c"/><path d="M458,105 L472,48 L498,48 L512,105 Z" fill="#9a3412"/>
-          <circle cx="595" cy="25" r="14" fill="#d6a87c"/><path d="M568,105 L582,42 L608,42 L622,105 Z" fill="#ca8a04"/>
-          <circle cx="685" cy="15" r="14" fill="#d6a87c"/><path d="M658,105 L672,32 L698,32 L712,105 Z" fill="#15803d"/>
-        </g>
-      `;
-      break;
-
-    default: // Illuminated Sacred Manuscript Fallback
+    default:
       const safeLabel = (label || key).replace(/[<>&"']/g, '');
       svgBody = `
         <defs>
@@ -564,19 +176,13 @@ const getSacredIllustrationUri = (key: string, label?: string): string => {
         </defs>
         <rect width="800" height="450" fill="url(#msGlow)"/>
         <rect x="28" y="28" width="744" height="394" fill="none" stroke="#c5a059" stroke-width="2" opacity="0.6"/>
-        <rect x="38" y="38" width="724" height="374" fill="none" stroke="#c5a059" stroke-width="1" opacity="0.35"/>
-        <circle cx="400" cy="195" r="68" fill="none" stroke="#e3c178" stroke-width="2" opacity="0.45"/>
-        <path d="M394,135 L406,135 L406,178 L442,178 L442,190 L406,190 L406,255 L394,255 L394,190 L358,190 L358,178 L394,178 Z" fill="#e3c178"/>
-        <text x="400" y="335" text-anchor="middle" fill="#f3dcb2" font-family="Georgia, serif" font-size="26" font-weight="bold" letter-spacing="3">${safeLabel.toUpperCase()}</text>
+        <text x="400" y="235" text-anchor="middle" fill="#f3dcb2" font-family="Georgia, serif" font-size="28" font-weight="bold" letter-spacing="3">${safeLabel.toUpperCase()}</text>
       `;
       break;
   }
-
-  const fullSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">${svgBody}</svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(fullSvg)}`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">${svgBody}</svg>`)}`;
 };
 
-// Curated historical painting search queries for the 10 Grand Narrative movements
 const NARRATIVE_ART_SEARCH_TERMS: Record<string, string> = {
   "NAR-01": "Creation of Light Gustave Dore Genesis painting",
   "NAR-02": "Expulsion from the Garden of Eden Thomas Cole painting",
@@ -706,7 +312,6 @@ const THEME_STORIES: ContentItem[] = [
   { id: "THM-10", section: "THEMES", title: "10. Perseverance", ref: "Job 1-42 | 1 Kings 17-19 | Acts 27-28 | 2 Timothy 2-4 | Matthew 26-28 | Luke 22-24", body: "Biblical Examples: Job, Elijah, Paul, Jesus.", why: "Spiritual leadership requires endurance through suffering and discouragement." }
 ];
 
-// The 46 Essential Biblical Stories mapped to OT and NT sections
 const OT_STORIES: ContentItem[] = [
   { id: "OT-01", section: "OT", title: "1. Creation and the Fall", ref: "Genesis 1-3", body: "God creates the world... Adam and Eve disobey God.", why: "Establishes human dignity and the need for redemption." },
   { id: "OT-02", section: "OT", title: "2. Cain and Abel", ref: "Genesis 4:1-16", body: "Cain becomes jealous of his brother Abel and murders him.", why: "Explores jealousy, violence, and accountability." },
@@ -757,10 +362,9 @@ const NT_STORIES: ContentItem[] = [
   { id: "NT-23", section: "NT", title: "23. Council of Jerusalem", ref: "Acts 15", body: "The early Church debates Gentile converts.", why: "Early example of church governance and discernment." },
   { id: "NT-24", section: "NT", title: "24. Paul and Silas in Prison", ref: "Acts 16:16-40", body: "Paul and Silas are beaten and imprisoned.", why: "Resilience, worship during adversity, and evangelism." },
   { id: "NT-25", section: "NT", title: "25. Paul's Shipwreck", ref: "Acts 27-28", body: "Paul survives a violent storm while travelling to Rome.", why: "Leadership under pressure and calm judgment." },
-  { id: "NT-26", section: "NT", title: "Extra: NT Epistles", ref: "Romans; Corinthians; Galatians", body: "Instructional material across the Epistles.", why: "Provides the framework for early Christian community." }
+  { id: "NT-26", section: "NT", title: "26. Extra: NT Epistles", ref: "Romans; Corinthians; Galatians", body: "Instructional material across the Epistles.", why: "Provides the framework for early Christian community." }
 ];
 
-// Rich core list of distinct pericopes spanning OT and NT
 const CORE_PERICOPES = [
   ["Creation and the Fall", "Genesis 1-3", "Humanity, sin, and redemption."],
   ["Cain and Abel", "Genesis 4:1-16", "Jealousy, violence, and accountability."],
@@ -876,12 +480,9 @@ const CORE_PERICOPES = [
   ["The River of Life", "Revelation 22", "The final restoration."]
 ];
 
-// Generate exactly 355 pericopes using the core list and thematic expansion
 const PERICOPE_STORIES: ContentItem[] = Array.from({ length: 355 }, (_, i) => {
   const num = i + 1;
   const coreItem = CORE_PERICOPES[i % CORE_PERICOPES.length];
-  
-  // To make all 355 feel distinct even when looping, we append slight contextual modifiers to the later ones
   let titleModifier = "";
   let whyModifier = "";
   if (i >= CORE_PERICOPES.length * 2) {
@@ -921,7 +522,6 @@ const SECTIONS: { id: StorySection; label: string }[] = [
 const renderSectionIcon = (sectionId: StorySection) => {
   switch (sectionId) {
     case 'NARRATIVE':
-      // Matches Grand Narrative.svg: Crowned orb with center cross over a flared pedestal
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <circle cx="12" cy="10.5" r="4.2" />
@@ -935,7 +535,6 @@ const renderSectionIcon = (sectionId: StorySection) => {
         </svg>
       );
     case 'OT':
-      // Matches Old Testament.svg: Horizontal Torah scroll with twin vertical rollers and two text lines
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <rect x="3" y="4.5" width="3.5" height="15" rx="1.75" />
@@ -945,7 +544,6 @@ const renderSectionIcon = (sectionId: StorySection) => {
         </svg>
       );
     case 'NT':
-      // Matches New Testament.svg: Open arched codex/book with a Latin cross on the right page
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <path d="M12 5.5C9.5 4 5.5 4.2 3 6v12.5c2.5-1.8 6.5-2 9-.5 2.5-1.5 6.5-1.3 9 .5V6c-2.5-1.8-6.5-2-9-.5z" />
@@ -954,7 +552,6 @@ const renderSectionIcon = (sectionId: StorySection) => {
         </svg>
       );
     case 'THEMES':
-      // Matches Leadership.svg: Shepherd's crook staff with guiding star on the right
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <path d="M8 20V9.5a4.2 4.2 0 1 1 8.4 0c0 1.8-1 3-2.2 3.8" />
@@ -963,7 +560,6 @@ const renderSectionIcon = (sectionId: StorySection) => {
         </svg>
       );
     case 'PERICOPES':
-      // Matches Pericopes.svg: Square brackets [ ] enclosing three left-aligned passage lines
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <path d="M7.5 5H5v14h2.5" />
@@ -974,122 +570,155 @@ const renderSectionIcon = (sectionId: StorySection) => {
   }
 };
 
-// Vector illustration matching the uploaded minimalist Dove of Peace holding an olive twig
 const renderDoveIcon = () => (
   <svg viewBox="0 0 100 100" fill="currentColor" className="w-5 h-5">
-    {/* Back / Secondary Wing */}
     <path d="M47 41 C43 32, 37 22, 39 10 C42 16, 46 23, 51 30 C56 36, 56 41, 49 46 C46 43, 45 41, 43 37 C40 32, 36 25, 36 17 C33 22, 35 30, 41 37 C37 35, 34 30, 33 24 C32 30, 36 37, 45 43 Z" />
-    {/* Main Sweeping Forewing with Layered Feathers & Negative-Space Arch */}
     <path d="M46 49 C47 42, 42 36, 33 31 C24 26, 17 18, 14 12 C12 18, 16 28, 22 34 C17 31, 13 25, 11 20 C11 27, 16 35, 24 41 C18 39, 13 34, 11 30 C11 37, 17 44, 26 48 C20 47, 15 44, 13 40 C13 46, 19 52, 28 54 C22 54, 17 52, 16 49 C16 54, 22 58, 30 59 C25 60, 20 59, 19 57 C20 61, 25 63, 33 62 C29 64, 24 64, 23 62 C25 66, 31 66, 38 63 C35 67, 29 70, 22 69 C16 68, 11 66, 8 64 C7 67, 7 71, 9 73 C13 74, 19 74, 25 73 C18 75, 12 75, 8 75 C8 78, 10 81, 13 82 C17 82, 23 80, 29 76 C22 81, 16 83, 12 84 C13 87, 16 89, 20 89 C24 88, 29 83, 34 78 C29 85, 24 89, 20 91 C22 93, 25 94, 29 93 C31 87, 35 80, 42 75 C52 68, 59 58, 63 45 C65 40, 68 38, 72 39 C70 36, 66 35, 62 35 C56 35, 51 41, 46 49 Z M60 40 C58.3 40, 57 38.7, 57 37 C57 35.3, 58.3 34, 60 34 C61.7 34, 63 35.3, 63 37 C63 38.7,61.7 40, 60 40 Z" />
-    {/* Upper Olive Leaf */}
     <path d="M72 37 C72 31, 77 27, 83 28 C83 34, 78 38, 72 37 Z" />
-    {/* Lower Olive Leaf */}
     <path d="M72 40 C78 39, 83 43, 83 49 C77 49, 72 45, 72 40 Z" />
   </svg>
 );
 
-// Helper that highlights recognized biblical names, places, and concepts in interactive crimson text
-const highlightBiblicalTerms = (
-  text: string,
-  enabled: boolean,
-  onSelectWord?: (entry: LexiconEntry, e: React.MouseEvent<HTMLSpanElement>) => void
-): React.ReactNode => {
-  if (!enabled || !text) return text;
-  const parts = text.split(LEXICON_REGEX);
-  return parts.map((part, idx) => {
-    const entry = findLexiconEntry(part);
-    if (entry) {
-      return (
-        <span
-          key={idx}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onSelectWord) onSelectWord(entry, e);
-          }}
-          className="text-[#8b0000] font-bold underline decoration-[#8b0000]/60 decoration-dotted underline-offset-2 cursor-pointer hover:bg-[#8b0000]/15 px-0.5 rounded transition-colors"
-          title={`Click for context on "${entry.term}"`}
-        >
-          {part}
-        </span>
-      );
-    }
-    return part;
-  });
-};
-
-const CollapsibleTextBlock = ({ title, children, isFetchingText }: { title: string, children: React.ReactNode, isFetchingText: boolean }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  return (
-    <article className="mb-6 bg-stone-100/50 p-4 rounded border border-stone-200 shadow-inner">
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-left text-xs font-bold text-[#8b0000] uppercase tracking-widest border-b border-[#c5a059]/40 pb-1 flex items-center justify-between focus:outline-none ui-font"
-      >
-        <span>
-          {title} 
-          {isFetchingText && <span className="animate-pulse inline-block w-2 h-2 bg-[#8b0000] rounded-full ml-1" title="Streaming live from Bible API..."></span>}
-        </span>
-        <svg className={`w-4 h-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </button>
-      <div className={`grid transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'}`}>
-        <div className="overflow-hidden">
-          <p className="text-sm leading-relaxed text-stone-800 text-justify italic reading-font">
-            {children}
-          </p>
-        </div>
-      </div>
-    </article>
-  );
-};
-
-const CollapsibleAnalysisBlock = ({ title, colorText, bgLine, children }: { title: string, colorText: string, bgLine: string, children: React.ReactNode }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  return (
-    <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
-      <div className={`absolute top-0 left-0 w-1 h-full ${bgLine}`}></div>
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full text-left text-xs font-bold ${colorText} uppercase tracking-widest flex items-center justify-between gap-1.5 focus:outline-none ui-font`}
-      >
-        {title}
-        <svg className={`w-4 h-4 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </button>
-      <div className={`grid transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'}`}>
-        <div className="overflow-hidden">
-          <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 prose-strong:text-[#4a3b32] reading-font">
-            {children}
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-};
-
 export default function App() {
   const [selectedStory, setSelectedStory] = useState<ContentItem>(MASTER_CONTENT[0]);
   const [isCoverOpen, setIsCoverOpen] = useState<boolean>(false);
-  
   const [activeSection, setActiveSection] = useState<StorySection>('NARRATIVE');
 
-  // Custom In-Page Animated Antique Golden Dropdown state
   const [isContextDropdownOpen, setIsContextDropdownOpen] = useState<boolean>(false);
   const [dropdownFilter, setDropdownFilter] = useState<string>('');
 
-  // State for the Dove Lexicon Highlighting & Context Menu Popover
   const [isHighlightMode, setIsHighlightMode] = useState<boolean>(false);
-  const [activeWordContext, setActiveWordContext] = useState<{
-    entry: LexiconEntry;
-    x: number;
-    y: number;
-  } | null>(null);
+  
+  // Word Selection & Unified Liquid Glass Sentence Focus State
+  const [boldedWordToken, setBoldedWordToken] = useState<string | null>(null);
+  const [activeSentence, setActiveSentence] = useState<string | null>(null);
+  const [displaySentence, setDisplaySentence] = useState<string>("");
+  const [sentenceToolView, setSentenceToolView] = useState<'NONE' | 'WORD' | 'PASSAGE' | 'NARRATIVE' | 'CHAPTER' | 'SEARCH'>('NONE');
+  const [wordLookupEntry, setWordLookupEntry] = useState<{ entry: LexiconEntry } | null>(null);
+  const [chapterLookupText, setChapterLookupText] = useState<string | null>(null);
+  const [isFetchingChapter, setIsFetchingChapter] = useState<boolean>(false);
+  const [popupOrigin, setPopupOrigin] = useState<{ x: string; y: string }>({ x: '50%', y: '50%' });
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Bookmarks & Top-Right Red Ribbon Drawer State
+  const [bookmarks, setBookmarks] = useState<BookmarkedSentence[]>([]);
+  const [isBookmarksOpen, setIsBookmarksOpen] = useState<boolean>(false);
+
+  const captureTapOrigin = (clientX: number, clientY: number) => {
+    const rect = pageContainerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const xPct = Math.max(12, Math.min(88, ((clientX - rect.left) / rect.width) * 100));
+    const yPct = Math.max(12, Math.min(88, ((clientY - rect.top) / rect.height) * 100));
+    setPopupOrigin({ x: `${xPct.toFixed(1)}%`, y: `${yPct.toFixed(1)}%` });
+  };
+
+  React.useEffect(() => {
+    if (activeSentence) {
+      setDisplaySentence(activeSentence);
+    }
+  }, [activeSentence]);
+
+  const getPrimaryWordFromSentence = (sentenceText: string): string => {
+    if (boldedWordToken) return boldedWordToken;
+    const words = (sentenceText.match(/[A-Za-z']+/g) || []).map(w => w.replace(/[^a-zA-Z]/g, ''));
+    const lexiconMatch = words.find(w => Boolean(findLexiconEntry(w)));
+    if (lexiconMatch) return lexiconMatch;
+    const stopWords = new Set(['the', 'and', 'that', 'this', 'with', 'from', 'unto', 'they', 'them', 'their', 'have', 'were', 'said', 'into', 'upon', 'shall', 'will', 'for', 'not', 'but', 'his', 'her', 'him', 'she', 'was', 'are']);
+    const significant = words.find(w => w.length >= 4 && !stopWords.has(w.toLowerCase()));
+    return significant || words[0] || 'Word';
+  };
+
+  const handleToggleSentenceBookmark = (sentenceToSave: string) => {
+    const clean = sentenceToSave.trim();
+    if (!clean) return;
+    setBookmarks(prev => {
+      const exists = prev.some(b => b.sentence === clean && b.storyId === selectedStory.id);
+      if (exists) {
+        return prev.filter(b => !(b.sentence === clean && b.storyId === selectedStory.id));
+      }
+      return [
+        {
+          id: `${selectedStory.id}-${Date.now()}`,
+          sentence: clean,
+          storyId: selectedStory.id,
+          storyTitle: selectedStory.title,
+          storyRef: selectedStory.ref,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        },
+        ...prev
+      ];
+    });
+  };
+
+  const handleChapterLookup = async (story: ContentItem) => {
+    setSentenceToolView('CHAPTER');
+    setIsFetchingChapter(true);
+    setChapterLookupText(null);
+    try {
+      let rawRef = story.ref.split(/[|;&]/)[0].trim();
+      rawRef = rawRef.split(',')[0].trim();
+      rawRef = rawRef.replace(/^The\s+Book\s+of\s+/i, '').replace(/^Book\s+of\s+/i, '').trim();
+      rawRef = rawRef.replace(/\s*\(.*?\)\s*/g, '').trim();
+      if (/^Psalms$/i.test(rawRef)) rawRef = 'Psalm 23';
+
+      const match = rawRef.match(/^([1-3]?\s*[A-Za-z]+(?:\s+of\s+[A-Za-z]+)?)\s*(\d+)?/);
+      let bookCode = 'JHN';
+      let chapterNum = 1;
+      if (match && match[1]) {
+        const bookName = match[1].trim().toLowerCase();
+        chapterNum = match[2] ? parseInt(match[2], 10) : 1;
+        if (bookName.includes('gen')) bookCode = 'GEN';
+        else if (bookName.includes('psalm')) bookCode = 'PSA';
+        else if (bookName.includes('matt')) bookCode = 'MAT';
+        else if (bookName.includes('john')) bookCode = 'JHN';
+        else if (bookName.includes('rom')) bookCode = 'ROM';
+        else if (bookName.includes('exod')) bookCode = 'EXO';
+      }
+
+      const res = await fetch(`https://helloao.org/api/eng_kjv/${bookCode}/${chapterNum}.json`);
+      if (!res.ok) throw new Error(`Could not load chapter from helloao.org`);
+      const data = await res.json();
+      
+      const extractHelloAoText = (contentArray: any[]): string => {
+        let text = "";
+        for (const item of contentArray) {
+          if (item.type === 'verse' && item.text) {
+            text += `[${item.number}] ${item.text} `;
+          } else if (item.content && Array.isArray(item.content)) {
+            text += extractHelloAoText(item.content);
+          }
+        }
+        return text;
+      };
+
+      if (data.chapter && data.chapter.content) {
+        const fullText = extractHelloAoText(data.chapter.content).trim();
+        setChapterLookupText(
+          fullText ? `${story.ref} (KJV via helloao.org)\n\n${fullText}` : `Chapter Summary (${story.ref}): ${story.body} — ${story.why}`
+        );
+      } else {
+        throw new Error("No chapter content array found.");
+      }
+    } catch (err: any) {
+      // Fallback to bible-api if helloao fails
+      try {
+        let rawRef = story.ref.split(/[|;&]/)[0].trim().split(',')[0].trim();
+        const response = await fetch(`https://bible-api.com/${encodeURIComponent(rawRef)}?translation=kjv`);
+        const data = await response.json();
+        setChapterLookupText(
+          data.text ? `${data.reference || story.ref} (KJV)\n\n${data.text.replace(/\s+/g, ' ').trim()}` : `Chapter Summary (${story.ref}): ${story.body} — ${story.why}`
+        );
+      } catch (innerErr) {
+        setChapterLookupText(`Chapter Summary (${story.ref}): ${story.body} — ${story.why}`);
+      }
+    } finally {
+      setIsFetchingChapter(false);
+    }
+  };
 
   const filteredStories = MASTER_CONTENT.filter(s => s.section === activeSection);
   let currentIndex = filteredStories.findIndex(s => s.id === selectedStory.id);
-  if (currentIndex === -1) currentIndex = 0; // Safe fallback
+  if (currentIndex === -1) currentIndex = 0;
   
   const nextStory = filteredStories[(currentIndex + 1) % filteredStories.length];
   const prevStory = filteredStories[(currentIndex - 1 + filteredStories.length) % filteredStories.length];
@@ -1101,7 +730,6 @@ export default function App() {
     prevStoryRef.current = prevStory;
   }, [nextStory, prevStory]);
 
-  // Page curl state: tracks the virtual corner/edge point being folded across the page
   const [curlState, setCurlState] = useState<{
     pointerX: number;
     pointerY: number;
@@ -1131,7 +759,6 @@ export default function App() {
   const [isFetchingText, setIsFetchingText] = useState<boolean>(false);
   const [textError, setTextError] = useState<string | null>(null);
 
-  // State and cache for displaying relevant biblical artwork from https://bible.art/
   const [bibleArt, setBibleArt] = useState<{
     imageUrl: string;
     title: string;
@@ -1152,11 +779,9 @@ export default function App() {
   }>>({});
   const [isFetchingArt, setIsFetchingArt] = useState<boolean>(false);
 
-  // State for golden wave background effect
   const [waves, setWaves] = useState<{id: number, x: number, y: number}[]>([]);
 
   React.useEffect(() => {
-    // Inject iOS share sheet meta tags & Favicon into document head dynamically
     let linkTag = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
     if (!linkTag) {
       linkTag = document.createElement('link');
@@ -1197,7 +822,9 @@ export default function App() {
     setPassageText(null);
     setError(null);
     setTextError(null);
-    setActiveWordContext(null);
+    setBoldedWordToken(null);
+    setActiveSentence(null);
+    setWordLookupEntry(null);
     setIsContextDropdownOpen(false);
     setDropdownFilter('');
 
@@ -1215,7 +842,6 @@ export default function App() {
     if (!pageContainerRef.current) return;
     const pericopes = MASTER_CONTENT.filter(s => s.section === 'PERICOPES');
     const today = new Date();
-    // Use day of year to deterministically pick a daily reading
     const start = new Date(today.getFullYear(), 0, 0);
     const diff = today.getTime() - start.getTime();
     const oneDay = 1000 * 60 * 60 * 24;
@@ -1235,8 +861,7 @@ export default function App() {
     try {
       const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
       const customQuery = NARRATIVE_ART_SEARCH_TERMS[story.id] || `${cleanTitle} biblical art painting`;
-      const searchTerm = encodeURIComponent(customQuery);
-      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=4&gsrsearch=${searchTerm}&prop=pageimages&pithumbsize=700`;
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=4&gsrsearch=${encodeURIComponent(customQuery)}&prop=pageimages&pithumbsize=700`;
 
       const response = await fetch(searchUrl);
       if (!response.ok) throw new Error("Image search API failed");
@@ -1282,7 +907,6 @@ export default function App() {
     }
   };
 
-  // Automatically fetch and prefetch Bible.art historical paintings for Grand Narrative and adjacent stories
   React.useEffect(() => {
     if (selectedStory.section === 'NARRATIVE' || selectedStory.preAnalyzed) {
       fetchBibleArt(selectedStory, false);
@@ -1319,80 +943,24 @@ export default function App() {
 
     try {
       const currentText = overrideText !== undefined ? overrideText : passageText;
-      
-      const systemPrompt = `You are a biblical scholar and theologian. Analyze the given story strictly following this 3-phase framework from the study guide:
-1. OBSERVATION: Acknowledge translations, identify genre, map structure, answer 5Ws and 1H.
-2. INTERPRETATION: Historical-cultural context, literary context, word studies, cross-reference, theological bridge.
-3. APPLICATION: Extract the timeless theological principle, and provide personal & contemporary relevance.
+      await new Promise(resolve => setTimeout(resolve, 450));
+      const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
+      const sectionLabel =
+        story.section === 'OT' ? 'Old Testament Narrative / Hebrew Scriptures' :
+        story.section === 'NT' ? 'New Testament Gospel & Apostolic Witness' :
+        story.section === 'THEMES' ? 'Biblical Leadership Motif' :
+        story.section === 'NARRATIVE' ? 'Redemptive-Historical Movement' :
+        'Canonical Pericope Study';
 
-Format your response clearly using these exact headings:
-### OBSERVATION
-[Your observation analysis here]
+      const excerptNote = currentText
+        ? `Key textual movements observed in **${story.ref}** highlight the direct words and actions recorded in the King James text: *"${currentText.slice(0, 180).trim()}..."*`
+        : `The canonical witness in **${story.ref}** structures the account around God's sovereign initiative and the human response within covenant history.`;
 
-### INTERPRETATION
-[Your interpretation analysis here]
-
-### APPLICATION
-[Your application analysis here]`;
-
-      const passageContext = currentText ? `\n\nHere is the raw text of the passage for context:\n"${currentText}"` : '';
-      const userQuery = `Please analyze this specific biblical story/section: ${story.title} (${story.ref}). Context: ${story.body}${passageContext}`;
-
-      const apiKey = (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) ? process.env.GEMINI_API_KEY : "";
-      let generatedText = "";
-
-      if (apiKey) {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const payload = {
-          contents: [{ parts: [{ text: userQuery }] }],
-          systemInstruction: {
-            parts: [{ text: systemPrompt }]
-          }
-        };
-
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        }
-      }
-
-      if (generatedText) {
-        const obsMatch = generatedText.match(/###\s*OBSERVATION([\s\S]*?)(?=###\s*INTERPRETATION|$)/i);
-        const intMatch = generatedText.match(/###\s*INTERPRETATION([\s\S]*?)(?=###\s*APPLICATION|$)/i);
-        const appMatch = generatedText.match(/###\s*APPLICATION([\s\S]*)/i);
-
-        setAnalysisResult({
-          observation: obsMatch ? obsMatch[1].trim() : generatedText,
-          interpretation: intMatch ? intMatch[1].trim() : "Interpretation details provided in summary.",
-          application: appMatch ? appMatch[1].trim() : "Application principles derived from text."
-        });
-      } else {
-        // Synthesize a rich, structured 3-phase OIA scholarly analysis directly from the passage metadata and text
-        await new Promise(resolve => setTimeout(resolve, 450));
-        const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
-        const sectionLabel =
-          story.section === 'OT' ? 'Old Testament Narrative / Hebrew Scriptures' :
-          story.section === 'NT' ? 'New Testament Gospel & Apostolic Witness' :
-          story.section === 'THEMES' ? 'Biblical Leadership Motif' :
-          story.section === 'NARRATIVE' ? 'Redemptive-Historical Movement' :
-          'Canonical Pericope Study';
-
-        const excerptNote = currentText
-          ? `Key textual movements observed in **${story.ref}** highlight the direct words and actions recorded in the King James text: *"${currentText.slice(0, 180).trim()}..."*`
-          : `The canonical witness in **${story.ref}** structures the account around God's sovereign initiative and the human response within covenant history.`;
-
-        setAnalysisResult({
-          observation: `**Literary & Structural Overview (${sectionLabel}):**\n\n* **Primary Passage:** ${story.ref}\n* **Core Narrative Focus:** ${story.body}\n* **Textual & Narrative Details:** ${excerptNote}\n* **Key Figures & Setting:** In *${cleanTitle}*, the narrative tension centers on how human choices, faith, and character are tested in the presence of God's word and calling.`,
-          interpretation: `**Theological & Historical-Cultural Meaning:**\n\n* **Redemptive Context:** Within the broader sweep of Scripture, *${cleanTitle}* (${story.ref}) reveals that spiritual authority and covenantal blessing are grounded in God's character rather than human status or self-reliance.\n* **Core Leadership Insight:** ${story.why}\n* **Canonical Bridge:** This passage connects God's enduring faithfulness with the call to holiness, humility, and truth among His people.`,
-          application: `**Leadership & Ministry Practice:**\n\n* **Timeless Principle:** ${story.why}\n* **Personal Formation:** Examine your own heart and leadership habits in light of **${story.ref}**. Where is God calling you to greater trust, integrity, or servant-hearted obedience?\n* **Contemporary Community:** Guide those under your care to embody the truth of *${cleanTitle}* through accountability, prayerful discernment, and compassionate action.`
-        });
-      }
+      setAnalysisResult({
+        observation: `**Literary & Structural Overview (${sectionLabel}):**\n\n* **Primary Passage:** ${story.ref}\n* **Core Narrative Focus:** ${story.body}\n* **Textual & Narrative Details:** ${excerptNote}\n* **Key Figures & Setting:** In *${cleanTitle}*, the narrative tension centers on how human choices, faith, and character are tested in the presence of God's word and calling.`,
+        interpretation: `**Theological & Historical-Cultural Meaning:**\n\n* **Redemptive Context:** Within the broader sweep of Scripture, *${cleanTitle}* (${story.ref}) reveals that spiritual authority and covenantal blessing are grounded in God's character rather than human status or self-reliance.\n* **Core Leadership Insight:** ${story.why}\n* **Canonical Bridge:** This passage connects God's enduring faithfulness with the call to holiness, humility, and truth among His people.`,
+        application: `**Leadership & Ministry Practice:**\n\n* **Timeless Principle:** ${story.why}\n* **Personal Formation:** Examine your own heart and leadership habits in light of **${story.ref}**. Where is God calling you to greater trust, integrity, or servant-hearted obedience?\n* **Contemporary Community:** Guide those under your care to embody the truth of *${cleanTitle}* through accountability, prayerful discernment, and compassionate action.`
+      });
     } catch (err: any) {
       setError(err.message || "Failed to analyze passage. Please try again.");
     } finally {
@@ -1404,12 +972,10 @@ Format your response clearly using these exact headings:
     const story = overrideStory || selectedStory;
     setIsFetchingText(true);
     setTextError(null);
-    setPassageText(''); // Start with empty string for streaming
+    setPassageText('');
     fetchBibleArt(story);
     
     try {
-      // Normalize any complex reference into a strict reference supported by bible-api.com
-      // Note: bible-api.com returns 400 Bad Request for multi-chapter ranges like "Genesis 1-2" or "Exodus 1-14"
       let rawRef = story.ref.split(/[|;&]/)[0].trim();
       rawRef = rawRef.split(',')[0].trim();
       rawRef = rawRef.replace(/^The\s+Book\s+of\s+/i, '').replace(/^Book\s+of\s+/i, '').trim();
@@ -1419,7 +985,6 @@ Format your response clearly using these exact headings:
         rawRef = 'Psalm 23';
       }
 
-      // Extract Book, Chapter, and optional Verse Range
       const match = rawRef.match(/^([1-3]?\s*[A-Za-z]+(?:\s+of\s+[A-Za-z]+)?)\s*(?:(\d+)(?::(\d+(?:-\d+)?))?)?/);
       let normalizedQuery = 'Genesis 1';
 
@@ -1438,7 +1003,6 @@ Format your response clearly using these exact headings:
 
       let response = await fetchFromApi(normalizedQuery);
 
-      // Fallback if verse range caused an issue: try just Book + Chapter
       if (!response.ok && normalizedQuery.includes(':')) {
         const chapterOnlyQuery = normalizedQuery.split(':')[0];
         response = await fetchFromApi(chapterOnlyQuery);
@@ -1453,11 +1017,9 @@ Format your response clearly using these exact headings:
         throw new Error("No text content received from API.");
       }
 
-      // Format verses cleanly and stream the complete passage without artificial word truncation
       const extractedText = data.text.replace(/\s+/g, ' ').trim();
       const words = extractedText.split(' ');
 
-      // Stream the entire passage smoothly onto the screen
       let streamedText = "";
       const chunkSize = Math.max(6, Math.ceil(words.length / 85));
       for (let i = 0; i < words.length; i += chunkSize) {
@@ -1477,7 +1039,6 @@ Format your response clearly using these exact headings:
     }
   };
 
-  // Smoothly animate the page curl to its final state using Apple-style damped spring physics
   const animateCurlTo = (
     fromX: number,
     fromY: number,
@@ -1490,24 +1051,20 @@ Format your response clearly using these exact headings:
     const rect = pageContainerRef.current?.getBoundingClientRect();
     const W = rect?.width || 370;
 
-    // For a back-swipe unrolling from x=0 across the page of width W, the crease Mx = Px * 0.5
-    // reaches the right edge (Mx = W) when Px = 2 * W. Animating to 2.02 * W ensures no mid-page snap!
     const toX = targetFlipped
       ? (isBackSwipe ? W * 2.02 : -W * 0.98)
       : (isBackSwipe ? 2 : W);
     const toY = originY;
 
-    // Spring physics state (mass = 1, stiffness = 290, damping = 28 for crisp iOS-like critically/under-damped feel)
     let curX = fromX;
     let curY = fromY;
-    let velX = initialVelocityPxPerMs * 1000; // Convert px/ms to px/s
+    let velX = initialVelocityPxPerMs * 1000;
     let velY = 0;
     const stiffness = 290;
     const damping = 28;
     let lastTime = performance.now();
 
     const step = (now: number) => {
-      // Clamp dt to max 32ms to avoid numerical instability on frame drops
       const dt = Math.min(0.032, Math.max(0.001, (now - lastTime) / 1000));
       lastTime = now;
 
@@ -1552,7 +1109,8 @@ Format your response clearly using these exact headings:
     isBackSwipe = false
   ) => {
     e.stopPropagation();
-    setActiveWordContext(null);
+    setBoldedWordToken(null);
+    setActiveSentence(null);
     setIsContextDropdownOpen(false);
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -1614,8 +1172,6 @@ Format your response clearly using these exact headings:
     const rawY = e.clientY - rect.top;
     const { originY, isBackSwipe } = dragStartRef.current;
 
-    // For a left-to-right back-swipe, scale the horizontal drag smoothly so dragging across
-    // the page moves the unrolling sheet's leading edge all the way to the right side (2 * W)
     const localX = isBackSwipe
       ? Math.max(8, Math.min(rect.width * 1.98, rawX * 1.85))
       : Math.max(-rect.width * 0.95, Math.min(rect.width - 8, rawX));
@@ -1653,7 +1209,6 @@ Format your response clearly using these exact headings:
     animateCurlTo(curX, curY, originY, targetFlipped, isBackSwipe, velocity);
   };
 
-  // True physical paper fold calculation using perpendicular bisector
   const computePageCurlGeometry = () => {
     const rect = pageContainerRef.current?.getBoundingClientRect();
     const W = rect?.width || 370;
@@ -1673,20 +1228,17 @@ Format your response clearly using these exact headings:
     }
 
     const isBack = curlState.isBackSwipe;
-    // For back swipe, fold starts from left edge x=0; for forward swipe, fold starts from right edge x=W
     const Ox = isBack ? 0 : W;
     const Oy = curlState.originY;
 
     let Px = isBack ? Math.max(4, curlState.pointerX) : Math.min(W - 4, curlState.pointerX);
     let Py = curlState.pointerY;
 
-    // Enforce physical paper constraints to prevent the fold from detaching from the spine
     if (!isBack) {
       const maxR0 = Math.sqrt(Math.max(0, W * W - Px * Px + Oy * Oy));
       const maxRH = Math.sqrt(Math.max(0, W * W - Px * Px + (H - Oy) * (H - Oy)));
       Py = Math.max(-maxR0, H - maxRH, Math.min(maxR0, H + maxRH, Py));
     } else {
-      // Smoothly level out vertical angle as the unrolling page approaches full width
       const progress = Math.min(1, Px / (W * 1.9));
       Py = Oy + (Py - Oy) * (1 - progress * 0.85);
     }
@@ -1735,7 +1287,6 @@ Format your response clearly using these exact headings:
       return result;
     };
 
-    // For back swipe, keep the right side as front and left side as curled back
     const frontPts = clipPolygon(isBack);
     const foldedPts = clipPolygon(!isBack);
     const reflectedPts = foldedPts.map((p) => {
@@ -1788,33 +1339,115 @@ Format your response clearly using these exact headings:
     const storyIdx = filteredStories.findIndex(s => s.id === story.id);
     const displayIndex = storyIdx !== -1 ? storyIdx + 1 : currentIndex + 1;
 
-    const handleWordClick = (entry: LexiconEntry, e: React.MouseEvent<HTMLSpanElement>) => {
-      if (!interactive || !pageContainerRef.current) return;
-      const rect = pageContainerRef.current.getBoundingClientRect();
-      const relX = Math.max(24, Math.min(rect.width - 24, e.clientX - rect.left));
-      const relY = Math.max(60, Math.min(rect.height - 140, e.clientY - rect.top));
-      setActiveWordContext({ entry, x: relX, y: relY });
+    // Two-tap interactive text tokenizer helper
+    const renderInteractiveText = (rawText: string) => {
+      if (!rawText) return rawText;
+
+      // Tokenize into sentences first to allow Liquid Glass sentence tapping
+      const sentences = rawText.match(/[^.?!]+[.?!]+(?:\s+|$)|[^.?!]+$/g) || [rawText];
+
+      return sentences.map((sentence, sIdx) => {
+        const tokens = sentence.match(/[\w']+|[^\w\s]|\s+/g) || [sentence];
+
+        return (
+          <span
+            key={sIdx}
+            className="cursor-pointer hover:bg-[#c5a059]/10 rounded transition-colors"
+            onClick={(e) => {
+              if (!interactive) return;
+              captureTapOrigin(e.clientX, e.clientY);
+              setSentenceToolView('NONE');
+              setActiveSentence(sentence);
+            }}
+            title="Tap sentence to focus"
+          >
+            {tokens.map((token, i) => {
+              const trimmedWord = token.replace(/[^a-zA-Z]/g, '');
+              const isWord = trimmedWord.length > 0;
+
+              if (!isWord) {
+                return <span key={i}>{token}</span>;
+              }
+
+              const isLexiconMatched = Boolean(findLexiconEntry(trimmedWord));
+              const isBolded = boldedWordToken?.toLowerCase() === trimmedWord.toLowerCase();
+
+              // If Dove lexicon scanner is active and it's a known biblical term, open the Liquid Glass dialogue directly to the Word Lookup view
+              if (isHighlightMode && isLexiconMatched) {
+                const entry = findLexiconEntry(trimmedWord)!;
+                return (
+                  <span
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!interactive) return;
+                      captureTapOrigin(e.clientX, e.clientY);
+                      setBoldedWordToken(trimmedWord);
+                      setDisplaySentence(sentence);
+                      setActiveSentence(sentence);
+                      setWordLookupEntry({ entry });
+                      setSentenceToolView('WORD');
+                    }}
+                    className="text-[#8b0000] font-bold underline decoration-[#8b0000]/60 decoration-dotted underline-offset-2 cursor-pointer hover:bg-[#8b0000]/15 px-0.5 rounded transition-colors"
+                    title={`Click for Webster's 1828 Dictionary definition on "${entry.term}"`}
+                  >
+                    {token}
+                  </span>
+                );
+              }
+
+              // Single unified Liquid Glass focus with inline word bolding
+              return (
+                <span
+                  key={i}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!interactive) return;
+                    captureTapOrigin(e.clientX, e.clientY);
+                    setBoldedWordToken(trimmedWord);
+                    setDisplaySentence(sentence);
+                    setActiveSentence(sentence);
+
+                    if (isBolded) {
+                      const entry = getKjvDictionaryEntry(trimmedWord);
+                      setWordLookupEntry({ entry });
+                      setSentenceToolView('WORD');
+                    } else {
+                      setSentenceToolView('NONE');
+                    }
+                  }}
+                  className={`cursor-pointer transition-colors px-0.5 rounded ${
+                    isBolded
+                      ? 'font-bold bg-[#c5a059]/25 text-[#382117] underline decoration-[#c5a059]'
+                      : 'hover:bg-stone-300/30'
+                  }`}
+                  title={`Tap to focus in Liquid Glass (tap again or press aA for Webster's 1828 Dictionary)`}
+                >
+                  {token}
+                </span>
+              );
+            })}
+          </span>
+        );
+      });
     };
 
-    // Custom markdown renderer so paragraphs & list items inside OIA analysis also highlight key terms
-    const markdownComponents = isHighlightMode
-      ? {
-          p: ({ children }: any) => (
-            <p>
-              {React.Children.map(children, (child) =>
-                typeof child === 'string' ? highlightBiblicalTerms(child, true, handleWordClick) : child
-              )}
-            </p>
-          ),
-          li: ({ children }: any) => (
-            <li>
-              {React.Children.map(children, (child) =>
-                typeof child === 'string' ? highlightBiblicalTerms(child, true, handleWordClick) : child
-              )}
-            </li>
-          ),
-        }
-      : undefined;
+    const markdownComponents = {
+      p: ({ children }: any) => (
+        <p>
+          {React.Children.map(children, (child) =>
+            typeof child === 'string' ? renderInteractiveText(child) : child
+          )}
+        </p>
+      ),
+      li: ({ children }: any) => (
+        <li>
+          {React.Children.map(children, (child) =>
+            typeof child === 'string' ? renderInteractiveText(child) : child
+          )}
+        </li>
+      ),
+    };
 
     const bibleGatewaySearch = encodeURIComponent(story.ref.replace(/\|/g, ';').replace(/Book of/g, '').trim());
     const bibleGatewayLink = `https://www.biblegateway.com/passage/?search=${bibleGatewaySearch}&version=KJV`;
@@ -1865,7 +1498,6 @@ Format your response clearly using these exact headings:
             </button>
           )}
 
-          {/* Custom In-Page Animated Antique Golden Dropdown (Overlay-positioned so it never shifts header spacing) */}
           <div className="flex flex-col gap-1 relative">
             <div className="flex items-center justify-between">
               <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ui-font">
@@ -1903,7 +1535,6 @@ Format your response clearly using these exact headings:
               </span>
             </button>
 
-            {/* Animated Floating Dropdown Sheet (Takes zero layout space when closed or open) */}
             {interactive && (
               <div
                 onClick={(e) => e.stopPropagation()}
@@ -1980,12 +1611,9 @@ Format your response clearly using these exact headings:
             </button>
             <button
               onClick={interactive ? () => {
-                setIsHighlightMode(prev => {
-                  if (prev) setActiveWordContext(null);
-                  return !prev;
-                });
+                setIsHighlightMode(prev => !prev);
               } : undefined}
-              title={isHighlightMode ? "Disable Biblical Key Terms Scanner" : "Scan & Highlight Names, Places, and Key Terms"}
+              title={isHighlightMode ? "Disable Webster's 1828 Biblical Key Terms Scanner" : "Scan & Highlight Names, Places, and Key Terms with Webster's 1828 definitions"}
               aria-label="Scan and highlight biblical terms"
               className={`w-10 shrink-0 flex items-center justify-center rounded-md border transition-all active:scale-95 active:opacity-60 shadow-sm ${
                 isHighlightMode
@@ -2001,11 +1629,11 @@ Format your response clearly using these exact headings:
         <section
           className="w-full relative flex-1 min-h-[240px] flex flex-col overflow-y-auto overscroll-contain pb-5 no-scrollbar"
           onClick={() => {
-            if (activeWordContext) setActiveWordContext(null);
+            if (boldedWordToken) setBoldedWordToken(null);
+            if (activeSentence) setActiveSentence(null);
             if (isContextDropdownOpen) setIsContextDropdownOpen(false);
           }}
         >
-          {/* Consistent Hero Artwork above Title & Reference on both active and underlying target pages */}
           {heroArtUrl && !showLoading && (!showFetchingText || showPassage) && (
             <div className="mb-4 bg-[#fdfaf2] p-2.5 rounded border border-[#c5a059]/60 shadow-sm flex flex-col items-center text-center shrink-0">
               <div className="w-full aspect-[16/9] overflow-hidden rounded-sm border border-stone-200 bg-stone-900 flex items-center justify-center">
@@ -2037,7 +1665,7 @@ Format your response clearly using these exact headings:
           {!showAnalysis && !showLoading && !showPassage && !showFetchingText && !showTextError && !showAppError && (
             <div className="flex-1 flex flex-col items-center text-center p-2">
               <h3 className="text-base font-bold text-[#4a3b32] mb-1 uppercase tracking-widest">
-                {highlightBiblicalTerms(story.title, isHighlightMode, handleWordClick)}
+                {renderInteractiveText(story.title)}
               </h3>
               <span className="text-[10px] uppercase tracking-widest text-[#c5a059] font-bold mb-1 block w-full">{story.ref}</span>
               
@@ -2053,14 +1681,14 @@ Format your response clearly using these exact headings:
               <div className="text-left bg-stone-100/60 p-3 rounded border border-stone-200 shadow-sm mb-4 w-full">
                 <h4 className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1.5">Context</h4>
                 <p className="text-sm leading-relaxed text-stone-800">
-                  {highlightBiblicalTerms(story.body, isHighlightMode, handleWordClick)}
+                  {renderInteractiveText(story.body)}
                 </p>
               </div>
 
               <div className="text-left bg-[#fffafa] p-3 rounded border border-[#8b0000]/20 shadow-sm w-full">
                 <h4 className="text-[10px] font-bold text-[#8b0000] uppercase tracking-widest mb-1.5">Why it matters for Leaders</h4>
                 <p className="text-sm leading-relaxed text-stone-800 italic">
-                  {highlightBiblicalTerms(story.why, isHighlightMode, handleWordClick)}
+                  {renderInteractiveText(story.why)}
                 </p>
               </div>
               
@@ -2073,7 +1701,7 @@ Format your response clearly using these exact headings:
           {showTextError && !showFetchingText && (
             <div className="bg-[#fffafa] text-[#8b0000] p-4 border border-[#8b0000]/30 flex flex-col items-start gap-2 mb-4">
               <div className="flex items-start gap-2">
-                <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                   <h4 className="font-bold uppercase tracking-widest text-xs mb-1">Passage Retrieval Failed</h4>
                   <p className="text-xs italic">{showTextError}</p>
@@ -2083,9 +1711,14 @@ Format your response clearly using these exact headings:
           )}
 
           {showPassage !== null && showPassage !== '' && !showTextError && (
-            <CollapsibleTextBlock title="Original Text Extract" isFetchingText={isFetchingText}>
-              "{highlightBiblicalTerms(showPassage, isHighlightMode, handleWordClick)}"
-            </CollapsibleTextBlock>
+            <article className="mb-6 bg-stone-100/50 p-4 rounded border border-stone-200 shadow-inner">
+              <div className="text-xs font-bold text-[#8b0000] uppercase tracking-widest border-b border-[#c5a059]/45 pb-1 mb-2 flex items-center justify-between">
+                <span>Original Text Extract {isFetchingText && <span className="animate-pulse inline-block w-2 h-2 bg-[#8b0000] rounded-full ml-1" />}</span>
+              </div>
+              <p className="text-sm leading-relaxed text-stone-800 text-justify italic reading-font">
+                "{renderInteractiveText(showPassage)}"
+              </p>
+            </article>
           )}
 
           {(showLoading || (showFetchingText && !showPassage)) && !isBacksideCopy && !isTargetPage && (
@@ -2130,7 +1763,7 @@ Format your response clearly using these exact headings:
 
           {showAppError && !showLoading && (
             <div className="bg-[#fffafa] text-[#8b0000] p-4 border border-[#8b0000]/30 flex items-start gap-3">
-              <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               <div>
                 <h4 className="font-bold uppercase tracking-widest text-xs mb-1">Analysis Failed</h4>
                 <p className="text-xs italic">{showAppError}</p>
@@ -2141,7 +1774,7 @@ Format your response clearly using these exact headings:
           {showAnalysis && !showLoading && !showAppError && (
             <div className="space-y-4">
               <h2 className="text-base font-bold text-[#4a3b32] mb-1 uppercase tracking-widest text-center">
-                {highlightBiblicalTerms(story.title, isHighlightMode, handleWordClick)}
+                {renderInteractiveText(story.title)}
               </h2>
               <p className="text-center text-[10px] uppercase tracking-widest text-[#c5a059] font-bold mb-1">{story.ref}</p>
               
@@ -2156,17 +1789,29 @@ Format your response clearly using these exact headings:
                 </a>
               </div>
 
-              <CollapsibleAnalysisBlock title="Observation" colorText="text-[#8b0000]" bgLine="bg-[#8b0000]/80">
-                <ReactMarkdown components={markdownComponents}>{showAnalysis.observation}</ReactMarkdown>
-              </CollapsibleAnalysisBlock>
+              <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#8b0000]/80"></div>
+                <h3 className="text-xs font-bold text-[#8b0000] uppercase tracking-widest mb-2">Observation</h3>
+                <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 reading-font">
+                  <ReactMarkdown components={markdownComponents}>{showAnalysis.observation}</ReactMarkdown>
+                </div>
+              </article>
 
-              <CollapsibleAnalysisBlock title="Interpretation" colorText="text-[#c5a059]" bgLine="bg-[#c5a059]">
-                <ReactMarkdown components={markdownComponents}>{showAnalysis.interpretation}</ReactMarkdown>
-              </CollapsibleAnalysisBlock>
+              <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#c5a059]"></div>
+                <h3 className="text-xs font-bold text-[#c5a059] uppercase tracking-widest mb-2">Interpretation</h3>
+                <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 reading-font">
+                  <ReactMarkdown components={markdownComponents}>{showAnalysis.interpretation}</ReactMarkdown>
+                </div>
+              </article>
 
-              <CollapsibleAnalysisBlock title="Application" colorText="text-stone-700" bgLine="bg-stone-700">
-                <ReactMarkdown components={markdownComponents}>{showAnalysis.application}</ReactMarkdown>
-              </CollapsibleAnalysisBlock>
+              <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-stone-700"></div>
+                <h3 className="text-xs font-bold text-stone-700 uppercase tracking-widest mb-2">Application</h3>
+                <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 reading-font">
+                  <ReactMarkdown components={markdownComponents}>{showAnalysis.application}</ReactMarkdown>
+                </div>
+              </article>
             </div>
           )}
         </section>
@@ -2252,14 +1897,12 @@ Format your response clearly using these exact headings:
           font-family: var(--font-ui);
         }
 
-        /* Hide scrollbar for Chrome, Safari and Opera */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
-        /* Hide scrollbar for IE, Edge and Firefox */
         .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         
         @keyframes popover-spring {
@@ -2447,7 +2090,6 @@ Format your response clearly using these exact headings:
           title={isCoverOpen ? "Click Bible cover to close" : "Click Bible cover to open"}
         >
           <div className="book-cover-front relative flex flex-col items-center justify-center px-6 text-center" style={{ backgroundImage: "url('Screenshot%202026-11-01%20at%2011.21.16%20PM.jpg')" }}>
-            
             <div className="text-center select-none pt-6 w-full flex flex-col items-center justify-center">
               <h1 className="text-4xl sm:text-5xl font-serif font-bold tracking-[0.18em] text-[#e3c178] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] opacity-95">
                 HOLY
@@ -2494,12 +2136,140 @@ Format your response clearly using these exact headings:
           <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-l from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-r-[12px] shadow-[-2px_0_5px_rgba(0,0,0,0.1)]"></div>
           <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-t from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-br-[12px]"></div>
 
+          {/* Red Bookmark Ribbon Strung Over the Top Right Corner */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsBookmarksOpen(prev => !prev);
+            }}
+            title={`Saved Bookmarks (${bookmarks.length})`}
+            aria-label="Open Saved Sentence Bookmarks"
+            className="absolute -top-0.5 right-4 sm:right-5 z-50 group focus:outline-none active:scale-95 transition-transform"
+          >
+            <div className="relative flex flex-col items-center">
+              <svg
+                viewBox="0 0 36 64"
+                className="w-7 h-12 sm:w-8 sm:h-14 drop-shadow-[0_4px_8px_rgba(0,0,0,0.45)] transition-transform duration-300 group-hover:translate-y-0.5"
+              >
+                <defs>
+                  <linearGradient id="crimsonRibbonGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#b31217" />
+                    <stop offset="55%" stopColor="#8b0000" />
+                    <stop offset="100%" stopColor="#5a0000" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M4 0 H32 V58 L18 46 L4 58 Z"
+                  fill="url(#crimsonRibbonGrad)"
+                  stroke="#e3c178"
+                  strokeWidth="1.2"
+                />
+                <path
+                  d="M7 2 V51 L18 41.5 L29 51 V2"
+                  fill="none"
+                  stroke="rgba(255,235,180,0.35)"
+                  strokeWidth="0.8"
+                  strokeDasharray="2 2"
+                />
+              </svg>
+              {bookmarks.length > 0 && (
+                <span className="absolute top-3.5 text-[9px] font-bold text-[#fdfaf2] ui-font drop-shadow">
+                  {bookmarks.length}
+                </span>
+              )}
+            </div>
+          </button>
+
+          {/* Bookmarks Drawer Overlay when clicking the Top-Right Red Ribbon */}
+          {isBookmarksOpen && (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsBookmarksOpen(false);
+              }}
+              className="absolute inset-0 z-50 bg-black/25 backdrop-blur-[2px] flex items-start justify-end p-4 pt-14"
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-[320px] max-h-[75%] bg-[#fdfaf2] border-2 border-[#c5a059] rounded-xl shadow-[0_18px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden animate-popover-spring"
+                style={{ transformOrigin: 'top right' }}
+              >
+                <div className="px-4 py-2.5 bg-[#8b0000] text-[#fdfaf2] flex items-center justify-between border-b border-[#c5a059]">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#e3c178]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 2h12a2 2 0 0 1 2 2v18l-8-4-8 4V4a2 2 0 0 1 2-2z" />
+                    </svg>
+                    <span className="text-xs font-bold uppercase tracking-widest ui-font">
+                      Ribbon Bookmarks ({bookmarks.length})
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setIsBookmarksOpen(false)}
+                    className="text-xs font-bold text-[#fdfaf2]/80 hover:text-white px-1.5 py-0.5"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-3 space-y-2.5 divide-y divide-[#e6d9c3]/70 no-scrollbar">
+                  {bookmarks.length === 0 ? (
+                    <div className="py-8 px-3 text-center text-xs text-stone-500 italic reading-font">
+                      No bookmarked sentences yet. Tap any sentence on the page and press the bookmark icon to save it to your crimson ribbon.
+                    </div>
+                  ) : (
+                    bookmarks.map((bm) => (
+                      <div key={bm.id} className="pt-2.5 first:pt-0 flex flex-col gap-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <button
+                            onClick={() => {
+                              const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
+                              if (target) {
+                                setActiveSection(target.section);
+                                handleStoryChange(target);
+                              }
+                              setIsBookmarksOpen(false);
+                            }}
+                            className="text-[10px] font-bold uppercase tracking-wider text-[#8b0000] hover:underline ui-font text-left truncate"
+                          >
+                            {bm.storyTitle} • {bm.storyRef}
+                          </button>
+                          <button
+                            onClick={() => setBookmarks(prev => prev.filter(item => item.id !== bm.id))}
+                            className="text-[10px] text-stone-400 hover:text-[#8b0000] px-1 ui-font"
+                            title="Remove bookmark"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <p
+                          onClick={() => {
+                            const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
+                            if (target) {
+                              setActiveSection(target.section);
+                              handleStoryChange(target);
+                              setTimeout(() => setActiveSentence(bm.sentence), 60);
+                            }
+                            setIsBookmarksOpen(false);
+                          }}
+                          className="text-xs italic text-[#2c1810] leading-relaxed cursor-pointer hover:bg-[#c5a059]/15 p-1.5 rounded transition-colors reading-font"
+                        >
+                          "{bm.sentence}"
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div
             ref={pageContainerRef}
             className="w-full h-full relative flex-1 min-h-0 grid-stack overflow-hidden"
           >
             
-            {/* Underlying Target Page (Revealed during swipe) */}
+            {/* Underlying Target Page */}
             <div
               style={{
                 paddingTop: 'calc(max(0.5rem, var(--safe-top)) + 1.25rem)',
@@ -2516,7 +2286,7 @@ Format your response clearly using these exact headings:
                </span>
             </div>
 
-            {/* Apple Books-style Infinite Crease Shadow cast onto the revealed page (4000px tall so top/bottom ends never enter viewport) */}
+            {/* Crease Shadow */}
             {curlGeo.isCurling && (
               <div className="grid-layer pointer-events-none z-[5] relative overflow-hidden">
                 <div
@@ -2535,7 +2305,7 @@ Format your response clearly using these exact headings:
               </div>
             )}
 
-            {/* Current Page (Front Flat Portion clipped dynamically along the crease line without container edge drop-shadow) */}
+            {/* Current Page */}
             <div 
               className="grid-layer relative overflow-hidden select-none z-10"
               style={{
@@ -2558,7 +2328,6 @@ Format your response clearly using these exact headings:
                     : (currentIndex + 1)}
                 </span>
 
-                {/* Soft shadow cast by the curled flap onto the flat front page (purely crease-aligned, no horizontal top/bottom cutoff) */}
                 {curlGeo.isCurling && (
                   <div
                     className="absolute pointer-events-none z-30"
@@ -2577,7 +2346,7 @@ Format your response clearly using these exact headings:
               </div>
             </div>
 
-            {/* 3D Curled Backside Flap with Crease-Aligned Cylindrical Shading */}
+            {/* Backside Flap */}
             {curlGeo.isCurling && (
               <div className="grid-layer pointer-events-none z-20 relative overflow-hidden">
                 <div
@@ -2599,7 +2368,6 @@ Format your response clearly using these exact headings:
                     {renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, true, false)}
                   </div>
 
-                  {/* Specular paper cylinder highlight & inner fold crease shading (4000px tall so no top/bottom edge ever shows) */}
                   <div
                     className="absolute pointer-events-none"
                     style={{
@@ -2617,7 +2385,7 @@ Format your response clearly using these exact headings:
               </div>
             )}
 
-            {/* Invisible Left Edge Swiping Zone (Restricted below the top button row, no visible bar or shadow) */}
+            {/* Left Edge Swiping Zone */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
               className="absolute bottom-0 left-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
@@ -2628,7 +2396,7 @@ Format your response clearly using these exact headings:
               title="Drag or tap from left edge to turn back"
             />
 
-            {/* Invisible Right Edge Swiping Zone (Restricted below the top button row, no visible bar or shadow) */}
+            {/* Right Edge Swiping Zone */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
               className="absolute bottom-0 right-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
@@ -2639,43 +2407,417 @@ Format your response clearly using these exact headings:
               title="Drag or tap from right edge to turn forward"
             />
 
-            {/* Biblical Term Context Menu Popover */}
-            {activeWordContext && (
+            {/* High-Transparency Liquid Glass Sentence Focus Popup */}
+            <div
+              className={`absolute inset-0 z-40 flex items-center justify-center px-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                activeSentence
+                  ? 'pointer-events-auto bg-transparent opacity-100'
+                  : 'pointer-events-none opacity-0'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveSentence(null);
+              }}
+            >
               <div
                 onClick={(e) => e.stopPropagation()}
+                className={`relative w-full max-w-[330px] overflow-hidden p-4 text-[#24130c] transition-[transform,opacity,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                  activeSentence
+                    ? 'scale-100 opacity-100 rounded-[26px]'
+                    : 'scale-[0.18] opacity-0 rounded-[48px]'
+                }`}
                 style={{
-                  top: `${Math.min(Math.max(activeWordContext.y + 12, 70), 460)}px`,
-                  transformOrigin: `${activeWordContext.x - 20}px -12px`
+                  transformOrigin: `${popupOrigin.x} ${popupOrigin.y}`,
+                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.10) 100%)',
+                  backdropFilter: 'blur(9px) saturate(155%) brightness(105%)',
+                  WebkitBackdropFilter: 'blur(9px) saturate(155%) brightness(105%)',
+                  border: '1px solid rgba(255, 255, 255, 0.52)',
+                  boxShadow: `
+                    0 14px 36px rgba(36, 19, 12, 0.16),
+                    0 3px 10px rgba(36, 19, 12, 0.08),
+                    inset 0 1px 1.5px rgba(255, 255, 255, 0.8),
+                    inset 0 -1px 2px rgba(197, 160, 89, 0.2),
+                    inset 0 10px 20px rgba(255, 255, 255, 0.14)
+                  `,
                 }}
-                className="absolute left-4 right-4 z-40 bg-[#fdfaf2] border-2 border-[#c5a059] rounded shadow-[0_10px_25px_rgba(0,0,0,0.45)] p-3.5 text-left animate-popover-spring"
               >
-                <div className="flex items-start justify-between gap-2 border-b border-[#c5a059]/40 pb-1.5 mb-2">
-                  <div>
-                    <span className="text-[9px] font-sans font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-[#8b0000]/10 text-[#8b0000] inline-block mb-0.5">
-                      {activeWordContext.entry.category}
-                    </span>
-                    <h4 className="text-sm font-bold text-[#4a3b32] leading-tight">
-                      {activeWordContext.entry.term}
-                    </h4>
+                {/* Refractive Light Overlay (Mimics curved glass reflection while keeping underlying shapes & colors visible) */}
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_35%_0%,rgba(255,255,255,0.55)_0%,transparent_60%)] opacity-55" />
+
+                <div className="relative z-10 flex flex-col">
+                  <div className="flex items-center justify-between gap-2 border-b border-[#4a3b32]/15 pb-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full text-[#8b0000] ui-font truncate"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%)',
+                          backdropFilter: 'blur(8px)',
+                          WebkitBackdropFilter: 'blur(8px)',
+                          border: '1px solid rgba(255, 255, 255, 0.55)',
+                        }}
+                      >
+                        {selectedStory.ref}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setActiveSentence(null)}
+                      className="h-6 w-6 rounded-full flex items-center justify-center text-xs text-[#382117] active:scale-95 transition-all ui-font shrink-0"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%)',
+                        backdropFilter: 'blur(8px)',
+                        WebkitBackdropFilter: 'blur(8px)',
+                        border: '1px solid rgba(255, 255, 255, 0.55)',
+                      }}
+                      aria-label="Close sentence focus"
+                    >
+                      ✕
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setActiveWordContext(null)}
-                    className="text-stone-400 hover:text-[#8b0000] text-xs font-bold px-1.5 py-0.5 rounded active:opacity-60 transition-opacity"
-                    aria-label="Close context menu"
+
+                  <p className="mt-3 text-[15px] leading-relaxed font-semibold text-[#1f100a] drop-shadow-[0_1px_2px_rgba(255,255,255,0.85)] reading-font italic">
+                    "{displaySentence.trim()}"
+                  </p>
+
+                  {/* Smoothly Expanding & Contracting Dynamic Content Container */}
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity,margin-top] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      sentenceToolView !== 'NONE'
+                        ? 'grid-rows-[1fr] opacity-100 mt-3'
+                        : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
+                    }`}
                   >
-                    ✕
-                  </button>
+                    <div className="overflow-hidden">
+                      <div
+                        className="rounded-2xl p-3 text-xs text-[#1f100a] max-h-44 overflow-y-auto no-scrollbar reading-font transition-all duration-300"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.10) 100%)',
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(255, 255, 255, 0.52)',
+                          boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.6)',
+                        }}
+                      >
+                        {sentenceToolView === 'WORD' && wordLookupEntry && (
+                          <div className="animate-fade-in">
+                            <div className="text-[9px] font-bold uppercase tracking-widest text-[#8b0000] mb-0.5 ui-font">
+                              {wordLookupEntry.entry.category} • Webster's 1828 Dictionary
+                            </div>
+                            <div className="text-sm font-bold text-[#382117] mb-1">
+                              {wordLookupEntry.entry.term}
+                            </div>
+                            <p className="leading-relaxed mb-1.5">
+                              <strong>Definition:</strong> {wordLookupEntry.entry.shortDef}
+                            </p>
+                            <p className="italic text-[#382117]/90 leading-relaxed">
+                              <strong>Significance:</strong> {wordLookupEntry.entry.significance}
+                            </p>
+                          </div>
+                        )}
+
+                        {sentenceToolView === 'PASSAGE' && (
+                          <div className="animate-fade-in">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] mb-1 ui-font">
+                              Passage Lookup • {selectedStory.ref}
+                            </div>
+                            <p className="leading-relaxed mb-1.5">
+                              <strong>Context:</strong> {selectedStory.body}
+                            </p>
+                            <p className="italic text-[#382117]/90 leading-relaxed">
+                              <strong>Leadership Significance:</strong> {selectedStory.why}
+                            </p>
+                          </div>
+                        )}
+
+                        {sentenceToolView === 'CHAPTER' && (
+                          <div className="animate-fade-in">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] mb-1 ui-font">
+                              Chapter Lookup • {selectedStory.ref}
+                            </div>
+                            {isFetchingChapter ? (
+                              <p className="italic text-stone-600 animate-pulse py-2">
+                                Loading full chapter from King James Scripture...
+                              </p>
+                            ) : (
+                              <p className="leading-relaxed whitespace-pre-line text-[11px]">
+                                {chapterLookupText}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {sentenceToolView === 'NARRATIVE' && (
+                          <div className="animate-fade-in">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] mb-1 ui-font">
+                              Broader Narrative Context
+                            </div>
+                            <p className="leading-relaxed mb-1.5">
+                              <strong>{selectedStory.title}</strong> ({selectedStory.ref}) sits within the <em>{SECTIONS.find(s => s.id === selectedStory.section)?.label}</em> movement of Scripture.
+                            </p>
+                            <p className="leading-relaxed text-[#382117]/90">
+                              {selectedStory.preAnalyzed?.interpretation ||
+                                `Within the grand biblical arc from Creation to New Creation, this passage reveals how God forms a covenant people and shapes faithful leaders through ${selectedStory.why.toLowerCase()}`}
+                            </p>
+                          </div>
+                        )}
+
+                        {sentenceToolView === 'SEARCH' && (
+                          <div className="animate-fade-in space-y-2">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
+                              Webster's 1828 & Scripture Search
+                            </div>
+                            <input
+                              type="text"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder="Search term or passage..."
+                              className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/45 border border-white/60 text-[#24130c] placeholder:text-stone-500 focus:outline-none focus:border-[#8b0000] ui-font"
+                            />
+                            {(() => {
+                              const q = (searchQuery.trim() || getPrimaryWordFromSentence(displaySentence)).trim();
+                              const lexEntry = getKjvDictionaryEntry(q);
+                              const matchingPassages = MASTER_CONTENT.filter(
+                                item =>
+                                  item.title.toLowerCase().includes(q.toLowerCase()) ||
+                                  item.body.toLowerCase().includes(q.toLowerCase()) ||
+                                  item.why.toLowerCase().includes(q.toLowerCase())
+                              ).slice(0, 3);
+
+                              return (
+                                <div className="space-y-1.5 pt-0.5">
+                                  <div className="p-2 rounded-lg bg-white/30 border border-white/40">
+                                    <div className="font-bold text-[#382117] text-[11px]">{lexEntry.term}</div>
+                                    <div className="text-[11px] leading-snug text-[#24130c] mt-0.5">{lexEntry.shortDef}</div>
+                                  </div>
+                                  {matchingPassages.length > 0 && (
+                                    <div className="space-y-1">
+                                      <div className="text-[9px] font-bold uppercase tracking-wider text-stone-600 ui-font">
+                                        Related Passages
+                                      </div>
+                                      {matchingPassages.map(mp => (
+                                        <button
+                                          key={mp.id}
+                                          type="button"
+                                          onClick={() => {
+                                            setActiveSection(mp.section);
+                                            handleStoryChange(mp);
+                                          }}
+                                          className="w-full text-left px-2 py-1 rounded bg-white/25 hover:bg-white/45 transition-colors flex items-center justify-between gap-2 ui-font"
+                                        >
+                                          <span className="text-[10px] font-bold text-[#382117] truncate">{mp.title}</span>
+                                          <span className="text-[9px] text-[#8b0000] shrink-0">{mp.ref}</span>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Two Separate Liquid Glass Pills Row: [Word, Passage, Chapter, Narrative] + [Search, Bookmark] */}
+                  <div className="mt-3.5 flex items-center justify-between gap-2 ui-font select-none">
+                    {/* Pill 1: Word (aA), Passage (List), Chapter (Paper), Broader Narrative (Bookmark in Square) */}
+                    <div
+                      className="flex items-center gap-1 rounded-full px-2 py-1"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 100%)',
+                        backdropFilter: 'blur(12px) saturate(160%)',
+                        WebkitBackdropFilter: 'blur(12px) saturate(160%)',
+                        border: '1px solid rgba(255, 255, 255, 0.55)',
+                        boxShadow: `
+                          0 6px 18px rgba(36, 19, 12, 0.12),
+                          inset 0 1px 1px rgba(255, 255, 255, 0.75),
+                          inset 0 -1px 1px rgba(197, 160, 89, 0.18)
+                        `,
+                      }}
+                    >
+                      {/* 1. "aA" Word Lookup (Vertically Centered SVG) */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (sentenceToolView === 'WORD') {
+                            setSentenceToolView('NONE');
+                            return;
+                          }
+                          const targetWord = getPrimaryWordFromSentence(displaySentence);
+                          const entry = getKjvDictionaryEntry(targetWord);
+                          setWordLookupEntry({ entry });
+                          setSentenceToolView('WORD');
+                        }}
+                        title="Word Lookup (Webster's 1828)"
+                        aria-label="Word Lookup"
+                        className={`h-8 w-9 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                          sentenceToolView === 'WORD'
+                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                            : 'text-[#24130c] hover:bg-white/25'
+                        }`}
+                      >
+                        <svg className="w-[20px] h-[18px]" viewBox="0 0 26 24" fill="currentColor">
+                          <text x="1" y="17.5" fontSize="11.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">a</text>
+                          <text x="9.5" y="17.5" fontSize="15.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">A</text>
+                        </svg>
+                      </button>
+
+                      {/* 2. Bullet Point List: Passage Lookup */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSentenceToolView(prev => (prev === 'PASSAGE' ? 'NONE' : 'PASSAGE'));
+                        }}
+                        title="Passage Lookup"
+                        aria-label="Passage Lookup"
+                        className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                          sentenceToolView === 'PASSAGE'
+                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                            : 'text-[#24130c] hover:bg-white/25'
+                        }`}
+                      >
+                        <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="4.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                          <circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none" />
+                          <circle cx="4.5" cy="17.5" r="1" fill="currentColor" stroke="none" />
+                          <line x1="9" y1="6.5" x2="19.5" y2="6.5" />
+                          <line x1="9" y1="12" x2="19.5" y2="12" />
+                          <line x1="9" y1="17.5" x2="19.5" y2="17.5" />
+                        </svg>
+                      </button>
+
+                      {/* 3. Paper Icon: Chapter Lookup */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (sentenceToolView === 'CHAPTER') {
+                            setSentenceToolView('NONE');
+                          } else {
+                            handleChapterLookup(selectedStory);
+                          }
+                        }}
+                        title="Chapter Lookup"
+                        aria-label="Chapter Lookup"
+                        className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                          sentenceToolView === 'CHAPTER'
+                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                            : 'text-[#24130c] hover:bg-white/25'
+                        }`}
+                      >
+                        <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="4" y="4" width="16" height="16" rx="2.5" />
+                          <path d="M4 8h16" strokeWidth="2.5" />
+                          <line x1="7.5" y1="12" x2="16.5" y2="12" strokeWidth="1.8" strokeLinecap="round" />
+                          <line x1="7.5" y1="15" x2="16.5" y2="15" strokeWidth="1.8" strokeLinecap="round" />
+                          <line x1="7.5" y1="18" x2="12.5" y2="18" strokeWidth="1.8" strokeLinecap="round" />
+                        </svg>
+                      </button>
+
+                      {/* 4. Bookmark in Square: Broader Narrative Context Lookup */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSentenceToolView(prev => (prev === 'NARRATIVE' ? 'NONE' : 'NARRATIVE'));
+                        }}
+                        title="Broader Narrative Context Lookup"
+                        aria-label="Broader Narrative Context Lookup"
+                        className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                          sentenceToolView === 'NARRATIVE'
+                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                            : 'text-[#24130c] hover:bg-white/25'
+                        }`}
+                      >
+                        <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
+                          <path d="M13.5 4.5v7l2.25-1.6L18 11.5v-7" fill="currentColor" stroke="none" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Pill 2: Search (Magnifying Glass) & Bookmark (Ribbon) */}
+                    <div
+                      className="flex items-center gap-1 rounded-full px-2 py-1"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 100%)',
+                        backdropFilter: 'blur(12px) saturate(160%)',
+                        WebkitBackdropFilter: 'blur(12px) saturate(160%)',
+                        border: '1px solid rgba(255, 255, 255, 0.55)',
+                        boxShadow: `
+                          0 6px 18px rgba(36, 19, 12, 0.12),
+                          inset 0 1px 1px rgba(255, 255, 255, 0.75),
+                          inset 0 -1px 1px rgba(197, 160, 89, 0.18)
+                        `,
+                      }}
+                    >
+                      {/* 5. Magnifying Glass: In-App Concordance & Lexicon Search */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (sentenceToolView === 'SEARCH') {
+                            setSentenceToolView('NONE');
+                          } else {
+                            setSearchQuery(getPrimaryWordFromSentence(displaySentence));
+                            setSentenceToolView('SEARCH');
+                          }
+                        }}
+                        title="Search Lexicon & Passages"
+                        aria-label="Search Lexicon and Passages"
+                        className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                          sentenceToolView === 'SEARCH'
+                            ? 'bg-white/45 text-[#8b0000] shadow-inner'
+                            : 'text-[#24130c] hover:bg-white/25'
+                        }`}
+                      >
+                        <svg className="w-[17px] h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="10.5" cy="10.5" r="6.5" />
+                          <line x1="15.5" y1="15.5" x2="20.5" y2="20.5" />
+                        </svg>
+                      </button>
+
+                      {/* 6. Bookmark Icon: Save Sentence to Top-Right Red Ribbon */}
+                      {(() => {
+                        const isSaved = bookmarks.some(
+                          b => b.sentence === displaySentence.trim() && b.storyId === selectedStory.id
+                        );
+                        return (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleSentenceBookmark(displaySentence);
+                            }}
+                            title={isSaved ? "Remove Sentence from Ribbon Bookmarks" : "Bookmark Sentence to Red Ribbon"}
+                            aria-label="Bookmark Sentence"
+                            className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                              isSaved
+                                ? 'bg-[#8b0000]/20 text-[#8b0000] shadow-inner'
+                                : 'text-[#24130c] hover:bg-white/25'
+                            }`}
+                          >
+                            <svg
+                              className="w-[17px] h-[17px]"
+                              viewBox="0 0 24 24"
+                              fill={isSaved ? 'currentColor' : 'none'}
+                              stroke="currentColor"
+                              strokeWidth="2.1"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z" />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-stone-800 leading-relaxed mb-2">
-                  <strong className="text-[#4a3b32] uppercase tracking-wider text-[10px]">Definition: </strong>
-                  {activeWordContext.entry.shortDef}
-                </p>
-                <p className="text-xs text-stone-700 italic leading-relaxed bg-[#fffafa] p-2 rounded border border-[#8b0000]/20">
-                  <strong className="text-[#8b0000] not-italic uppercase tracking-wider text-[10px]">Biblical Context: </strong>
-                  {activeWordContext.entry.significance}
-                </p>
               </div>
-            )}
+            </div>
 
           </div>
         </main>
