@@ -34,15 +34,39 @@ interface BookmarkedSentence {
   timestamp: string;
 }
 
-type GranularScopeType = 'WORD_IN_SENTENCE' | 'SENTENCE_IN_VERSE' | 'VERSE_IN_PASSAGE' | 'PASSAGE_IN_BIBLE';
+type ExegeticalPhaseId = 'PHASE_1' | 'PHASE_2' | 'PHASE_3' | 'PHASE_4' | 'PHASE_5' | 'PHASE_6';
 
-interface GranularAnalysisResult {
-  heading: string;
-  focalElement: string;
-  contextualMeaning: string;
-  linguisticOrLiteraryNote: string;
-  practicalInsight: string;
-  crossReferences: string[];
+interface SixPhaseAnalysisData {
+  phase1: {
+    originalLanguagesAndVariants: string;
+    lexicalAndGrammaticalAnalysis: string;
+    figurativeLanguageAndSigns: string;
+  };
+  phase2: {
+    ancientWorldview: string;
+    relationalDynamics: string;
+  };
+  phase3: {
+    circlesOfContext: string;
+    genreAndForm: string;
+  };
+  phase4: {
+    intertextuality: string;
+    organicDevelopmentAndRuleOfFaith: string;
+    crossReferences: string[];
+  };
+  phase5: {
+    patristicConsensus: string;
+    medievalAndReformation: string;
+    modernCriticalScholarship: string;
+  };
+  phase6: {
+    exegeticalVerdict: string;
+    originalApplication: string;
+    levelOfSpecificity: string;
+    crossCulturalPrinciple: string;
+    contemporaryEmbodiment: string;
+  };
 }
 
 // Full Structured AI Biblical Scholar Analysis Interface
@@ -140,8 +164,6 @@ const BIBLICAL_LEXICON: Record<string, LexiconEntry> = {
   "Cornelius": { term: "Cornelius", category: "Person", shortDef: "Webster 1828: A horn; devout Roman centurion baptized by Peter.", significance: "Marks the historic breakthrough confirming that Gentiles receive the Spirit on equal footing." },
   "Silas": { term: "Silas (Silvanus)", category: "Person", shortDef: "Webster 1828: Woody, forest; missionary companion of Paul.", significance: "Models joyful resilience and partnership in gospel ministry during persecution." },
   "Rome": { term: "Rome", category: "Place", shortDef: "Webster 1828: Strength, power; imperial capital of the classical Western world.", significance: "Paul's journey to Rome demonstrates that the gospel advances even into the heart of empire." },
-  
-  // Expanded Core Biblical & Leadership Lexicon Terms
   "Stewardship": { term: "Stewardship", category: "Concept & Artifact", shortDef: "Webster 1828: The office, duties, or management of a steward; the responsible overseeing and care of another's property, resources, or household.", significance: "Establishes that leaders and believers own nothing absolute, but are accountable to God for managing time, talents, and resources faithfully." },
   "Righteousness": { term: "Righteousness (Tzedakah / Dikaiosyne)", category: "Concept & Artifact", shortDef: "Webster 1828: Purity of heart and rectitude of life; conformity of heart and life to the divine law.", significance: "The moral perfection required by God, imputed to believers through faith in Christ and expressed in upright living." },
   "Redemption": { term: "Redemption (Golel / Apyltrosis)", category: "Concept & Artifact", shortDef: "Webster 1828: Repurchase of captured goods or freedom; deliverance from sin, penalty, or bondage by the payment of a ransom.", significance: "The heart of the gospel story—Christ paying the ultimate price to liberate humanity from the slavery of sin." },
@@ -174,7 +196,6 @@ const findLexiconEntry = (word: string): LexiconEntry | undefined => {
   return matchedKey ? BIBLICAL_LEXICON[matchedKey] : undefined;
 };
 
-// Fallback Webster 1828 Dictionary definition generator for any arbitrary word tapped by the user
 const getKjvDictionaryEntry = (word: string): LexiconEntry => {
   const cleanWord = word.replace(/[^a-zA-Z]/g, '');
   const existing = findLexiconEntry(cleanWord);
@@ -634,16 +655,16 @@ export default function App() {
   const [boldedWordToken, setBoldedWordToken] = useState<string | null>(null);
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
   const [displaySentence, setDisplaySentence] = useState<string>("");
-  const [sentenceToolView, setSentenceToolView] = useState<'NONE' | 'WORD' | 'PASSAGE' | 'NARRATIVE' | 'CHAPTER' | 'SEARCH' | 'CROSS_REF'>('NONE');
+  const [sentenceToolView, setSentenceToolView] = useState<'NONE' | ExegeticalPhaseId | 'SEARCH' | 'CROSS_REF'>('NONE');
   const [chapterLookupText, setChapterLookupText] = useState<string | null>(null);
   const [isFetchingChapter, setIsFetchingChapter] = useState<boolean>(false);
   const [popupOrigin, setPopupOrigin] = useState<{ x: string; y: string }>({ x: '50%', y: '50%' });
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Concentric 4-Level AI Scope Analysis State for Liquid Glass Pill Buttons
-  const [granularAnalysis, setGranularAnalysis] = useState<GranularAnalysisResult | null>(null);
+  // 6-Phase Exegetical & Hermeneutical AI Analysis State for Liquid Glass Popup
+  const [sixPhaseData, setSixPhaseData] = useState<SixPhaseAnalysisData | null>(null);
   const [isAnalyzingScope, setIsAnalyzingScope] = useState<boolean>(false);
-  const [granularCache, setGranularCache] = useState<Record<string, GranularAnalysisResult>>({});
+  const [sixPhaseCache, setSixPhaseCache] = useState<Record<string, SixPhaseAnalysisData>>({});
 
   // Interactive Liquid Glass Tactile Distortion & Specular Physics State
   const [glassDrag, setGlassDrag] = useState<{
@@ -719,6 +740,7 @@ export default function App() {
     const rawDx = e.clientX - startX;
     const rawDy = e.clientY - startY;
 
+    // Rubber-band fluid resistance using hyperbolic tangent
     const maxPull = 26;
     const dx = Math.tanh(rawDx / 95) * maxPull;
     const dy = Math.tanh(rawDy / 95) * maxPull;
@@ -726,6 +748,7 @@ export default function App() {
     const absX = Math.min(1, Math.abs(rawDx) / 170);
     const absY = Math.min(1, Math.abs(rawDy) / 170);
 
+    // Subtle liquid distension: stretches along pull axis, compresses slightly on perpendicular axis
     const scaleX = 1 + absX * 0.052 - absY * 0.022;
     const scaleY = 1 + absY * 0.052 - absX * 0.022;
 
@@ -776,10 +799,22 @@ export default function App() {
     });
   };
 
-  // Bookmarks & Top-Right Red Ribbon Drawer State
+  // Bookmarks & Table of Contents Hub State (Triggered via Left-to-Right Page Curl on Ribbon Click)
   const [bookmarks, setBookmarks] = useState<BookmarkedSentence[]>([]);
-  const [isRibbonMenuOpen, setIsRibbonMenuOpen] = useState<boolean>(false);
-  const [ribbonView, setRibbonView] = useState<'MENU' | 'BOOKMARKS'>('MENU');
+  const [isTocOpen, setIsTocOpen] = useState<boolean>(false);
+  const [tocTargetAfterCurl, setTocTargetAfterCurl] = useState<boolean | null>(null);
+  const [tocSubView, setTocSubView] = useState<'HUB' | 'BOOKMARKS'>('HUB');
+  const [showPwaPrompt, setShowPwaPrompt] = useState<boolean>(false);
+  const [deferredPwaPrompt, setDeferredPwaPrompt] = useState<any>(null);
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPwaPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
 
   const captureTapOrigin = (clientX: number, clientY: number) => {
     const rect = pageContainerRef.current?.getBoundingClientRect();
@@ -805,122 +840,117 @@ export default function App() {
     return significant || words[0] || 'Word';
   };
 
-  const handleToggleSentenceBookmark = (sentenceToSave: string) => {
-    const clean = sentenceToSave.trim();
-    if (!clean) return;
-    setBookmarks(prev => {
-      const exists = prev.some(b => b.sentence === clean && b.storyId === selectedStory.id);
-      if (exists) {
-        return prev.filter(b => !(b.sentence === clean && b.storyId === selectedStory.id));
+  const handleFullscreenAndPwa = async () => {
+    try {
+      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+        await document.documentElement.requestFullscreen().catch(() => {});
       }
-      return [
-        {
-          id: `${selectedStory.id}-${Date.now()}`,
-          sentence: clean,
-          storyId: selectedStory.id,
-          storyTitle: selectedStory.title,
-          storyRef: selectedStory.ref,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        },
-        ...prev
-      ];
-    });
+    } catch {}
+
+    if (deferredPwaPrompt) {
+      deferredPwaPrompt.prompt();
+      await deferredPwaPrompt.userChoice.catch(() => {});
+      setDeferredPwaPrompt(null);
+    }
+    setShowPwaPrompt(true);
   };
 
-  // Concentric 4-Button AI Scope Analyzer
-  const handleGranularScopeAnalysis = async (
-    viewType: 'WORD' | 'PASSAGE' | 'CHAPTER' | 'NARRATIVE',
-    scopeType: GranularScopeType,
+  // Build Scholarly 6-Phase Fallback if Offline or API Unconfigured
+  const buildFallbackSixPhaseData = (
+    story: ContentItem,
+    targetWord: string,
+    activeSent: string
+  ): SixPhaseAnalysisData => {
+    const lex = getKjvDictionaryEntry(targetWord);
+    const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
+    const sectionLabel = SECTIONS.find(s => s.id === story.section)?.label || 'Biblical Canon';
+    const refs = story.ref.split(/[|;&]/).map(s => s.trim()).filter(Boolean);
+
+    return {
+      phase1: {
+        originalLanguagesAndVariants: `Textual witness for ${story.ref} (${cleanTitle}) rests upon stable Masoretic Hebrew / Koine Greek manuscript traditions. Core doctrinal readings in "${activeSent}" exhibit high textual certainty across classical witnesses.`,
+        lexicalAndGrammaticalAnalysis: `Focal term "${lex.term}" (${lex.category}): ${lex.shortDef} Within the clause "${activeSent}", its grammatical placement anchors the primary verbal action and theological emphasis.`,
+        figurativeLanguageAndSigns: `${lex.significance} Concrete biblical imagery and covenantal signs in ${story.ref} point beyond surface objects to God's sovereign governance.`
+      },
+      phase2: {
+        ancientWorldview: `Composed within the historical-cultural horizon of the ${sectionLabel} era, addressing ancient Near Eastern or Greco-Roman social structures, sacred covenants, and communal identity.`,
+        relationalDynamics: `Addresses the covenant community regarding ${cleanTitle.toLowerCase()}: ${story.body}`
+      },
+      phase3: {
+        circlesOfContext: `Situated within ${story.ref} as a key pericope in the ${sectionLabel} movement, connecting immediate narrative/discourse units to the overarching canonical testimony.`,
+        genreAndForm: `${story.preAnalyzed?.observation || story.body} Structured to move the reader from historical observation to covenantal response.`
+      },
+      phase4: {
+        intertextuality: `Echoes foundational covenantal promises and anticipates redemptive fulfillment across Old and New Testament witnesses (${refs.join(', ')}).`,
+        organicDevelopmentAndRuleOfFaith: `Read through the Rule of Faith, the seed of revelation in ${story.ref} matures organically within salvation history, finding its ultimate telos in Christ and His Church.`,
+        crossReferences: refs.length > 0 ? refs.slice(0, 4) : ['Genesis 12:1-3', 'Luke 24:27', 'Hebrews 1:1-2']
+      },
+      phase5: {
+        patristicConsensus: `Early Church Fathers (including Chrysostom, Augustine, and Cyril) read ${story.ref} both historically and christologically, discerning pastoral instruction in virtue and divine grace.`,
+        medievalAndReformation: `Synthesized in the Catena tradition and Reformation exegesis (Calvin, Luther) to emphasize God's sovereign initiative, humble faith, and the accountability of spiritual leaders.`,
+        modernCriticalScholarship: `Contemporary grammatical-historical commentaries affirm the literary unity and theological intentionality of ${story.ref} within its ancient setting.`
+      },
+      phase6: {
+        exegeticalVerdict: `${story.preAnalyzed?.interpretation || story.why} Integrates immediate biblical theology (redemptive history) with enduring systematic truth.`,
+        originalApplication: `Called the original hearers of ${story.ref} to wholehearted covenantal trust, repentance, and faithful stewardship.`,
+        levelOfSpecificity: `While specific ancient customs belong to the historical horizon of ${story.ref}, the underlying moral and theological demands transcend cultural boundaries.`,
+        crossCulturalPrinciple: `${story.why}`,
+        contemporaryEmbodiment: `${story.preAnalyzed?.application || `Embody the truth of ${cleanTitle} today through humble servant leadership, integrity, and love of God and neighbor.`}`
+      }
+    };
+  };
+
+  // 6-Phase Exegetical & Hermeneutical Framework Analyzer
+  const handlePhaseAnalysis = async (
+    phaseId: ExegeticalPhaseId,
     overrideWord?: string,
     overrideSentence?: string
   ) => {
     const activeSent = (overrideSentence ?? displaySentence).trim();
     const targetWord = (overrideWord ?? getPrimaryWordFromSentence(activeSent)).replace(/[^a-zA-Z']/g, '');
-    const cacheKey = `${selectedStory.id}::${scopeType}::${targetWord.toLowerCase()}::${activeSent.slice(0, 60)}`;
+    const cacheKey = `${selectedStory.id}::${targetWord.toLowerCase()}::${activeSent.slice(0, 50)}`;
 
-    setSentenceToolView(viewType);
+    setSentenceToolView(phaseId);
 
-    if (granularCache[cacheKey]) {
-      setGranularAnalysis(granularCache[cacheKey]);
+    if (sixPhaseCache[cacheKey]) {
+      setSixPhaseData(sixPhaseCache[cacheKey]);
       return;
     }
 
     setIsAnalyzingScope(true);
-    setGranularAnalysis(null);
 
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          mode: 'SIX_PHASE_FRAMEWORK',
           storyId: selectedStory.id,
           title: selectedStory.title,
           ref: selectedStory.ref,
           body: selectedStory.body,
           why: selectedStory.why,
           scriptureText: passageText || '',
-          granularScope: scopeType,
           targetWord,
           targetSentence: activeSent,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Scope analysis HTTP ${response.status}`);
+        throw new Error(`6-Phase analysis HTTP ${response.status}`);
       }
 
       const json = await response.json();
       if (!json.success || !json.data) {
-        throw new Error('Invalid granular scope payload');
+        throw new Error('Invalid 6-Phase payload');
       }
 
-      setGranularAnalysis(json.data);
-      setGranularCache(prev => ({ ...prev, [cacheKey]: json.data }));
+      setSixPhaseData(json.data);
+      setSixPhaseCache(prev => ({ ...prev, [cacheKey]: json.data }));
     } catch (err) {
-      const lex = getKjvDictionaryEntry(targetWord);
-      const cleanTitle = selectedStory.title.replace(/^[0-9.]+\s*/, '').trim();
-      let fallback: GranularAnalysisResult;
-
-      if (scopeType === 'WORD_IN_SENTENCE') {
-        fallback = {
-          heading: `1. Word in Sentence Context`,
-          focalElement: `"${lex.term}" within "${activeSent}"`,
-          contextualMeaning: `Within this specific sentence, "${targetWord}" anchors the clause's theological and moral weight. ${lex.shortDef}`,
-          linguisticOrLiteraryNote: `Lexical Category (${lex.category}): ${lex.significance}`,
-          practicalInsight: `Pay close attention to how "${targetWord}" shapes the action and posture required in ${selectedStory.ref}.`,
-          crossReferences: [selectedStory.ref.split(/[|;&]/)[0].trim()]
-        };
-      } else if (scopeType === 'SENTENCE_IN_VERSE') {
-        fallback = {
-          heading: `2. Sentence in Verse Context`,
-          focalElement: activeSent,
-          contextualMeaning: `In the immediate verse structure of ${selectedStory.ref}, this statement establishes the primary premise and connects the surrounding clauses into a unified witness.`,
-          linguisticOrLiteraryNote: `Biblical verses often employ synthetic or antithetic parallelism—this sentence supplies the core movement that the rest of the verse reinforces.`,
-          practicalInsight: selectedStory.preAnalyzed?.observation || `Observe how the immediate wording in ${selectedStory.ref} reveals God's direct involvement.`,
-          crossReferences: [selectedStory.ref.split(/[|;&]/)[0].trim()]
-        };
-      } else if (scopeType === 'VERSE_IN_PASSAGE') {
-        fallback = {
-          heading: `3. Verse in Passage Context (${cleanTitle})`,
-          focalElement: `${selectedStory.ref} — ${cleanTitle}`,
-          contextualMeaning: `Within the broader pericope of ${cleanTitle}, this verse serves as a pivotal turning point: ${selectedStory.body}`,
-          linguisticOrLiteraryNote: selectedStory.preAnalyzed?.interpretation || `Literary Setting: Positioned within ${selectedStory.ref} to highlight covenant faithfulness and human responsibility.`,
-          practicalInsight: `Leadership Principle: ${selectedStory.why}`,
-          crossReferences: selectedStory.ref.split(/[|;&]/).map(s => s.trim()).filter(Boolean).slice(0, 3)
-        };
-      } else {
-        const sectionLabel = SECTIONS.find(s => s.id === selectedStory.section)?.label || 'Biblical Narrative';
-        fallback = {
-          heading: `4. Passage in the Context of the Bible`,
-          focalElement: `${cleanTitle} (${selectedStory.ref}) in the Canon`,
-          contextualMeaning: `Situated within the ${sectionLabel} movement of Scripture, ${cleanTitle} advances the overarching redemptive arc from Creation and Covenant toward fulfillment in Christ and the New Creation.`,
-          linguisticOrLiteraryNote: `Canonical Trajectory: Connects the historical witness of ${selectedStory.ref} to the enduring theology of God's Kingdom and covenant people.`,
-          practicalInsight: selectedStory.preAnalyzed?.application || `Live out the canonical witness of ${cleanTitle} through faithful stewardship and humble obedience.`,
-          crossReferences: ['Genesis 12:1-3', 'Luke 24:27', 'Revelation 21:1-5']
-        };
-      }
-
-      setGranularAnalysis(fallback);
+      const fallback = buildFallbackSixPhaseData(selectedStory, targetWord, activeSent);
+      setSixPhaseData(fallback);
+      setSixPhaseCache(prev => ({ ...prev, [cacheKey]: fallback }));
     } finally {
       setIsAnalyzingScope(false);
     }
@@ -1026,27 +1056,12 @@ export default function App() {
   const [waves, setWaves] = useState<{id: number, x: number, y: number}[]>([]);
 
   React.useEffect(() => {
-    let linkTag = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
-    if (!linkTag) {
-      linkTag = document.createElement('link');
-      linkTag.rel = 'icon';
-      document.head.appendChild(linkTag);
-    }
-    linkTag.href = "IMG_0523.jpeg";
-
-    let appleTouchIcon = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
-    if (!appleTouchIcon) {
-      appleTouchIcon = document.createElement('link');
-      appleTouchIcon.rel = 'apple-touch-icon';
-      document.head.appendChild(appleTouchIcon);
-    }
-    appleTouchIcon.href = "IMG_0523.jpeg";
-
     const metaTags = [
       { name: 'apple-mobile-web-app-capable', content: 'yes' },
       { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
       { name: 'apple-mobile-web-app-title', content: 'Biblical Leadership' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover' }
+      { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover' },
+      { name: 'theme-color', content: '#0c0b09' }
     ];
 
     metaTags.forEach(tagInfo => {
@@ -1345,7 +1360,6 @@ export default function App() {
       const rawDt = Math.min(0.032, Math.max(0.001, (now - lastTime) / 1000));
       lastTime = now;
 
-      // Sub-step spring integration for locked 60/120fps stability
       const subSteps = 2;
       const dt = rawDt / subSteps;
       for (let i = 0; i < subSteps; i++) {
@@ -1372,7 +1386,10 @@ export default function App() {
         animFrameRef.current = requestAnimationFrame(step);
       } else {
         setCurlState(null);
-        if (targetFlipped) {
+        if (tocTargetAfterCurl !== null) {
+          setIsTocOpen(tocTargetAfterCurl);
+          setTocTargetAfterCurl(null);
+        } else if (targetFlipped) {
           if (isBackSwipe) {
             handleStoryChange(prevStoryRef.current);
           } else {
@@ -1384,6 +1401,266 @@ export default function App() {
     };
 
     animFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const triggerRibbonTocPageTurn = () => {
+    const rect = pageContainerRef.current?.getBoundingClientRect();
+    const W = rect?.width || 370;
+    const H = rect?.height || 740;
+    setActiveSentence(null);
+    setIsContextDropdownOpen(false);
+    setTocSubView('HUB');
+
+    if (!isTocOpen) {
+      setTocTargetAfterCurl(true);
+      setCurlState({
+        pointerX: 24,
+        pointerY: H * 0.22,
+        originY: 0,
+        isDragging: false,
+        isBackSwipe: true,
+      });
+      animateCurlTo(24, H * 0.22, 0, true, true, 1.35);
+    } else {
+      setTocTargetAfterCurl(false);
+      setCurlState({
+        pointerX: W - 24,
+        pointerY: H * 0.22,
+        originY: 0,
+        isDragging: false,
+        isBackSwipe: false,
+      });
+      animateCurlTo(W - 24, H * 0.22, 0, true, false, -1.35);
+    }
+  };
+
+  const renderTocContent = (interactive = true) => {
+    const filteredBySearch = searchQuery.trim()
+      ? MASTER_CONTENT.filter(
+          s =>
+            s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.ref.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.body.toLowerCase().includes(searchQuery.toLowerCase())
+        ).slice(0, 12)
+      : [];
+
+    return (
+      <div className="w-full max-w-[356px] mx-auto flex flex-col h-full reading-font select-none">
+        <header className="text-center border-b-2 border-double border-[#c5a059] pb-2.5 mb-3 shrink-0">
+          <div className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#8b0000] ui-font">
+            Sacred Study Platform
+          </div>
+          <h2 className="text-xl font-bold tracking-[0.14em] text-[#382117] uppercase mt-0.5">
+            Table of Contents
+          </h2>
+          <p className="text-[10px] italic text-stone-500 mt-0.5">
+            Select a canonical division, passage, or study tool
+          </p>
+        </header>
+
+        <div className="flex bg-[#fdfaf2] border border-[#c5a059]/70 rounded-md p-0.5 mb-3 shrink-0 ui-font text-[10px] font-bold uppercase tracking-wider">
+          <button
+            type="button"
+            onClick={interactive ? () => setTocSubView('HUB') : undefined}
+            className={`flex-1 py-1.5 rounded transition-all ${
+              tocSubView === 'HUB' ? 'bg-[#8b0000] text-[#fdfaf2] shadow-xs' : 'text-[#4a3b32]'
+            }`}
+          >
+            Index & Hub
+          </button>
+          <button
+            type="button"
+            onClick={interactive ? () => setTocSubView('BOOKMARKS') : undefined}
+            className={`flex-1 py-1.5 rounded transition-all flex items-center justify-center gap-1.5 ${
+              tocSubView === 'BOOKMARKS' ? 'bg-[#8b0000] text-[#fdfaf2] shadow-xs' : 'text-[#4a3b32]'
+            }`}
+          >
+            <span>Bookmarks</span>
+            {bookmarks.length > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-[#c5a059]/30">
+                {bookmarks.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {tocSubView === 'HUB' ? (
+          <div className="flex-1 overflow-y-auto no-scrollbar space-y-3.5 pr-0.5 pb-4">
+            <div className="bg-[#fdfaf2] border border-[#c5a059]/60 rounded-lg p-2.5 shadow-xs ui-font">
+              <label className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-1">
+                Concordance & Passage Jump
+              </label>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={interactive ? (e) => setSearchQuery(e.target.value) : undefined}
+                placeholder="Search any story, theme, or verse..."
+                className="w-full px-2.5 py-1.5 text-xs bg-[#fffcf5] border border-[#c5a059]/50 rounded focus:outline-none focus:border-[#8b0000] text-[#382117]"
+              />
+              {filteredBySearch.length > 0 && (
+                <div className="mt-2 max-h-36 overflow-y-auto divide-y divide-[#e6d9c3]/50 no-scrollbar">
+                  {filteredBySearch.map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={interactive ? () => {
+                        setActiveSection(item.section);
+                        handleStoryChange(item);
+                        setSearchQuery('');
+                        triggerRibbonTocPageTurn();
+                      } : undefined}
+                      className="w-full text-left py-1.5 px-1.5 hover:bg-[#c5a059]/15 flex items-center justify-between gap-2 rounded"
+                    >
+                      <span className="text-xs font-bold text-[#382117] truncate">{item.title}</span>
+                      <span className="text-[10px] text-[#8b0000] shrink-0">{item.ref}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b0000] border-b border-[#c5a059]/40 pb-1 ui-font">
+                I. Canonical Divisions
+              </div>
+              {SECTIONS.map((sec, idx) => {
+                const count = MASTER_CONTENT.filter(s => s.section === sec.id).length;
+                const isCurrent = activeSection === sec.id;
+                return (
+                  <button
+                    key={sec.id}
+                    type="button"
+                    onClick={interactive ? () => {
+                      handleSectionChange(sec.id);
+                      triggerRibbonTocPageTurn();
+                    } : undefined}
+                    className={`w-full py-2.5 px-3 rounded-lg border text-left flex items-center justify-between gap-3 apple-gpu-btn ${
+                      isCurrent
+                        ? 'bg-[#c5a059]/20 border-[#8b0000] text-[#382117]'
+                        : 'bg-[#fdfaf2]/90 border-[#c5a059]/50 hover:border-[#c5a059] text-[#382117]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="text-[#8b0000] shrink-0">{renderSectionIcon(sec.id)}</span>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold tracking-wide truncate">
+                          {idx + 1}. {sec.label}
+                        </div>
+                        <div className="text-[10px] text-stone-500 ui-font">
+                          {count} Curated Passages & Studies
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-[#8b0000] ui-font">→</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="space-y-1.5 pt-1">
+              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b0000] border-b border-[#c5a059]/40 pb-1 ui-font">
+                II. Study Tools & App Experience
+              </div>
+
+              <button
+                type="button"
+                onClick={interactive ? () => {
+                  setActiveSection('PERICOPES');
+                  handleDailyPericope();
+                  triggerRibbonTocPageTurn();
+                } : undefined}
+                className="w-full py-2.5 px-3 rounded-lg border border-[#c5a059]/60 bg-[#fdfaf2] text-left flex items-center justify-between apple-gpu-btn ui-font"
+              >
+                <div>
+                  <div className="text-xs font-bold text-[#382117]">✦ Daily Pericope Reading</div>
+                  <div className="text-[10px] text-stone-500">Jump to today's appointed scripture</div>
+                </div>
+                <span className="text-xs text-[#8b0000] font-bold">Open</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={interactive ? () => {
+                  setIsHighlightMode(prev => !prev);
+                } : undefined}
+                className="w-full py-2.5 px-3 rounded-lg border border-[#c5a059]/60 bg-[#fdfaf2] text-left flex items-center justify-between apple-gpu-btn ui-font"
+              >
+                <div>
+                  <div className="text-xs font-bold text-[#382117]">Webster's 1828 Key Term Scanner</div>
+                  <div className="text-[10px] text-stone-500">Highlight biblical names, places & concepts</div>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isHighlightMode ? 'bg-[#8b0000] text-white' : 'bg-stone-200 text-stone-600'}`}>
+                  {isHighlightMode ? 'ACTIVE' : 'OFF'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={interactive ? handleFullscreenAndPwa : undefined}
+                className="w-full py-3 px-3 rounded-lg border-2 border-[#c5a059] bg-gradient-to-r from-[#382117] to-[#4a3b32] text-[#fdfaf2] text-left flex items-center justify-between apple-gpu-btn shadow-md ui-font"
+              >
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-[#e3c178]">
+                    Fullscreen Mode • Add to Home Screen
+                  </div>
+                  <div className="text-[10px] text-[#fdfaf2]/80">
+                    Install as a Progressive Web App (PWA)
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-[#e3c178] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={interactive ? triggerRibbonTocPageTurn : undefined}
+              className="w-full py-2.5 px-4 rounded-md bg-[#8b0000] text-[#fdfaf2] text-xs font-bold uppercase tracking-widest text-center shadow-sm apple-gpu-btn ui-font"
+            >
+              Return to {selectedStory.ref} →
+            </button>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-2 space-y-2.5 divide-y divide-[#e6d9c3]/70 no-scrollbar">
+            {bookmarks.length === 0 ? (
+              <div className="py-12 px-4 text-center text-xs text-stone-500 italic reading-font">
+                No bookmarked sentences saved yet.
+              </div>
+            ) : (
+              bookmarks.map((bm) => (
+                <div key={bm.id} className="pt-2.5 first:pt-0 flex flex-col gap-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <button
+                      onClick={interactive ? () => {
+                        const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
+                        if (target) {
+                          setActiveSection(target.section);
+                          handleStoryChange(target);
+                        }
+                        triggerRibbonTocPageTurn();
+                      } : undefined}
+                      className="text-[10px] font-bold uppercase tracking-wider text-[#8b0000] hover:underline ui-font text-left truncate"
+                    >
+                      {bm.storyTitle} • {bm.storyRef}
+                    </button>
+                    <button
+                      onClick={interactive ? () => setBookmarks(prev => prev.filter(item => item.id !== bm.id)) : undefined}
+                      className="text-[10px] text-stone-400 hover:text-[#8b0000] px-1 ui-font"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p className="text-xs italic text-[#2c1810] leading-relaxed p-1.5 rounded bg-[#fdfaf2] border border-[#e6d9c3]/60 reading-font">
+                    "{bm.sentence}"
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const handlePointerDown = (
@@ -1664,10 +1941,10 @@ export default function App() {
                       setBoldedWordToken(trimmedWord);
                       setDisplaySentence(sentence);
                       setActiveSentence(sentence);
-                      handleGranularScopeAnalysis('WORD', 'WORD_IN_SENTENCE', trimmedWord, sentence);
+                      handlePhaseAnalysis('PHASE_1', trimmedWord, sentence);
                     }}
                     className="text-[#8b0000] font-bold underline decoration-[#8b0000]/60 decoration-dotted underline-offset-2 cursor-pointer hover:bg-[#8b0000]/15 px-0.5 rounded transition-colors"
-                    title={`Click for AI Word-in-Sentence analysis on "${entry.term}"`}
+                    title={`Click for Phase 1 Exegetical & Linguistic analysis on "${entry.term}"`}
                   >
                     {token}
                   </span>
@@ -1686,7 +1963,7 @@ export default function App() {
                     setActiveSentence(sentence);
 
                     if (isBolded) {
-                      handleGranularScopeAnalysis('WORD', 'WORD_IN_SENTENCE', trimmedWord, sentence);
+                      handlePhaseAnalysis('PHASE_1', trimmedWord, sentence);
                     } else {
                       setSentenceToolView('NONE');
                     }
@@ -1696,7 +1973,7 @@ export default function App() {
                       ? 'font-bold bg-[#c5a059]/25 text-[#382117] underline decoration-[#c5a059]'
                       : 'hover:bg-stone-300/30'
                   }`}
-                  title={`Tap to focus in Liquid Glass (tap again or press aA for AI Word-in-Sentence Analysis)`}
+                  title={`Tap to focus in Liquid Glass (tap again or select any of the 6 Exegetical Phase buttons)`}
                 >
                   {token}
                 </span>
@@ -2696,11 +2973,10 @@ export default function App() {
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setRibbonView('MENU');
-              setIsRibbonMenuOpen(prev => !prev);
+              triggerRibbonTocPageTurn();
             }}
-            title="Options & Bookmarks"
-            aria-label="Open Options Menu"
+            title={isTocOpen ? "Return to Scripture Page" : "Turn to Table of Contents Hub"}
+            aria-label="Toggle Table of Contents Page"
             className="absolute -top-0.5 right-4 sm:right-5 z-50 group focus:outline-none active:scale-95 transition-transform"
           >
             <div className="relative flex flex-col items-center">
@@ -2737,124 +3013,53 @@ export default function App() {
             </div>
           </button>
 
-          {isRibbonMenuOpen && (
+          {showPwaPrompt && (
             <div
               onClick={(e) => {
                 e.stopPropagation();
-                setIsRibbonMenuOpen(false);
+                setShowPwaPrompt(false);
               }}
-              className="absolute inset-0 z-50 bg-black/25 backdrop-blur-[2px] flex items-start justify-end p-4 pt-14"
+              className="absolute inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-5"
             >
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-[320px] max-h-[75%] bg-[#fdfaf2] border-2 border-[#c5a059] rounded-xl shadow-[0_18px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden animate-popover-spring"
-                style={{ transformOrigin: 'top right' }}
+                className="w-full max-w-[320px] bg-[#fdfaf2] border-2 border-[#c5a059] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.65)] p-5 text-center animate-popover-spring ui-font"
               >
-                {ribbonView === 'MENU' ? (
-                  <div className="flex-1 overflow-y-auto p-4 space-y-3 ui-font">
-                    <button
-                      onClick={() => setRibbonView('BOOKMARKS')}
-                      className="w-full p-4 bg-white/70 rounded-xl shadow-sm border border-stone-200 text-[#8b0000] font-bold uppercase tracking-widest text-sm flex items-center justify-between hover:bg-white active:scale-[0.98] transition-all"
-                    >
-                      <span>Bookmarks</span>
-                      {bookmarks.length > 0 && (
-                        <span className="text-xs bg-[#8b0000]/10 text-[#8b0000] px-2.5 py-1 rounded-full">{bookmarks.length}</span>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (!document.fullscreenElement) {
-                          document.documentElement.requestFullscreen().catch(e => console.error(e));
-                        } else {
-                          if (document.exitFullscreen) {
-                            document.exitFullscreen().catch(e => console.error(e));
-                          }
-                        }
-                        setIsRibbonMenuOpen(false);
-                      }}
-                      className="w-full p-4 bg-white/70 rounded-xl shadow-sm border border-stone-200 text-[#4a3b32] font-bold uppercase tracking-widest text-sm flex items-center justify-between hover:bg-white active:scale-[0.98] transition-all"
-                    >
-                      <span>Fullscreen Mode</span>
-                      <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                      </svg>
-                    </button>
+                <img
+                  src="/apple-touch-icon.png"
+                  alt="Holybook App Icon"
+                  className="w-16 h-16 mx-auto rounded-2xl shadow-md border border-[#c5a059] mb-3"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+                <h3 className="text-sm font-bold uppercase tracking-widest text-[#382117]">
+                  Install Fullscreen Web App
+                </h3>
+                <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
+                  To experience <strong>Holybook</strong> in true edge-to-edge Fullscreen Mode as a Progressive Web App:
+                </p>
+                <div className="mt-3 p-3 rounded-xl bg-[#fffcf5] border border-[#e6d9c3] text-left text-xs text-[#382117] space-y-2">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-[#8b0000] text-white text-[10px] font-bold flex items-center justify-center shrink-0">1</span>
+                    <span>Tap the browser <strong>Share</strong> button <span className="inline-block px-1 py-0.5 bg-stone-200 rounded text-[10px]">↑</span> in Safari or Chrome.</span>
                   </div>
-                ) : (
-                  <>
-                    <div className="px-4 py-2.5 bg-[#8b0000] text-[#fdfaf2] flex items-center justify-between border-b border-[#c5a059]">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setRibbonView('MENU')}
-                          className="text-[#e3c178] hover:text-white mr-1 active:scale-95 transition-transform"
-                          title="Back to Options"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
-                          </svg>
-                        </button>
-                        <span className="text-xs font-bold uppercase tracking-widest ui-font">
-                          Saved Bookmarks ({bookmarks.length})
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => setIsRibbonMenuOpen(false)}
-                        className="text-xs font-bold text-[#fdfaf2]/80 hover:text-white px-1.5 py-0.5"
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-3 space-y-2.5 divide-y divide-[#e6d9c3]/70 no-scrollbar">
-                      {bookmarks.length === 0 ? (
-                        <div className="py-8 px-3 text-center text-xs text-stone-500 italic reading-font">
-                          No bookmarked sentences yet. Tap any sentence on the page and press the bookmark icon to save it to your crimson ribbon.
-                        </div>
-                      ) : (
-                        bookmarks.map((bm) => (
-                          <div key={bm.id} className="pt-2.5 first:pt-0 flex flex-col gap-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <button
-                                onClick={() => {
-                                  const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
-                                  if (target) {
-                                    setActiveSection(target.section);
-                                    handleStoryChange(target);
-                                  }
-                                  setIsRibbonMenuOpen(false);
-                                }}
-                                className="text-[10px] font-bold uppercase tracking-wider text-[#8b0000] hover:underline ui-font text-left truncate"
-                              >
-                                {bm.storyTitle} • {bm.storyRef}
-                              </button>
-                              <button
-                                onClick={() => setBookmarks(prev => prev.filter(item => item.id !== bm.id))}
-                                className="text-[10px] text-stone-400 hover:text-[#8b0000] px-1 ui-font"
-                                title="Remove bookmark"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                            <p
-                              onClick={() => {
-                                const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
-                                if (target) {
-                                  setActiveSection(target.section);
-                                  handleStoryChange(target);
-                                  setTimeout(() => setActiveSentence(bm.sentence), 60);
-                                }
-                                setIsRibbonMenuOpen(false);
-                              }}
-                              className="text-xs italic text-[#2c1810] leading-relaxed cursor-pointer hover:bg-[#c5a059]/15 p-1.5 rounded transition-colors reading-font"
-                            >
-                              "{bm.sentence}"
-                            </p>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </>
-                )}
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-[#8b0000] text-white text-[10px] font-bold flex items-center justify-center shrink-0">2</span>
+                    <span>Select <strong>"Add to Home Screen"</strong> <span className="inline-block px-1 py-0.5 bg-stone-200 rounded text-[10px]">＋</span>.</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-[#8b0000] text-white text-[10px] font-bold flex items-center justify-center shrink-0">3</span>
+                    <span>Launch <strong>Holybook</strong> from your Home Screen for distraction-free fullscreen study.</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPwaPrompt(false)}
+                  className="mt-4 w-full py-2.5 rounded-lg bg-[#8b0000] text-[#fdfaf2] text-xs font-bold uppercase tracking-widest apple-gpu-btn"
+                >
+                  Got It
+                </button>
               </div>
             </div>
           )}
@@ -2864,7 +3069,6 @@ export default function App() {
             className="w-full h-full relative flex-1 min-h-0 grid-stack overflow-hidden"
           >
             
-            {/* Underlying Target Page */}
             <div
               style={{
                 paddingTop: 'calc(max(0.5rem, var(--safe-top)) + 1.25rem)',
@@ -2873,15 +3077,20 @@ export default function App() {
               className="grid-layer bg-[#fffcf5] px-6 sm:px-8 flex flex-col gap-4 relative overflow-hidden select-none z-0 pointer-events-none"
             >
                <div className="absolute inset-2 sm:inset-3 border border-[#e6d9c3] pointer-events-none z-20" />
-               {renderPageContent(curlState?.isBackSwipe ? selectedStory : nextStory, false, true)}
+               {tocTargetAfterCurl === true
+                 ? renderPageContent(selectedStory, false, true)
+                 : tocTargetAfterCurl === false
+                 ? renderPageContent(selectedStory, false, true)
+                 : isTocOpen
+                 ? renderTocContent(false)
+                 : renderPageContent(curlState?.isBackSwipe ? selectedStory : nextStory, false, true)}
                <span className="absolute bottom-3.5 sm:bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
-                 {curlState?.isBackSwipe 
+                 {isTocOpen ? 'INDEX' : curlState?.isBackSwipe 
                    ? (currentIndex + 1) 
                    : (currentIndex + 2 > filteredStories.length ? 1 : currentIndex + 2)}
                </span>
             </div>
 
-            {/* Crease Shadow */}
             {curlGeo.isCurling && (
               <div className="grid-layer pointer-events-none z-[5] relative overflow-hidden">
                 <div
@@ -2900,7 +3109,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Current Page */}
             <div 
               className="grid-layer relative overflow-hidden select-none z-10"
               style={{
@@ -2916,9 +3124,17 @@ export default function App() {
                 }}
               >
                 <div className="absolute inset-2 sm:inset-3 border border-[#e6d9c3] pointer-events-none z-20" />
-                {renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, false, false)}
+                {tocTargetAfterCurl === true
+                  ? renderTocContent(false)
+                  : tocTargetAfterCurl === false
+                  ? renderTocContent(false)
+                  : isTocOpen
+                  ? renderTocContent(true)
+                  : renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, false, false)}
                 <span className="absolute bottom-3.5 sm:bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
-                  {curlState?.isBackSwipe
+                  {isTocOpen || tocTargetAfterCurl === true
+                    ? 'INDEX'
+                    : curlState?.isBackSwipe
                     ? ((currentIndex - 1 + filteredStories.length) % filteredStories.length) + 1 
                     : (currentIndex + 1)}
                 </span>
@@ -2941,7 +3157,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Backside Flap */}
             {curlGeo.isCurling && (
               <div className="grid-layer pointer-events-none z-20 relative overflow-hidden">
                 <div
@@ -2960,7 +3175,9 @@ export default function App() {
                     }}
                   >
                     <div className="absolute inset-2 sm:inset-3 border border-[#e6d9c3] pointer-events-none" />
-                    {renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, true, false)}
+                    {tocTargetAfterCurl !== null
+                      ? renderTocContent(false)
+                      : renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, true, false)}
                   </div>
 
                   <div
@@ -2980,7 +3197,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Left Edge Swiping Zone */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
               className="absolute bottom-0 left-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
@@ -2991,7 +3207,6 @@ export default function App() {
               title="Drag or tap from left edge to turn back"
             />
 
-            {/* Right Edge Swiping Zone */}
             <div
               style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
               className="absolute bottom-0 right-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
@@ -3028,9 +3243,6 @@ export default function App() {
                   transition: activeSentence
                     ? 'transform 420ms cubic-bezier(0.22, 1.26, 0.36, 1), opacity 200ms cubic-bezier(0.22, 1, 0.36, 1)'
                     : 'transform 240ms cubic-bezier(0.32, 0.72, 0, 1), opacity 160ms ease-out',
-                  willChange: 'transform, opacity',
-                  backfaceVisibility: 'hidden',
-                  WebkitBackfaceVisibility: 'hidden',
                 }}
               >
                 {/* Inner Interactive Liquid Glass Lens: Pure GPU transform on drag, spring on release */}
@@ -3045,9 +3257,6 @@ export default function App() {
                     transition: glassDrag.isPressed
                       ? 'none'
                       : 'transform 560ms cubic-bezier(0.22, 1.32, 0.36, 1)',
-                    willChange: 'transform',
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden',
                     background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.09) 60%, rgba(255, 255, 255, 0.16) 100%)',
                     backdropFilter: 'blur(12px) saturate(175%) brightness(105%)',
                     WebkitBackdropFilter: 'blur(12px) saturate(175%) brightness(105%)',
@@ -3109,27 +3318,26 @@ export default function App() {
                     >
                       <div className="overflow-hidden">
                         <div
-                          className="rounded-2xl p-3 text-xs text-[#1f100a] max-h-52 overflow-y-auto no-scrollbar reading-font transition-all duration-300"
+                          className="rounded-2xl p-3 text-xs text-[#1f100a] max-h-56 overflow-y-auto no-scrollbar reading-font transition-all duration-300"
                           style={{
                             background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.14) 100%)',
                             border: '1px solid rgba(255, 255, 255, 0.6)',
                             boxShadow: 'inset 0 1px 1.5px rgba(255, 255, 255, 0.75)',
                           }}
                         >
-                          {(sentenceToolView === 'WORD' ||
-                            sentenceToolView === 'PASSAGE' ||
-                            sentenceToolView === 'CHAPTER' ||
-                            sentenceToolView === 'NARRATIVE') && (
+                          {sentenceToolView.startsWith('PHASE_') && (
                             <div className="animate-fade-in space-y-2">
                               <div className="flex items-center justify-between gap-2 border-b border-[#4a3b32]/15 pb-1">
                                 <span className="text-[9px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
-                                  {sentenceToolView === 'WORD' && '1 • Word in Sentence Context'}
-                                  {sentenceToolView === 'PASSAGE' && '2 • Sentence in Verse Context'}
-                                  {sentenceToolView === 'CHAPTER' && '3 • Verse in Passage Context'}
-                                  {sentenceToolView === 'NARRATIVE' && '4 • Passage in Bible Context'}
+                                  {sentenceToolView === 'PHASE_1' && 'Phase 1 • Text, Linguistics & Signs'}
+                                  {sentenceToolView === 'PHASE_2' && 'Phase 2 • Historical-Cultural Context'}
+                                  {sentenceToolView === 'PHASE_3' && 'Phase 3 • Literary Context & Genre'}
+                                  {sentenceToolView === 'PHASE_4' && 'Phase 4 • Canonical & OT/NT Links'}
+                                  {sentenceToolView === 'PHASE_5' && 'Phase 5 • History of Interpretation'}
+                                  {sentenceToolView === 'PHASE_6' && 'Phase 6 • Synthesis & Application'}
                                 </span>
-                                <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#8b0000]/10 text-[#8b0000] ui-font">
-                                  ✦ AI Scholar
+                                <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#8b0000]/10 text-[#8b0000] ui-font shrink-0">
+                                  ✦ Exegesis AI
                                 </span>
                               </div>
 
@@ -3137,26 +3345,74 @@ export default function App() {
                                 <div className="py-4 flex flex-col items-center justify-center gap-2 text-center">
                                   <span className="w-4 h-4 rounded-full border-2 border-[#8b0000]/30 border-t-[#8b0000] animate-spin" />
                                   <p className="text-[11px] italic text-stone-700 animate-pulse">
-                                    Analyzing {sentenceToolView === 'WORD' ? `"${getPrimaryWordFromSentence(displaySentence)}" in sentence` : sentenceToolView === 'PASSAGE' ? 'sentence in verse' : sentenceToolView === 'CHAPTER' ? 'verse in passage' : 'passage in the Bible'}...
+                                    Running 6-Phase Exegetical & Hermeneutical Analysis...
                                   </p>
                                 </div>
-                              ) : granularAnalysis ? (
-                                <div className="space-y-1.5">
-                                  <p className="italic text-[11px] text-[#8b0000]/95 leading-relaxed">
-                                    <strong>Insight:</strong> {granularAnalysis.practicalInsight}
-                                  </p>
-                                  {granularAnalysis.crossReferences && granularAnalysis.crossReferences.length > 0 && (
-                                    <div className="pt-1 flex flex-wrap items-center gap-1 ui-font">
-                                      <span className="text-[9px] font-bold uppercase text-stone-600">Refs:</span>
-                                      {granularAnalysis.crossReferences.map((refStr, idx) => (
-                                        <span
-                                          key={idx}
-                                          className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/40 border border-white/60 text-[#8b0000]"
-                                        >
-                                          {refStr}
-                                        </span>
-                                      ))}
-                                    </div>
+                              ) : sixPhaseData ? (
+                                <div className="space-y-2 text-[11px] leading-relaxed text-[#1f100a]">
+                                  {sentenceToolView === 'PHASE_1' && (
+                                    <>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Original Languages & Variants</strong>{sixPhaseData.phase1.originalLanguagesAndVariants}</p>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Lexical & Grammatical Analysis</strong>{sixPhaseData.phase1.lexicalAndGrammaticalAnalysis}</p>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Figurative Language & "Signs"</strong>{sixPhaseData.phase1.figurativeLanguageAndSigns}</p>
+                                    </>
+                                  )}
+
+                                  {sentenceToolView === 'PHASE_2' && (
+                                    <>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Ancient Worldview</strong>{sixPhaseData.phase2.ancientWorldview}</p>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Relational Dynamics</strong>{sixPhaseData.phase2.relationalDynamics}</p>
+                                    </>
+                                  )}
+
+                                  {sentenceToolView === 'PHASE_3' && (
+                                    <>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Circles of Context</strong>{sixPhaseData.phase3.circlesOfContext}</p>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Genre & Form</strong>{sixPhaseData.phase3.genreAndForm}</p>
+                                    </>
+                                  )}
+
+                                  {sentenceToolView === 'PHASE_4' && (
+                                    <>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Intertextuality (OT/NT)</strong>{sixPhaseData.phase4.intertextuality}</p>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Organic Development & Rule of Faith</strong>{sixPhaseData.phase4.organicDevelopmentAndRuleOfFaith}</p>
+                                      {sixPhaseData.phase4.crossReferences && sixPhaseData.phase4.crossReferences.length > 0 && (
+                                        <div className="pt-1 flex flex-wrap items-center gap-1 ui-font">
+                                          <span className="text-[9px] font-bold uppercase text-stone-600">Refs:</span>
+                                          {sixPhaseData.phase4.crossReferences.map((refStr, idx) => (
+                                            <button
+                                              key={idx}
+                                              type="button"
+                                              onClick={(e) => handleCrossReferenceClick(refStr, e)}
+                                              className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/50 hover:bg-white/80 border border-white/70 text-[#8b0000] transition-colors"
+                                            >
+                                              {refStr} ↗
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
+
+                                  {sentenceToolView === 'PHASE_5' && (
+                                    <>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Early Church / Patristic Consensus</strong>{sixPhaseData.phase5.patristicConsensus}</p>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Medieval & Reformation Theology</strong>{sixPhaseData.phase5.medievalAndReformation}</p>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Modern Critical Scholarship</strong>{sixPhaseData.phase5.modernCriticalScholarship}</p>
+                                    </>
+                                  )}
+
+                                  {sentenceToolView === 'PHASE_6' && (
+                                    <>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Exegetical Verdict</strong>{sixPhaseData.phase6.exegeticalVerdict}</p>
+                                      <div className="p-2 rounded-lg bg-white/35 border border-white/50 space-y-1">
+                                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#382117] block ui-font">4-Step Application ("Principlizing")</span>
+                                        <p className="text-[10.5px]"><strong>1. Original:</strong> {sixPhaseData.phase6.originalApplication}</p>
+                                        <p className="text-[10.5px]"><strong>2. Specificity:</strong> {sixPhaseData.phase6.levelOfSpecificity}</p>
+                                        <p className="text-[10.5px]"><strong>3. Principle:</strong> {sixPhaseData.phase6.crossCulturalPrinciple}</p>
+                                        <p className="text-[10.5px] text-[#8b0000] font-medium"><strong>4. Embodiment:</strong> {sixPhaseData.phase6.contemporaryEmbodiment}</p>
+                                      </div>
+                                    </>
                                   )}
                                 </div>
                               ) : null}
@@ -3243,11 +3499,10 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Two Separate Liquid Glass Pills Row: [Word, Passage, Chapter, Narrative] + [Search, Bookmark] */}
-                    <div className="mt-3.5 flex items-center justify-between gap-2 ui-font select-none">
-                      {/* Pill 1: Word (aA), Passage (List), Chapter (Paper), Broader Narrative (Bookmark in Square) */}
+                    {/* Single Centered Liquid Glass Pill: 6 Exegetical & Hermeneutical Phase Buttons */}
+                    <div className="mt-3.5 flex items-center justify-center ui-font select-none">
                       <div
-                        className="flex items-center gap-1 rounded-full px-2 py-1 relative z-10"
+                        className="flex items-center gap-1 rounded-full px-2.5 py-1 relative z-10"
                         style={{
                           background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.72) 100%)',
                           border: '1px solid rgba(255, 255, 255, 0.95)',
@@ -3259,188 +3514,153 @@ export default function App() {
                           `,
                         }}
                       >
-                        {/* 1. "aA": Word in the context of the sentence */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (sentenceToolView === 'WORD') {
+                            if (sentenceToolView === 'PHASE_1') {
                               setSentenceToolView('NONE');
                               return;
                             }
-                            handleGranularScopeAnalysis('WORD', 'WORD_IN_SENTENCE');
+                            handlePhaseAnalysis('PHASE_1');
                           }}
-                          title="1) Analyze Word in the Context of the Sentence"
-                          aria-label="Analyze Word in the Context of the Sentence"
-                          className={`h-8 w-9 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'WORD'
-                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                              : 'text-[#24130c] hover:bg-white/25'
+                          title="Phase 1: Original Text, Linguistics, and Signs"
+                          aria-label="Phase 1: Original Text, Linguistics, and Signs"
+                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'PHASE_1'
+                              ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner font-bold'
+                              : 'text-[#24130c] hover:bg-black/5'
                           }`}
                         >
-                          <svg className="w-[20px] h-[18px]" viewBox="0 0 26 24" fill="currentColor">
+                          <svg className="w-[18px] h-[17px]" viewBox="0 0 26 24" fill="currentColor">
                             <text x="1" y="17.5" fontSize="11.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">a</text>
                             <text x="9.5" y="17.5" fontSize="15.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">A</text>
                           </svg>
                         </button>
 
-                        {/* 2. Bullet List: Sentence in the context of the verse */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (sentenceToolView === 'PASSAGE') {
+                            if (sentenceToolView === 'PHASE_2') {
                               setSentenceToolView('NONE');
                               return;
                             }
-                            handleGranularScopeAnalysis('PASSAGE', 'SENTENCE_IN_VERSE');
+                            handlePhaseAnalysis('PHASE_2');
                           }}
-                          title="2) Analyze Sentence in the Context of the Verse"
-                          aria-label="Analyze Sentence in the Context of the Verse"
+                          title="Phase 2: Historical-Cultural Context"
+                          aria-label="Phase 2: Historical-Cultural Context"
                           className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'PASSAGE'
-                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                              : 'text-[#24130c] hover:bg-white/25'
+                            sentenceToolView === 'PHASE_2'
+                              ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-black/5'
                           }`}
                         >
-                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="4.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-                            <circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none" />
-                            <circle cx="4.5" cy="17.5" r="1" fill="currentColor" stroke="none" />
-                            <line x1="9" y1="6.5" x2="19.5" y2="6.5" />
-                            <line x1="9" y1="12" x2="19.5" y2="12" />
-                            <line x1="9" y1="17.5" x2="19.5" y2="17.5" />
+                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 9l9-5 9 5v2H3V9z" />
+                            <line x1="6" y1="11" x2="6" y2="18" />
+                            <line x1="10" y1="11" x2="10" y2="18" />
+                            <line x1="14" y1="11" x2="14" y2="18" />
+                            <line x1="18" y1="11" x2="18" y2="18" />
+                            <path d="M3 18h18v2H3z" />
                           </svg>
                         </button>
 
-                        {/* 3. Paper Icon: Verse in the context of the passage */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (sentenceToolView === 'CHAPTER') {
+                            if (sentenceToolView === 'PHASE_3') {
                               setSentenceToolView('NONE');
                               return;
                             }
-                            handleGranularScopeAnalysis('CHAPTER', 'VERSE_IN_PASSAGE');
+                            handlePhaseAnalysis('PHASE_3');
                           }}
-                          title="3) Analyze Verse in the Context of the Passage"
-                          aria-label="Analyze Verse in the Context of the Passage"
+                          title="Phase 3: Literary Context and Genre"
+                          aria-label="Phase 3: Literary Context and Genre"
                           className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'CHAPTER'
-                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                              : 'text-[#24130c] hover:bg-white/25'
+                            sentenceToolView === 'PHASE_3'
+                              ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-black/5'
                           }`}
                         >
-                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="4" y="4" width="16" height="16" rx="2.5" />
-                            <path d="M4 8h16" strokeWidth="2.5" />
-                            <line x1="7.5" y1="12" x2="16.5" y2="12" strokeWidth="1.8" strokeLinecap="round" />
-                            <line x1="7.5" y1="15" x2="16.5" y2="15" strokeWidth="1.8" strokeLinecap="round" />
-                            <line x1="7.5" y1="18" x2="12.5" y2="18" strokeWidth="1.8" strokeLinecap="round" />
+                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="9" />
+                            <circle cx="12" cy="12" r="5.5" />
+                            <circle cx="12" cy="12" r="2" fill="currentColor" />
                           </svg>
                         </button>
 
-                        {/* 4. Bookmark in Square: Passage in the context of the Bible */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (sentenceToolView === 'NARRATIVE') {
+                            if (sentenceToolView === 'PHASE_4') {
                               setSentenceToolView('NONE');
                               return;
                             }
-                            handleGranularScopeAnalysis('NARRATIVE', 'PASSAGE_IN_BIBLE');
+                            handlePhaseAnalysis('PHASE_4');
                           }}
-                          title="4) Analyze Passage in the Context of the Bible"
-                          aria-label="Analyze Passage in the Context of the Bible"
+                          title="Phase 4: Canonical & Old/New Testament Connections"
+                          aria-label="Phase 4: Canonical & Old/New Testament Connections"
                           className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'NARRATIVE'
-                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                              : 'text-[#24130c] hover:bg-white/25'
+                            sentenceToolView === 'PHASE_4'
+                              ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-black/5'
                           }`}
                         >
-                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
-                            <path d="M13.5 4.5v7l2.25-1.6L18 11.5v-7" fill="currentColor" stroke="none" />
+                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                           </svg>
                         </button>
-                      </div>
 
-                      {/* Pill 2: Search (Magnifying Glass) & Bookmark (Ribbon) */}
-                      <div
-                        className="flex items-center gap-1 rounded-full px-2 py-1 relative z-10"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.72) 100%)',
-                          border: '1px solid rgba(255, 255, 255, 0.95)',
-                          boxShadow: `
-                            0 10px 24px rgba(36, 19, 12, 0.16),
-                            0 3px 8px rgba(36, 19, 12, 0.08),
-                            inset 0 1px 2px rgba(255, 255, 255, 1),
-                            inset 0 -1px 1.5px rgba(197, 160, 89, 0.15)
-                          `,
-                        }}
-                      >
-                        {/* 5. Magnifying Glass: In-App Concordance & Lexicon Search */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (sentenceToolView === 'SEARCH') {
+                            if (sentenceToolView === 'PHASE_5') {
                               setSentenceToolView('NONE');
-                            } else {
-                              setSearchQuery(getPrimaryWordFromSentence(displaySentence));
-                              setSentenceToolView('SEARCH');
+                              return;
                             }
+                            handlePhaseAnalysis('PHASE_5');
                           }}
-                          title="Search Lexicon & Passages"
-                          aria-label="Search Lexicon and Passages"
+                          title="Phase 5: History of Interpretation (The Great Chain of Tradition)"
+                          aria-label="Phase 5: History of Interpretation"
                           className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'SEARCH'
-                              ? 'bg-white/45 text-[#8b0000] shadow-inner'
-                              : 'text-[#24130c] hover:bg-white/25'
+                            sentenceToolView === 'PHASE_5'
+                              ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-black/5'
                           }`}
                         >
-                          <svg className="w-[17px] h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="10.5" cy="10.5" r="6.5" />
-                            <line x1="15.5" y1="15.5" x2="20.5" y2="20.5" />
+                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                           </svg>
                         </button>
 
-                        {/* 6. Bookmark Icon: Save Sentence to Top-Right Red Ribbon */}
-                        {(() => {
-                          const isSaved = bookmarks.some(
-                            b => b.sentence === displaySentence.trim() && b.storyId === selectedStory.id
-                          );
-                          return (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleToggleSentenceBookmark(displaySentence);
-                              }}
-                              title={isSaved ? "Remove Sentence from Ribbon Bookmarks" : "Bookmark Sentence to Red Ribbon"}
-                              aria-label="Bookmark Sentence"
-                              className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                                isSaved
-                                  ? 'bg-[#8b0000]/20 text-[#8b0000] shadow-inner'
-                                  : 'text-[#24130c] hover:bg-white/25'
-                              }`}
-                            >
-                              <svg
-                                className="w-[17px] h-[17px]"
-                                viewBox="0 0 24 24"
-                                fill={isSaved ? 'currentColor' : 'none'}
-                                stroke="currentColor"
-                                strokeWidth="2.1"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z" />
-                              </svg>
-                            </button>
-                          );
-                        })()}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (sentenceToolView === 'PHASE_6') {
+                              setSentenceToolView('NONE');
+                              return;
+                            }
+                            handlePhaseAnalysis('PHASE_6');
+                          }}
+                          title="Phase 6: Exegetical Synthesis and Contemporary Application"
+                          aria-label="Phase 6: Exegetical Synthesis and Contemporary Application"
+                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'PHASE_6'
+                              ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
+                              : 'text-[#24130c] hover:bg-black/5'
+                          }`}
+                        >
+                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="9" />
+                            <polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5 15.5 8.5" fill="currentColor" stroke="currentColor" strokeWidth="1.2" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   </div>
