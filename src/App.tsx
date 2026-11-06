@@ -640,6 +640,8 @@ export default function App() {
   const [sentenceToolView, setSentenceToolView] = useState<'NONE' | OiaPhaseId>('NONE');
   const [popupOrigin, setPopupOrigin] = useState<{ x: string; y: string }>({ x: '50%', y: '50%' });
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [lexiconFilter, setLexiconFilter] = useState<'ALL' | 'Person' | 'Place' | 'Concept & Artifact'>('ALL');
+  const homeScrollRef = useRef<HTMLDivElement>(null);
 
   // OIA AI Analysis State for Liquid Glass Popup
   const [oiaData, setOiaData] = useState<OiaAnalysisData | null>(null);
@@ -779,11 +781,26 @@ export default function App() {
     });
   };
 
-  // Bookmarks & Table of Contents Hub State (Triggered via Left-to-Right Page Curl on Ribbon Click)
-  const [bookmarks, setBookmarks] = useState<BookmarkedSentence[]>([]);
-  const [isTocOpen, setIsTocOpen] = useState<boolean>(false);
+  // Bookmarks & Home Hub State (Triggered via Left-to-Right Page Curl on Ribbon Click)
+  const [bookmarks, setBookmarks] = useState<BookmarkedSentence[]>([
+    {
+      id: 'bm-default-1',
+      sentence: 'God creates the heavens and the earth, brings order out of darkness, and makes humanity in His image.',
+      storyId: 'NAR-01',
+      storyTitle: '1. Creation',
+      storyRef: 'Genesis 1-2',
+      timestamp: 'Saved Study Note',
+    },
+  ]);
+  // 1) First page the Bible opens to is the "Home" page
+  const [isTocOpen, setIsTocOpen] = useState<boolean>(true);
   const [tocTargetAfterCurl, setTocTargetAfterCurl] = useState<boolean | null>(null);
-  const [tocSubView, setTocSubView] = useState<'HUB' | 'BOOKMARKS'>('HUB');
+  const tocTargetAfterCurlRef = useRef<boolean | null>(null);
+  const lastVisitedPageRef = useRef<{ section: StorySection; story: ContentItem }>({
+    section: 'NARRATIVE',
+    story: MASTER_CONTENT[0],
+  });
+  const [tocSubView, setTocSubView] = useState<'HUB' | 'BOOKMARKS' | 'LEXICON' | 'SEARCH'>('HUB');
   const [showPwaPrompt, setShowPwaPrompt] = useState<boolean>(false);
   const [deferredPwaPrompt, setDeferredPwaPrompt] = useState<any>(null);
 
@@ -821,6 +838,7 @@ export default function App() {
   };
 
   const [isFullscreenActive, setIsFullscreenActive] = useState<boolean>(false);
+  const [isSimulatedFullscreen, setIsSimulatedFullscreen] = useState<boolean>(false);
 
   React.useEffect(() => {
     const onFsChange = () => {
@@ -831,6 +849,7 @@ export default function App() {
         (document as any).msFullscreenElement
       );
       setIsFullscreenActive(isFS);
+      if (!isFS) setIsSimulatedFullscreen(false);
     };
     document.addEventListener('fullscreenchange', onFsChange);
     document.addEventListener('webkitfullscreenchange', onFsChange);
@@ -840,49 +859,64 @@ export default function App() {
     };
   }, []);
 
-  const handleFullscreenAndPwa = async () => {
-    let enteredNativeFullscreen = false;
-    try {
-      const docEl = document.documentElement as any;
-      const requestFS =
-        docEl.requestFullscreen ||
-        docEl.webkitRequestFullscreen ||
-        docEl.mozRequestFullScreen ||
-        docEl.msRequestFullscreen;
+  const isAnyFullscreen = isFullscreenActive || isSimulatedFullscreen;
+
+  const handleFullscreenAndPwa = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+
+    const docEl = document.documentElement as any;
+    const isNativeFS = Boolean(
+      document.fullscreenElement ||
+      (document as any).webkitFullscreenElement ||
+      (document as any).mozFullScreenElement ||
+      (document as any).msFullscreenElement
+    );
+
+    // 1. If already in native or simulated fullscreen, exit cleanly
+    if (isNativeFS || isSimulatedFullscreen) {
       const exitFS =
         document.exitFullscreen ||
         (document as any).webkitExitFullscreen ||
         (document as any).mozCancelFullScreen ||
         (document as any).msExitFullscreen;
-      const isFS = Boolean(
-        document.fullscreenElement ||
-        (document as any).webkitFullscreenElement ||
-        (document as any).mozFullScreenElement ||
-        (document as any).msFullscreenElement
-      );
-
-      if (requestFS && !isFS) {
-        await requestFS.call(docEl);
-        enteredNativeFullscreen = true;
-      } else if (exitFS && isFS) {
-        await exitFS.call(document);
-        return;
+      if (isNativeFS && exitFS) {
+        try {
+          exitFS.call(document);
+        } catch {}
       }
-    } catch {
-      enteredNativeFullscreen = false;
+      setIsSimulatedFullscreen(false);
+      setIsFullscreenActive(false);
+      return;
     }
 
-    if (deferredPwaPrompt) {
+    // 2. Always enable simulated edge-to-edge fullscreen immediately for instant responsiveness,
+    // and simultaneously request native browser fullscreen where supported
+    setIsSimulatedFullscreen(true);
+
+    const requestFS =
+      docEl.requestFullscreen ||
+      docEl.webkitRequestFullscreen ||
+      docEl.mozRequestFullScreen ||
+      docEl.msRequestFullscreen;
+
+    if (requestFS) {
       try {
-        deferredPwaPrompt.prompt();
-        const choiceResult = await deferredPwaPrompt.userChoice;
-        setDeferredPwaPrompt(null);
-        if (choiceResult?.outcome === 'accepted') return;
-      } catch {}
-    }
-
-    if (!enteredNativeFullscreen) {
-      setShowPwaPrompt(true);
+        const promise = requestFS.call(docEl);
+        if (promise && typeof promise.then === 'function') {
+          promise
+            .then(() => {
+              setIsFullscreenActive(true);
+            })
+            .catch(() => {
+              // Keep simulated edge-to-edge fullscreen active when iframe or iOS blocks native API
+              setIsSimulatedFullscreen(true);
+            });
+        } else {
+          setIsFullscreenActive(true);
+        }
+      } catch {
+        setIsSimulatedFullscreen(true);
+      }
     }
   };
 
@@ -1086,6 +1120,7 @@ export default function App() {
   }, []);
 
   const handleStoryChange = (story: ContentItem) => {
+    lastVisitedPageRef.current = { section: story.section, story };
     setSelectedStory(story);
     setAnalysisResult(null);
     setActiveCitations([]);
@@ -1109,8 +1144,7 @@ export default function App() {
     }
   };
 
-  const handleDailyPericope = () => {
-    if (!pageContainerRef.current) return;
+  const handleDailyPericope = (): ContentItem => {
     const pericopes = MASTER_CONTENT.filter(s => s.section === 'PERICOPES');
     const today = new Date();
     const start = new Date(today.getFullYear(), 0, 0);
@@ -1118,7 +1152,10 @@ export default function App() {
     const oneDay = 1000 * 60 * 60 * 24;
     const dayOfYear = Math.floor(diff / oneDay);
     const dailyIndex = dayOfYear % pericopes.length;
-    handleStoryChange(pericopes[dailyIndex]);
+    const dailyStory = pericopes[dailyIndex];
+    setActiveSection('PERICOPES');
+    handleStoryChange(dailyStory);
+    return dailyStory;
   };
 
   const fetchBibleArt = async (story: ContentItem, isBackgroundPrefetch = false) => {
@@ -1374,8 +1411,9 @@ export default function App() {
         animFrameRef.current = requestAnimationFrame(step);
       } else {
         setCurlState(null);
-        if (tocTargetAfterCurl !== null) {
-          setIsTocOpen(tocTargetAfterCurl);
+        if (tocTargetAfterCurlRef.current !== null) {
+          setIsTocOpen(tocTargetAfterCurlRef.current);
+          tocTargetAfterCurlRef.current = null;
           setTocTargetAfterCurl(null);
         } else if (targetFlipped) {
           if (isBackSwipe) {
@@ -1391,15 +1429,42 @@ export default function App() {
     animFrameRef.current = requestAnimationFrame(step);
   };
 
+  const navigateFromHomeToStory = (section: StorySection, targetStory?: ContentItem) => {
+    const sectionStories = MASTER_CONTENT.filter(s => s.section === section);
+    const resolvedStory = targetStory || sectionStories[0] || MASTER_CONTENT[0];
+
+    setActiveSection(section);
+    handleStoryChange(resolvedStory);
+    lastVisitedPageRef.current = { section, story: resolvedStory };
+
+    const rect = pageContainerRef.current?.getBoundingClientRect();
+    const W = rect?.width || 370;
+    const H = rect?.height || 740;
+
+    tocTargetAfterCurlRef.current = false;
+    setTocTargetAfterCurl(false);
+    setCurlState({
+      pointerX: W - 24,
+      pointerY: H * 0.22,
+      originY: 0,
+      isDragging: false,
+      isBackSwipe: false,
+    });
+    animateCurlTo(W - 24, H * 0.22, 0, true, false, -1.35);
+  };
+
   const triggerRibbonTocPageTurn = () => {
     const rect = pageContainerRef.current?.getBoundingClientRect();
     const W = rect?.width || 370;
     const H = rect?.height || 740;
     setActiveSentence(null);
     setIsContextDropdownOpen(false);
-    setTocSubView('HUB');
 
     if (!isTocOpen) {
+      // Save current page before curling to Home
+      lastVisitedPageRef.current = { section: activeSection, story: selectedStory };
+      setTocSubView('HUB');
+      tocTargetAfterCurlRef.current = true;
       setTocTargetAfterCurl(true);
       setCurlState({
         pointerX: 24,
@@ -1410,6 +1475,13 @@ export default function App() {
       });
       animateCurlTo(24, H * 0.22, 0, true, true, 1.35);
     } else {
+      // Revert back to the exact page we came from
+      const prev = lastVisitedPageRef.current;
+      if (prev) {
+        setActiveSection(prev.section);
+        setSelectedStory(prev.story);
+      }
+      tocTargetAfterCurlRef.current = false;
       setTocTargetAfterCurl(false);
       setCurlState({
         pointerX: W - 24,
@@ -1422,224 +1494,498 @@ export default function App() {
     }
   };
 
+  const toggleSentenceBookmark = (sentenceText: string) => {
+    const clean = sentenceText.trim();
+    if (!clean) return;
+    setBookmarks(prev => {
+      const exists = prev.some(b => b.sentence === clean && b.storyId === selectedStory.id);
+      if (exists) {
+        return prev.filter(b => !(b.sentence === clean && b.storyId === selectedStory.id));
+      }
+      return [
+        {
+          id: `bm-${Date.now()}`,
+          sentence: clean,
+          storyId: selectedStory.id,
+          storyTitle: selectedStory.title,
+          storyRef: selectedStory.ref,
+          timestamp: new Date().toLocaleDateString(),
+        },
+        ...prev,
+      ];
+    });
+  };
+
+  // Replaced Table of Contents with Apple TV-Style "Home" Horizontal Tile Carousel Screen
   const renderTocContent = (interactive = true) => {
     const filteredBySearch = searchQuery.trim()
       ? MASTER_CONTENT.filter(
           s =>
             s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             s.ref.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.body.toLowerCase().includes(searchQuery.toLowerCase())
-        ).slice(0, 12)
-      : [];
+            s.body.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.why.toLowerCase().includes(searchQuery.toLowerCase())
+        ).slice(0, 25)
+      : MASTER_CONTENT.slice(0, 12);
+
+    const allLexiconEntries = Object.values(BIBLICAL_LEXICON).filter(entry =>
+      lexiconFilter === 'ALL' ? true : entry.category === lexiconFilter
+    );
+
+    const INTRODUCTORY_TILES: {
+      id: StorySection;
+      title: string;
+      subtitle: string;
+      gradient: string;
+    }[] = [
+      {
+        id: 'NARRATIVE',
+        title: 'Grand Narrative',
+        subtitle: 'Creation to New Creation',
+        gradient: 'linear-gradient(155deg, #d8b467 0%, #8b6520 55%, #2c1a0e 100%)',
+      },
+      {
+        id: 'OT',
+        title: 'OT',
+        subtitle: 'Old Testament',
+        gradient: 'linear-gradient(155deg, #4b382a 0%, #261a13 60%, #120b07 100%)',
+      },
+      {
+        id: 'NT',
+        title: 'NT',
+        subtitle: 'New Testament',
+        gradient: 'linear-gradient(155deg, #8b1e1e 0%, #4d0d0d 60%, #1d0505 100%)',
+      },
+      {
+        id: 'THEMES',
+        title: 'Leadership',
+        subtitle: 'Core Virtues',
+        gradient: 'linear-gradient(155deg, #7c5836 0%, #3d2716 60%, #180e07 100%)',
+      },
+      {
+        id: 'PERICOPES',
+        title: 'Pericopes',
+        subtitle: '355 Passages',
+        gradient: 'linear-gradient(155deg, #525b44 0%, #272d1f 60%, #11140d 100%)',
+      },
+    ];
+
+    const CATEGORY_ROWS: {
+      headline: string;
+      section: StorySection;
+      items: ContentItem[];
+      gradients: string[];
+    }[] = [
+      {
+        headline: 'Grand Narrative',
+        section: 'NARRATIVE',
+        items: NARRATIVE_STORIES,
+        gradients: [
+          'linear-gradient(160deg, #c5a059 0%, #5c4318 65%, #231709 100%)',
+          'linear-gradient(160deg, #5a3d28 0%, #2c1d12 65%, #140c07 100%)',
+          'linear-gradient(160deg, #7a2020 0%, #3d0e0e 65%, #1a0606 100%)',
+          'linear-gradient(160deg, #3b4d5e 0%, #1c2730 65%, #0d1318 100%)',
+        ],
+      },
+      {
+        headline: 'Old Testament',
+        section: 'OT',
+        items: OT_STORIES,
+        gradients: [
+          'linear-gradient(160deg, #8c6239 0%, #4a3219 65%, #1e1308 100%)',
+          'linear-gradient(160deg, #4f4339 0%, #29221c 65%, #120e0b 100%)',
+          'linear-gradient(160deg, #6e472b 0%, #382212 65%, #170d06 100%)',
+        ],
+      },
+      {
+        headline: 'New Testament',
+        section: 'NT',
+        items: NT_STORIES,
+        gradients: [
+          'linear-gradient(160deg, #9e2a2b 0%, #541112 65%, #220606 100%)',
+          'linear-gradient(160deg, #b08d57 0%, #594322 65%, #241a0b 100%)',
+          'linear-gradient(160deg, #3d352e 0%, #211c18 65%, #0f0c0a 100%)',
+        ],
+      },
+      {
+        headline: 'Leadership',
+        section: 'THEMES',
+        items: THEME_STORIES,
+        gradients: [
+          'linear-gradient(160deg, #b89249 0%, #61491c 65%, #241a08 100%)',
+          'linear-gradient(160deg, #423329 0%, #241b15 65%, #100b08 100%)',
+          'linear-gradient(160deg, #732626 0%, #3b1111 65%, #180606 100%)',
+        ],
+      },
+      {
+        headline: 'Pericopes',
+        section: 'PERICOPES',
+        items: PERICOPE_STORIES.slice(0, 15),
+        gradients: [
+          'linear-gradient(160deg, #525b44 0%, #272d1f 65%, #11140d 100%)',
+          'linear-gradient(160deg, #7c5836 0%, #3d2716 65%, #180e07 100%)',
+          'linear-gradient(160deg, #4b382a 0%, #261a13 65%, #120b07 100%)',
+        ],
+      },
+    ];
 
     return (
       <div className="w-full max-w-[356px] mx-auto flex flex-col h-full reading-font select-none">
-        <header className="text-center border-b-2 border-double border-[#c5a059] pb-2.5 mb-3 shrink-0">
-          <div className="text-[9px] font-bold uppercase tracking-[0.28em] text-[#8b0000] ui-font">
-            Sacred Study Platform
-          </div>
-          <h2 className="text-xl font-bold tracking-[0.14em] text-[#382117] uppercase mt-0.5">
-            Table of Contents
-          </h2>
-          <p className="text-[10px] italic text-stone-500 mt-0.5">
-            Select a canonical division, passage, or study tool
-          </p>
-        </header>
-
-        <div className="flex bg-[#fdfaf2] border border-[#c5a059]/70 rounded-md p-0.5 mb-3 shrink-0 ui-font text-[10px] font-bold uppercase tracking-wider">
+        {/* Top Header: "Home" + Fullscreen & PWA Controls */}
+        <header className="flex items-center justify-between border-b-2 border-double border-[#c5a059] pb-2.5 mb-3 shrink-0">
           <button
             type="button"
-            onClick={interactive ? () => setTocSubView('HUB') : undefined}
-            className={`flex-1 py-1.5 rounded transition-all ${
-              tocSubView === 'HUB' ? 'bg-[#8b0000] text-[#fdfaf2] shadow-xs' : 'text-[#4a3b32]'
-            }`}
+            onClick={
+              interactive
+                ? () => {
+                    setTocSubView('HUB');
+                    homeScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                : undefined
+            }
+            className="text-left focus:outline-none group"
           >
-            Index & Hub
+            <div className="text-[8.5px] font-bold uppercase tracking-[0.28em] text-[#8b0000] ui-font">
+              Holybook Library
+            </div>
+            <h2 className="text-2xl font-bold tracking-[0.06em] text-[#382117] leading-tight group-hover:text-[#8b0000] transition-colors">
+              Home
+            </h2>
           </button>
-          <button
-            type="button"
-            onClick={interactive ? () => setTocSubView('BOOKMARKS') : undefined}
-            className={`flex-1 py-1.5 rounded transition-all flex items-center justify-center gap-1.5 ${
-              tocSubView === 'BOOKMARKS' ? 'bg-[#8b0000] text-[#fdfaf2] shadow-xs' : 'text-[#4a3b32]'
-            }`}
-          >
-            <span>Bookmarks</span>
-            {bookmarks.length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-[#c5a059]/30">
-                {bookmarks.length}
+
+          <div className="flex items-center gap-1.5 ui-font mr-7">
+            <button
+              type="button"
+              onClick={interactive ? (e) => handleFullscreenAndPwa(e) : undefined}
+              title={isAnyFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+              className={`px-2.5 py-1.5 rounded-full border flex items-center gap-1 transition-all apple-gpu-btn cursor-pointer ${
+                isAnyFullscreen
+                  ? 'bg-[#8b0000] text-[#fdfaf2] border-[#8b0000] shadow-sm'
+                  : 'bg-[#fdfaf2] text-[#382117] border-[#c5a059]/90 hover:border-[#8b0000]'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isAnyFullscreen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 9L4 4m0 0v4m0-4h4m7 5l5-5m0 0v4m0-4h-4M9 15l-5 5m0 0v-4m0 4h4m7-5l5 5m0 0v-4m0 4h-4" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                )}
+              </svg>
+              <span className="text-[9.5px] font-bold uppercase tracking-wider">
+                {isAnyFullscreen ? 'Exit' : 'Full'}
               </span>
-            )}
-          </button>
-        </div>
-
-        {tocSubView === 'HUB' ? (
-          <div className="flex-1 overflow-y-auto no-scrollbar space-y-3.5 pr-0.5 pb-4">
-            <div className="bg-[#fdfaf2] border border-[#c5a059]/60 rounded-lg p-2.5 shadow-xs ui-font">
-              <label className="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-1">
-                Concordance & Passage Jump
-              </label>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={interactive ? (e) => setSearchQuery(e.target.value) : undefined}
-                placeholder="Search any story, theme, or verse..."
-                className="w-full px-2.5 py-1.5 text-xs bg-[#fffcf5] border border-[#c5a059]/50 rounded focus:outline-none focus:border-[#8b0000] text-[#382117]"
-              />
-              {filteredBySearch.length > 0 && (
-                <div className="mt-2 max-h-36 overflow-y-auto divide-y divide-[#e6d9c3]/50 no-scrollbar">
-                  {filteredBySearch.map(item => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={interactive ? () => {
-                        setActiveSection(item.section);
-                        handleStoryChange(item);
-                        setSearchQuery('');
-                        triggerRibbonTocPageTurn();
-                      } : undefined}
-                      className="w-full text-left py-1.5 px-1.5 hover:bg-[#c5a059]/15 flex items-center justify-between gap-2 rounded"
-                    >
-                      <span className="text-xs font-bold text-[#382117] truncate">{item.title}</span>
-                      <span className="text-[10px] text-[#8b0000] shrink-0">{item.ref}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b0000] border-b border-[#c5a059]/40 pb-1 ui-font">
-                I. Canonical Divisions
-              </div>
-              {SECTIONS.map((sec, idx) => {
-                const count = MASTER_CONTENT.filter(s => s.section === sec.id).length;
-                const isCurrent = activeSection === sec.id;
-                return (
-                  <button
-                    key={sec.id}
-                    type="button"
-                    onClick={interactive ? () => {
-                      handleSectionChange(sec.id);
-                      triggerRibbonTocPageTurn();
-                    } : undefined}
-                    className={`w-full py-2.5 px-3 rounded-lg border text-left flex items-center justify-between gap-3 apple-gpu-btn ${
-                      isCurrent
-                        ? 'bg-[#c5a059]/20 border-[#8b0000] text-[#382117]'
-                        : 'bg-[#fdfaf2]/90 border-[#c5a059]/50 hover:border-[#c5a059] text-[#382117]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-[#8b0000] shrink-0">{renderSectionIcon(sec.id)}</span>
-                      <div className="min-w-0">
-                        <div className="text-xs font-bold tracking-wide truncate">
-                          {idx + 1}. {sec.label}
-                        </div>
-                        <div className="text-[10px] text-stone-500 ui-font">
-                          {count} Curated Passages & Studies
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-xs font-bold text-[#8b0000] ui-font">→</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="space-y-1.5 pt-1">
-              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b0000] border-b border-[#c5a059]/40 pb-1 ui-font">
-                II. Study Tools & App Experience
-              </div>
-
-              <button
-                type="button"
-                onClick={interactive ? () => {
-                  setActiveSection('PERICOPES');
-                  handleDailyPericope();
-                  triggerRibbonTocPageTurn();
-                } : undefined}
-                className="w-full py-2.5 px-3 rounded-lg border border-[#c5a059]/60 bg-[#fdfaf2] text-left flex items-center justify-between apple-gpu-btn ui-font"
-              >
-                <div>
-                  <div className="text-xs font-bold text-[#382117]">✦ Daily Pericope Reading</div>
-                  <div className="text-[10px] text-stone-500">Jump to today's appointed scripture</div>
-                </div>
-                <span className="text-xs text-[#8b0000] font-bold">Open</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={interactive ? () => {
-                  setIsHighlightMode(prev => !prev);
-                } : undefined}
-                className="w-full py-2.5 px-3 rounded-lg border border-[#c5a059]/60 bg-[#fdfaf2] text-left flex items-center justify-between apple-gpu-btn ui-font"
-              >
-                <div>
-                  <div className="text-xs font-bold text-[#382117]">Webster's 1828 Key Term Scanner</div>
-                  <div className="text-[10px] text-stone-500">Highlight biblical names, places & concepts</div>
-                </div>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isHighlightMode ? 'bg-[#8b0000] text-white' : 'bg-stone-200 text-stone-600'}`}>
-                  {isHighlightMode ? 'ACTIVE' : 'OFF'}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={interactive ? handleFullscreenAndPwa : undefined}
-                className="w-full py-3 px-3 rounded-lg border-2 border-[#c5a059] bg-gradient-to-r from-[#382117] to-[#4a3b32] text-[#fdfaf2] text-left flex items-center justify-between apple-gpu-btn shadow-md ui-font"
-              >
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#e3c178]">
-                    {isFullscreenActive ? 'Exit Fullscreen Mode' : 'Fullscreen Mode • Add to Home Screen'}
-                  </div>
-                  <div className="text-[10px] text-[#fdfaf2]/80">
-                    {isFullscreenActive ? 'Currently running in fullscreen' : 'Install as a Progressive Web App (PWA)'}
-                  </div>
-                </div>
-                <svg className="w-5 h-5 text-[#e3c178] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                </svg>
-              </button>
-            </div>
+            </button>
 
             <button
               type="button"
-              onClick={interactive ? triggerRibbonTocPageTurn : undefined}
-              className="w-full py-2.5 px-4 rounded-md bg-[#8b0000] text-[#fdfaf2] text-xs font-bold uppercase tracking-widest text-center shadow-sm apple-gpu-btn ui-font"
+              onClick={
+                interactive
+                  ? async (e) => {
+                      e.stopPropagation();
+                      if (deferredPwaPrompt) {
+                        try {
+                          deferredPwaPrompt.prompt();
+                          await deferredPwaPrompt.userChoice;
+                          setDeferredPwaPrompt(null);
+                          return;
+                        } catch {}
+                      }
+                      setShowPwaPrompt(true);
+                    }
+                  : undefined
+              }
+              title="Install App Instructions"
+              className="px-2.5 py-1.5 rounded-full border border-[#c5a059]/90 bg-[#fdfaf2] hover:border-[#8b0000] text-[#382117] text-[9.5px] font-bold uppercase tracking-wider apple-gpu-btn cursor-pointer"
             >
-              Return to {selectedStory.ref} →
+              PWA
             </button>
           </div>
-        ) : (
-          <div className="flex-1 overflow-y-auto p-2 space-y-2.5 divide-y divide-[#e6d9c3]/70 no-scrollbar">
+        </header>
+
+        {/* Main Body Subviews: HUB | LEXICON | BOOKMARKS | SEARCH */}
+        {tocSubView === 'HUB' && (
+          <div
+            ref={homeScrollRef}
+            className="flex-1 overflow-y-auto no-scrollbar space-y-5 pr-0.5 pb-4"
+          >
+            {/* 1. First Headline: "Introductory" with the 5 Canonical Tiles */}
+            <section className="space-y-2">
+              <div className="flex items-center justify-between px-0.5">
+                <button
+                  type="button"
+                  onClick={
+                    interactive
+                      ? () => navigateFromHomeToStory('NARRATIVE', NARRATIVE_STORIES[0])
+                      : undefined
+                  }
+                  className="flex items-center gap-1 text-left group cursor-pointer focus:outline-none"
+                >
+                  <h3 className="text-[15px] font-bold tracking-tight text-[#382117] group-hover:text-[#8b0000] transition-colors ui-font">
+                    Introductory
+                  </h3>
+                  <span className="text-[#8b0000] font-bold text-sm transition-transform group-hover:translate-x-0.5">
+                    ›
+                  </span>
+                </button>
+                <span className="text-[9px] uppercase tracking-widest text-[#c5a059] font-bold ui-font">
+                  5 Divisions
+                </span>
+              </div>
+
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1.5 pt-0.5 -mx-1 px-1 snap-x snap-mandatory touch-pan-x">
+                {INTRODUCTORY_TILES.map((tile, idx) => {
+                  const isCurrent = activeSection === tile.id;
+                  const firstInDivision = MASTER_CONTENT.find(s => s.section === tile.id);
+                  return (
+                    <button
+                      key={tile.id}
+                      type="button"
+                      onClick={
+                        interactive
+                          ? () => navigateFromHomeToStory(tile.id, firstInDivision)
+                          : undefined
+                      }
+                      style={{ background: tile.gradient }}
+                      className={`snap-start shrink-0 w-[108px] h-[148px] rounded-[16px] p-3 flex flex-col justify-between text-left relative overflow-hidden apple-gpu-btn cursor-pointer shadow-[0_6px_16px_rgba(36,19,12,0.22)] border ${
+                        isCurrent ? 'border-[#8b0000] ring-2 ring-[#c5a059]' : 'border-[#c5a059]/45'
+                      }`}
+                    >
+                      <div
+                        className="pointer-events-none absolute inset-0 opacity-30"
+                        style={{
+                          background:
+                            'radial-gradient(circle at 20% 15%, rgba(255,255,255,0.55) 0%, transparent 60%)',
+                        }}
+                      />
+
+                      <div className="relative z-10 flex items-start justify-between w-full">
+                        <span className="text-2xl font-bold text-[#fdfaf2]/90 ui-font leading-none drop-shadow">
+                          {idx + 1}
+                        </span>
+                        <span className="text-[#e3c178]/90 scale-90">
+                          {renderSectionIcon(tile.id)}
+                        </span>
+                      </div>
+
+                      <div className="relative z-10 mt-auto">
+                        <div className="text-[12px] font-bold text-[#fdfaf2] leading-tight tracking-wide drop-shadow">
+                          {tile.title}
+                        </div>
+                        <div className="text-[9px] text-[#e3c178]/90 ui-font mt-0.5 truncate">
+                          {tile.subtitle}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Subsequent Category Carousels */}
+            {CATEGORY_ROWS.map((row) => (
+              <section key={row.headline} className="space-y-2">
+                <div className="flex items-center justify-between px-0.5">
+                  <button
+                    type="button"
+                    onClick={
+                      interactive
+                        ? () => navigateFromHomeToStory(row.section, row.items[0])
+                        : undefined
+                    }
+                    className="flex items-center gap-1 text-left group cursor-pointer focus:outline-none"
+                  >
+                    <h3 className="text-[15px] font-bold tracking-tight text-[#382117] group-hover:text-[#8b0000] transition-colors ui-font">
+                      {row.headline}
+                    </h3>
+                    <span className="text-[#8b0000] font-bold text-sm transition-transform group-hover:translate-x-0.5">
+                      ›
+                    </span>
+                  </button>
+                  <span className="text-[9px] uppercase tracking-widest text-stone-400 font-semibold ui-font">
+                    {row.items.length} Tiles
+                  </span>
+                </div>
+
+                <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1.5 pt-0.5 -mx-1 px-1 snap-x snap-mandatory touch-pan-x">
+                  {row.items.map((item, idx) => {
+                    const cleanTitle = item.title.replace(/^[0-9.]+\s*/, '').trim();
+                    const bgGrad = row.gradients[idx % row.gradients.length];
+                    const cachedThumb = artCache[item.id]?.imageUrl;
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={
+                          interactive
+                            ? () => navigateFromHomeToStory(item.section, item)
+                            : undefined
+                        }
+                        style={{ background: bgGrad }}
+                        className="snap-start shrink-0 w-[108px] h-[148px] rounded-[16px] p-3 flex flex-col justify-between text-left relative overflow-hidden apple-gpu-btn cursor-pointer shadow-[0_6px_16px_rgba(36,19,12,0.2)] border border-[#c5a059]/40"
+                      >
+                        {cachedThumb && (
+                          <img
+                            src={cachedThumb}
+                            alt={cleanTitle}
+                            className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-luminosity"
+                          />
+                        )}
+                        <div
+                          className="pointer-events-none absolute inset-0"
+                          style={{
+                            background:
+                              'linear-gradient(to bottom, rgba(20,12,8,0.15) 0%, rgba(20,12,8,0.82) 100%)',
+                          }}
+                        />
+
+                        <span className="relative z-10 text-2xl font-bold text-[#fdfaf2]/90 ui-font leading-none drop-shadow">
+                          {idx + 1}
+                        </span>
+
+                        <div className="relative z-10 mt-auto">
+                          <div className="text-[11.5px] font-bold text-[#fdfaf2] leading-snug line-clamp-2 drop-shadow">
+                            {cleanTitle}
+                          </div>
+                          <div className="text-[8.5px] text-[#e3c178] ui-font mt-0.5 truncate">
+                            {item.ref.split('|')[0].trim()}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+
+        {/* Lexicon Subview (Triggered by "Lexicon" Dock Button) */}
+        {tocSubView === 'LEXICON' && (
+          <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pr-0.5 pb-4 animate-fade-in">
+            <div className="bg-[#fdfaf2] border border-[#c5a059]/80 rounded-xl p-3 shadow-xs ui-font flex items-center justify-between">
+              <div>
+                <div className="text-xs font-bold text-[#382117]">
+                  Webster's 1828 In-Text Scanner
+                </div>
+                <div className="text-[10px] text-stone-500">
+                  Highlight key biblical terms inside scripture passages
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={interactive ? () => setIsHighlightMode(prev => !prev) : undefined}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                  isHighlightMode
+                    ? 'bg-[#8b0000] text-[#fdfaf2]'
+                    : 'bg-stone-200 text-stone-700'
+                }`}
+              >
+                {isHighlightMode ? 'Scanner ON' : 'Scanner OFF'}
+              </button>
+            </div>
+
+            <div className="flex gap-1 ui-font text-[9.5px] font-bold uppercase tracking-wider overflow-x-auto no-scrollbar">
+              {(['ALL', 'Person', 'Place', 'Concept & Artifact'] as const).map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={interactive ? () => setLexiconFilter(cat) : undefined}
+                  className={`px-2.5 py-1 rounded-full border shrink-0 cursor-pointer ${
+                    lexiconFilter === cat
+                      ? 'bg-[#382117] text-[#e3c178] border-[#382117]'
+                      : 'bg-[#fdfaf2] text-[#4a3b32] border-[#c5a059]/50'
+                  }`}
+                >
+                  {cat === 'Concept & Artifact' ? 'Concepts' : cat}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              {allLexiconEntries.map(entry => (
+                <div
+                  key={entry.term}
+                  className="p-2.5 rounded-xl bg-[#fdfaf2] border border-[#e6d9c3] shadow-2xs space-y-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#8b0000]">{entry.term}</span>
+                    <span className="text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#c5a059]/20 text-[#382117] ui-font font-semibold">
+                      {entry.category}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#2c1810] leading-relaxed">{entry.shortDef}</p>
+                  <p className="text-[10.5px] italic text-stone-600">{entry.significance}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Saved Bookmarks Library View (Triggered by "Library" Dock Button) */}
+        {tocSubView === 'BOOKMARKS' && (
+          <div className="flex-1 overflow-y-auto p-1 space-y-2.5 no-scrollbar pb-4 animate-fade-in">
+            <div className="flex items-center justify-between border-b border-[#c5a059]/40 pb-1.5 ui-font">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000]">
+                Saved Scripture Library ({bookmarks.length})
+              </span>
+              <span className="text-[9.5px] text-stone-500">Tap any verse to open</span>
+            </div>
             {bookmarks.length === 0 ? (
-              <div className="py-12 px-4 text-center text-xs text-stone-500 italic reading-font">
-                No bookmarked sentences saved yet.
+              <div className="py-12 px-4 text-center text-xs text-stone-500 italic reading-font space-y-2">
+                <p>No bookmarked sentences saved yet.</p>
+                <p className="text-[10px] not-italic ui-font text-stone-400">
+                  Tip: Tap any sentence while reading and press the Bookmark icon in the Liquid Glass popup.
+                </p>
               </div>
             ) : (
               bookmarks.map((bm) => (
-                <div key={bm.id} className="pt-2.5 first:pt-0 flex flex-col gap-1">
+                <div
+                  key={bm.id}
+                  className="p-2.5 rounded-xl bg-[#fdfaf2] border border-[#c5a059]/60 shadow-2xs flex flex-col gap-1.5"
+                >
                   <div className="flex items-center justify-between gap-2">
                     <button
-                      onClick={interactive ? () => {
-                        const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
-                        if (target) {
-                          setActiveSection(target.section);
-                          handleStoryChange(target);
-                        }
-                        triggerRibbonTocPageTurn();
-                      } : undefined}
-                      className="text-[10px] font-bold uppercase tracking-wider text-[#8b0000] hover:underline ui-font text-left truncate"
+                      type="button"
+                      onClick={
+                        interactive
+                          ? () => {
+                              const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
+                              if (target) {
+                                navigateFromHomeToStory(target.section, target);
+                              }
+                            }
+                          : undefined
+                      }
+                      className="text-[10px] font-bold uppercase tracking-wider text-[#8b0000] hover:underline ui-font text-left truncate cursor-pointer"
                     >
-                      {bm.storyTitle} • {bm.storyRef}
+                      {bm.storyTitle} • {bm.storyRef} →
                     </button>
                     <button
-                      onClick={interactive ? () => setBookmarks(prev => prev.filter(item => item.id !== bm.id)) : undefined}
-                      className="text-[10px] text-stone-400 hover:text-[#8b0000] px-1 ui-font"
+                      type="button"
+                      onClick={
+                        interactive
+                          ? () => setBookmarks(prev => prev.filter(item => item.id !== bm.id))
+                          : undefined
+                      }
+                      className="text-[10px] text-stone-400 hover:text-[#8b0000] px-1 ui-font cursor-pointer"
                     >
                       ✕
                     </button>
                   </div>
-                  <p className="text-xs italic text-[#2c1810] leading-relaxed p-1.5 rounded bg-[#fdfaf2] border border-[#e6d9c3]/60 reading-font">
+                  <p
+                    onClick={
+                      interactive
+                        ? () => {
+                            const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
+                            if (target) {
+                              navigateFromHomeToStory(target.section, target);
+                            }
+                          }
+                        : undefined
+                    }
+                    className="text-xs italic text-[#2c1810] leading-relaxed cursor-pointer hover:text-[#8b0000] transition-colors reading-font"
+                  >
                     "{bm.sentence}"
                   </p>
                 </div>
@@ -1647,6 +1993,192 @@ export default function App() {
             )}
           </div>
         )}
+
+        {/* Interactive Concordance Search View (Triggered by "Search" Dock Button) */}
+        {tocSubView === 'SEARCH' && (
+          <div className="flex-1 flex flex-col overflow-hidden pb-4 animate-fade-in ui-font">
+            <div className="bg-[#fdfaf2] border-2 border-[#c5a059] rounded-xl p-2.5 shadow-xs mb-3 shrink-0">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-[#8b0000] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  id="home-search-input"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search 422 stories, verses, or leadership themes..."
+                  className="w-full text-xs bg-transparent focus:outline-none text-[#382117] placeholder:text-stone-400"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={interactive ? () => setSearchQuery('') : undefined}
+                    className="text-[10px] font-bold text-stone-400 hover:text-[#8b0000] px-1 cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto no-scrollbar space-y-1.5 pr-0.5">
+              {filteredBySearch.length === 0 ? (
+                <p className="text-xs text-stone-500 italic text-center py-8">
+                  No matching passages found for "{searchQuery}".
+                </p>
+              ) : (
+                filteredBySearch.map(item => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={
+                      interactive
+                        ? () => {
+                            setSearchQuery('');
+                            navigateFromHomeToStory(item.section, item);
+                          }
+                        : undefined
+                    }
+                    className="w-full text-left p-2.5 rounded-xl bg-[#fdfaf2] hover:bg-[#c5a059]/20 border border-[#e6d9c3] flex items-center justify-between gap-2 transition-colors cursor-pointer"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-[#382117] truncate">{item.title}</div>
+                      <div className="text-[10px] text-stone-500 truncate">{item.why}</div>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#8b0000] shrink-0">
+                      {item.ref.split('|')[0].trim()} →
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Bottom Floating Liquid Glass Pill Dock: 5 Functional Buttons */}
+        <div className="mt-auto pt-2 shrink-0 ui-font">
+          <div
+            className="flex items-center justify-around rounded-full px-2 py-1.5 border border-[#c5a059]/70 shadow-[0_10px_25px_rgba(36,19,12,0.22)]"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(253, 250, 242, 0.94) 0%, rgba(239, 229, 208, 0.88) 100%)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
+          >
+            {/* 1. Home */}
+            <button
+              type="button"
+              onClick={
+                interactive
+                  ? () => {
+                      setTocSubView('HUB');
+                      homeScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  : undefined
+              }
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                tocSubView === 'HUB'
+                  ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
+                  : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3l9-8z" />
+              </svg>
+              <span className="text-[9px]">Home</span>
+            </button>
+
+            {/* 2. Daily */}
+            <button
+              type="button"
+              onClick={
+                interactive
+                  ? () => {
+                      const dailyStory = handleDailyPericope();
+                      navigateFromHomeToStory('PERICOPES', dailyStory);
+                    }
+                  : undefined
+              }
+              className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-full text-[#4a3b32]/75 hover:text-[#8b0000] active:bg-[#c5a059]/25 transition-colors cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <span className="text-[9px]">Daily</span>
+            </button>
+
+            {/* 3. Lexicon */}
+            <button
+              type="button"
+              onClick={
+                interactive
+                  ? () => {
+                      setIsHighlightMode(true);
+                      setTocSubView(prev => (prev === 'LEXICON' ? 'HUB' : 'LEXICON'));
+                    }
+                  : undefined
+              }
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                tocSubView === 'LEXICON'
+                  ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
+                  : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
+              }`}
+            >
+              {renderDoveIcon()}
+              <span className="text-[9px]">Lexicon</span>
+            </button>
+
+            {/* 4. Library */}
+            <button
+              type="button"
+              onClick={
+                interactive
+                  ? () => setTocSubView(prev => (prev === 'BOOKMARKS' ? 'HUB' : 'BOOKMARKS'))
+                  : undefined
+              }
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors relative cursor-pointer ${
+                tocSubView === 'BOOKMARKS'
+                  ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
+                  : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              <span className="text-[9px]">Library</span>
+            </button>
+
+            {/* 5. Search */}
+            <button
+              type="button"
+              onClick={
+                interactive
+                  ? () => {
+                      setTocSubView(prev => (prev === 'SEARCH' ? 'HUB' : 'SEARCH'));
+                      setTimeout(() => {
+                        const input = document.querySelector<HTMLInputElement>('#home-search-input');
+                        if (input) input.focus();
+                      }, 60);
+                    }
+                  : undefined
+              }
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                tocSubView === 'SEARCH'
+                  ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
+                  : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <span className="text-[9px]">Search</span>
+            </button>
+          </div>
+        </div>
       </div>
     );
   };
@@ -2499,7 +3031,9 @@ export default function App() {
 
   return (
     <div 
-      className="fixed inset-0 h-[100dvh] w-full reading-font selection:bg-[#c5a059]/30 p-0 sm:p-6 flex justify-center items-center overflow-hidden bg-[#0c0b09] cursor-pointer overscroll-none"
+      className={`fixed inset-0 h-[100dvh] w-full reading-font selection:bg-[#c5a059]/30 flex justify-center items-center overflow-hidden bg-[#0c0b09] cursor-pointer overscroll-none ${
+        isAnyFullscreen ? 'p-0' : 'p-0 sm:p-6'
+      }`}
       style={{
         backgroundImage: `url("Antique%20Gold%20Crosses%20and%20Foliage%20Pattern.png")`,
         backgroundRepeat: 'repeat',
@@ -2771,7 +3305,13 @@ export default function App() {
         }
       `}</style>
       
-      <div className="book-cover-container book-interactive-area w-full h-[100dvh] sm:h-auto sm:max-w-[410px] sm:aspect-[9/19.5] sm:max-h-[95dvh] my-auto mx-auto relative z-20 cursor-default">
+      <div
+        className={`book-cover-container book-interactive-area mx-auto relative z-20 cursor-default transition-all duration-300 ${
+          isAnyFullscreen
+            ? 'w-[100dvw] h-[100dvh] max-w-none max-h-none rounded-none my-0'
+            : 'w-full h-[100dvh] sm:h-auto sm:max-w-[410px] sm:aspect-[9/19.5] sm:max-h-[95dvh] my-auto'
+        }`}
+      >
         
         <div 
           className={`book-cover ${isCoverOpen ? 'is-open' : ''}`}
@@ -2812,7 +3352,7 @@ export default function App() {
           </div>
         </div>
 
-        {isCoverOpen && (
+        {isCoverOpen && !isAnyFullscreen && (
           <div
             onClick={(e) => {
               e.stopPropagation();
@@ -2827,11 +3367,30 @@ export default function App() {
           </div>
         )}
 
-        <main className="absolute inset-0 w-full h-full bg-[#fffcf5] shadow-[15px_15px_30px_rgba(0,0,0,0.8)] rounded-none sm:rounded-[4px_12px_12px_4px] border-l-[10px] sm:border-l-[14px] border-[#3a2a22] flex flex-col overflow-hidden box-border">
+        <main
+          className={`absolute inset-0 w-full h-full bg-[#fffcf5] shadow-[15px_15px_30px_rgba(0,0,0,0.8)] border-l-[10px] sm:border-l-[14px] border-[#3a2a22] flex flex-col overflow-hidden box-border ${
+            isAnyFullscreen ? 'rounded-none' : 'rounded-none sm:rounded-[4px_12px_12px_4px]'
+          }`}
+        >
           
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-b from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-tr-[12px]"></div>
           <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-l from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-r-[12px] shadow-[-2px_0_5px_rgba(0,0,0,0.1)]"></div>
           <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-t from-[#b38b22] via-[#f7e099] to-[#b38b22] z-30 pointer-events-none sm:rounded-br-[12px]"></div>
+
+          {/* Floating Exit Fullscreen Pill when Fullscreen is Active */}
+          {isAnyFullscreen && (
+            <button
+              type="button"
+              onClick={(e) => handleFullscreenAndPwa(e)}
+              title="Exit Fullscreen Mode"
+              className="absolute top-2.5 left-4 z-50 px-2.5 py-1 rounded-full bg-[#382117]/90 text-[#e3c178] border border-[#c5a059] text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 shadow-md apple-gpu-btn ui-font"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 9L4 4m0 0v4m0-4h4m7 5l5-5m0 0v4m0-4h-4M9 15l-5 5m0 0v-4m0 4h4m7-5l5 5m0 0v-4m0 4h-4" />
+              </svg>
+              <span>Exit Fullscreen</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -2839,8 +3398,8 @@ export default function App() {
               e.stopPropagation();
               triggerRibbonTocPageTurn();
             }}
-            title={isTocOpen ? "Return to Scripture Page" : "Turn to Table of Contents Hub"}
-            aria-label="Toggle Table of Contents Page"
+            title={isTocOpen ? "Return to Scripture Page" : "Turn to Home Hub"}
+            aria-label="Toggle Home Hub Page"
             className="absolute -top-0.5 right-4 sm:right-5 z-50 group focus:outline-none active:scale-95 transition-transform"
           >
             <div className="relative flex flex-col items-center">
@@ -2949,7 +3508,7 @@ export default function App() {
                  ? renderTocContent(false)
                  : renderPageContent(curlState?.isBackSwipe ? selectedStory : nextStory, false, true)}
                <span className="absolute bottom-3.5 sm:bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
-                 {isTocOpen ? 'INDEX' : curlState?.isBackSwipe 
+                 {isTocOpen ? 'HOME' : curlState?.isBackSwipe 
                    ? (currentIndex + 1) 
                    : (currentIndex + 2 > filteredStories.length ? 1 : currentIndex + 2)}
                </span>
@@ -2995,13 +3554,13 @@ export default function App() {
                   : isTocOpen
                   ? renderTocContent(true)
                   : renderPageContent(curlState?.isBackSwipe ? prevStory : selectedStory, false, false)}
-                <span className="absolute bottom-3.5 sm:bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
-                  {isTocOpen || tocTargetAfterCurl === true
-                    ? 'INDEX'
-                    : curlState?.isBackSwipe
-                    ? ((currentIndex - 1 + filteredStories.length) % filteredStories.length) + 1 
-                    : (currentIndex + 1)}
-                </span>
+                {!isTocOpen && tocTargetAfterCurl !== true && (
+                  <span className="absolute bottom-3.5 sm:bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-stone-400 ui-font pointer-events-none">
+                    {curlState?.isBackSwipe
+                      ? ((currentIndex - 1 + filteredStories.length) % filteredStories.length) + 1 
+                      : (currentIndex + 1)}
+                  </span>
+                )}
 
                 {curlGeo.isCurling && (
                   <div
@@ -3061,25 +3620,29 @@ export default function App() {
               </div>
             )}
 
-            <div
-              style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
-              className="absolute bottom-0 left-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
-              onPointerDown={(e) => handlePointerDown(e, true)}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-              title="Drag or tap from left edge to turn back"
-            />
+            {!isTocOpen && (
+              <>
+                <div
+                  style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
+                  className="absolute bottom-0 left-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
+                  onPointerDown={(e) => handlePointerDown(e, true)}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                  title="Drag or tap from left edge to turn back"
+                />
 
-            <div
-              style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
-              className="absolute bottom-0 right-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
-              onPointerDown={(e) => handlePointerDown(e, false)}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-              title="Drag or tap from right edge to turn forward"
-            />
+                <div
+                  style={{ top: activeSection === 'PERICOPES' ? '265px' : '225px' }}
+                  className="absolute bottom-0 right-0 w-10 cursor-grab active:cursor-grabbing z-30 bg-transparent touch-none"
+                  onPointerDown={(e) => handlePointerDown(e, false)}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                  title="Drag or tap from right edge to turn forward"
+                />
+              </>
+            )}
 
             {/* High-Transparency Liquid Glass Sentence Focus Popup */}
             <div
@@ -3156,17 +3719,37 @@ export default function App() {
                           {selectedStory.ref}
                         </span>
                       </div>
-                      <button
-                        onClick={() => setActiveSentence(null)}
-                        className="h-6 w-6 rounded-full flex items-center justify-center text-xs text-[#382117] apple-gpu-btn ui-font shrink-0"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.2) 100%)',
-                          border: '1px solid rgba(255, 255, 255, 0.7)',
-                        }}
-                        aria-label="Close sentence focus"
-                      >
-                        ✕
-                      </button>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => toggleSentenceBookmark(displaySentence)}
+                          className="h-6 px-2 rounded-full flex items-center gap-1 text-[10px] font-bold text-[#8b0000] apple-gpu-btn ui-font cursor-pointer"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.25) 100%)',
+                            border: '1px solid rgba(255, 255, 255, 0.75)',
+                          }}
+                          title="Save sentence to Home Library"
+                        >
+                          <span>
+                            {bookmarks.some(
+                              b => b.sentence === displaySentence.trim() && b.storyId === selectedStory.id
+                            )
+                              ? '★ Saved'
+                              : '☆ Save'}
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setActiveSentence(null)}
+                          className="h-6 w-6 rounded-full flex items-center justify-center text-xs text-[#382117] apple-gpu-btn ui-font shrink-0 cursor-pointer"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.2) 100%)',
+                            border: '1px solid rgba(255, 255, 255, 0.7)',
+                          }}
+                          aria-label="Close sentence focus"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
 
                     <p className="mt-3 text-[15px] leading-relaxed font-semibold text-[#1f100a] drop-shadow-[0_1px_2px_rgba(255,255,255,0.85)] reading-font italic">
