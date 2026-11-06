@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
 
 type StorySection = 'NARRATIVE' | 'OT' | 'NT' | 'THEMES' | 'PERICOPES';
 
@@ -34,69 +33,52 @@ interface BookmarkedSentence {
   timestamp: string;
 }
 
-type ExegeticalPhaseId = 'PHASE_1' | 'PHASE_2' | 'PHASE_3' | 'PHASE_4' | 'PHASE_5' | 'PHASE_6';
+type OiaPhaseId = 'OBSERVATION' | 'INTERPRETATION' | 'APPLICATION';
 
-interface SixPhaseAnalysisData {
-  phase1: {
-    originalLanguagesAndVariants: string;
-    lexicalAndGrammaticalAnalysis: string;
-    figurativeLanguageAndSigns: string;
+interface OiaAnalysisData {
+  observation: {
+    journalistic_baseline: {
+      who: string;
+      what: string;
+      where: string;
+      when: string;
+      why_here: string;
+    };
+    grammar_and_structure: {
+      verbs_analysis: string;
+      key_conjunctions: string;
+      pronoun_tracing: string;
+    };
+    literary_features: {
+      repetition: string[];
+      comparisons_contrasts: string;
+      tone: string;
+    };
   };
-  phase2: {
-    ancientWorldview: string;
-    relationalDynamics: string;
+  interpretation: {
+    contextual_analysis: {
+      immediate_context: string;
+      book_context: string;
+      cultural_historical_context: string;
+    };
+    theological_analysis: {
+      theology_proper: string;
+      christology: string;
+      anthropology: string;
+    };
+    principlizing_bridge: string;
   };
-  phase3: {
-    circlesOfContext: string;
-    genreAndForm: string;
+  application: {
+    spacepets_audit: {
+      applicable_categories: string[];
+      audit_explanation: string;
+    };
+    action_plan: {
+      internal_alignment: string;
+      relational_impact: string;
+      measurable_action: string;
+    };
   };
-  phase4: {
-    intertextuality: string;
-    organicDevelopmentAndRuleOfFaith: string;
-    crossReferences: string[];
-  };
-  phase5: {
-    patristicConsensus: string;
-    medievalAndReformation: string;
-    modernCriticalScholarship: string;
-  };
-  phase6: {
-    exegeticalVerdict: string;
-    originalApplication: string;
-    levelOfSpecificity: string;
-    crossCulturalPrinciple: string;
-    contemporaryEmbodiment: string;
-  };
-}
-
-// Full Structured AI Biblical Scholar Analysis Interface
-export interface ExtendedAnalysisData {
-  overview?: string;
-  observation: string;
-  interpretation: string;
-  application: string;
-  historicalCulturalContext?: string;
-  theologicalSignificance?: string;
-  biblicalConnections?: Array<{
-    reference: string;
-    connectionType: string;
-    description: string;
-    significance: string;
-  }>;
-  keyTerms?: Array<{
-    term: string;
-    originalLanguage?: string;
-    definition: string;
-    relevance: string;
-  }>;
-  beginnerSummary?: string;
-  keyTakeaways?: string[];
-  commonMisunderstandings?: string[];
-  reflectionQuestions?: Array<{
-    question: string;
-    level: string;
-  }>;
-  interpretationCaveats?: string[];
 }
 
 const BIBLICAL_LEXICON: Record<string, LexiconEntry> = {
@@ -655,16 +637,14 @@ export default function App() {
   const [boldedWordToken, setBoldedWordToken] = useState<string | null>(null);
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
   const [displaySentence, setDisplaySentence] = useState<string>("");
-  const [sentenceToolView, setSentenceToolView] = useState<'NONE' | ExegeticalPhaseId | 'SEARCH' | 'CROSS_REF'>('NONE');
-  const [chapterLookupText, setChapterLookupText] = useState<string | null>(null);
-  const [isFetchingChapter, setIsFetchingChapter] = useState<boolean>(false);
+  const [sentenceToolView, setSentenceToolView] = useState<'NONE' | OiaPhaseId>('NONE');
   const [popupOrigin, setPopupOrigin] = useState<{ x: string; y: string }>({ x: '50%', y: '50%' });
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // 6-Phase Exegetical & Hermeneutical AI Analysis State for Liquid Glass Popup
-  const [sixPhaseData, setSixPhaseData] = useState<SixPhaseAnalysisData | null>(null);
+  // OIA AI Analysis State for Liquid Glass Popup
+  const [oiaData, setOiaData] = useState<OiaAnalysisData | null>(null);
   const [isAnalyzingScope, setIsAnalyzingScope] = useState<boolean>(false);
-  const [sixPhaseCache, setSixPhaseCache] = useState<Record<string, SixPhaseAnalysisData>>({});
+  const [oiaCache, setOiaCache] = useState<Record<string, OiaAnalysisData>>({});
 
   // Interactive Liquid Glass Tactile Distortion & Specular Physics State
   const [glassDrag, setGlassDrag] = useState<{
@@ -840,69 +820,131 @@ export default function App() {
     return significant || words[0] || 'Word';
   };
 
+  const [isFullscreenActive, setIsFullscreenActive] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    const onFsChange = () => {
+      const isFS = Boolean(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      );
+      setIsFullscreenActive(isFS);
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFsChange);
+      document.removeEventListener('webkitfullscreenchange', onFsChange);
+    };
+  }, []);
+
   const handleFullscreenAndPwa = async () => {
+    let enteredNativeFullscreen = false;
     try {
-      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-        await document.documentElement.requestFullscreen().catch(() => {});
+      const docEl = document.documentElement as any;
+      const requestFS =
+        docEl.requestFullscreen ||
+        docEl.webkitRequestFullscreen ||
+        docEl.mozRequestFullScreen ||
+        docEl.msRequestFullscreen;
+      const exitFS =
+        document.exitFullscreen ||
+        (document as any).webkitExitFullscreen ||
+        (document as any).mozCancelFullScreen ||
+        (document as any).msExitFullscreen;
+      const isFS = Boolean(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      );
+
+      if (requestFS && !isFS) {
+        await requestFS.call(docEl);
+        enteredNativeFullscreen = true;
+      } else if (exitFS && isFS) {
+        await exitFS.call(document);
+        return;
       }
-    } catch {}
+    } catch {
+      enteredNativeFullscreen = false;
+    }
 
     if (deferredPwaPrompt) {
-      deferredPwaPrompt.prompt();
-      await deferredPwaPrompt.userChoice.catch(() => {});
-      setDeferredPwaPrompt(null);
+      try {
+        deferredPwaPrompt.prompt();
+        const choiceResult = await deferredPwaPrompt.userChoice;
+        setDeferredPwaPrompt(null);
+        if (choiceResult?.outcome === 'accepted') return;
+      } catch {}
     }
-    setShowPwaPrompt(true);
+
+    if (!enteredNativeFullscreen) {
+      setShowPwaPrompt(true);
+    }
   };
 
-  // Build Scholarly 6-Phase Fallback if Offline or API Unconfigured
-  const buildFallbackSixPhaseData = (
+  // Build Scholarly OIA Fallback if Offline or API Unconfigured
+  const buildFallbackOiaData = (
     story: ContentItem,
     targetWord: string,
     activeSent: string
-  ): SixPhaseAnalysisData => {
+  ): OiaAnalysisData => {
     const lex = getKjvDictionaryEntry(targetWord);
     const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
-    const sectionLabel = SECTIONS.find(s => s.id === story.section)?.label || 'Biblical Canon';
-    const refs = story.ref.split(/[|;&]/).map(s => s.trim()).filter(Boolean);
 
     return {
-      phase1: {
-        originalLanguagesAndVariants: `Textual witness for ${story.ref} (${cleanTitle}) rests upon stable Masoretic Hebrew / Koine Greek manuscript traditions. Core doctrinal readings in "${activeSent}" exhibit high textual certainty across classical witnesses.`,
-        lexicalAndGrammaticalAnalysis: `Focal term "${lex.term}" (${lex.category}): ${lex.shortDef} Within the clause "${activeSent}", its grammatical placement anchors the primary verbal action and theological emphasis.`,
-        figurativeLanguageAndSigns: `${lex.significance} Concrete biblical imagery and covenantal signs in ${story.ref} point beyond surface objects to God's sovereign governance.`
+      observation: {
+        journalistic_baseline: {
+          who: "The biblical author and original covenant community.",
+          what: `Action surrounding "${activeSent}"`,
+          where: "Ancient Near Eastern / Greco-Roman setting.",
+          when: "Redemptive historical timeline.",
+          why_here: "Crucial transition in the overarching narrative."
+        },
+        grammar_and_structure: {
+          verbs_analysis: "Primary verbs dictate the theological action.",
+          key_conjunctions: "Links preceding context to the outcome.",
+          pronoun_tracing: "Identifies key actors in the text."
+        },
+        literary_features: {
+          repetition: [lex.term],
+          comparisons_contrasts: "Contrasts human weakness with divine faithfulness.",
+          tone: "Authoritative and pastoral."
+        }
       },
-      phase2: {
-        ancientWorldview: `Composed within the historical-cultural horizon of the ${sectionLabel} era, addressing ancient Near Eastern or Greco-Roman social structures, sacred covenants, and communal identity.`,
-        relationalDynamics: `Addresses the covenant community regarding ${cleanTitle.toLowerCase()}: ${story.body}`
+      interpretation: {
+        contextual_analysis: {
+          immediate_context: story.body,
+          book_context: `Advances the core theme of ${cleanTitle}.`,
+          cultural_historical_context: "Addresses ancient societal and religious norms."
+        },
+        theological_analysis: {
+          theology_proper: "Reveals God's sovereign covenantal nature.",
+          christology: "Foreshadows or reflects the redemptive work of Christ.",
+          anthropology: "Exposes human frailty and the need for grace."
+        },
+        principlizing_bridge: story.why
       },
-      phase3: {
-        circlesOfContext: `Situated within ${story.ref} as a key pericope in the ${sectionLabel} movement, connecting immediate narrative/discourse units to the overarching canonical testimony.`,
-        genreAndForm: `${story.preAnalyzed?.observation || story.body} Structured to move the reader from historical observation to covenantal response.`
-      },
-      phase4: {
-        intertextuality: `Echoes foundational covenantal promises and anticipates redemptive fulfillment across Old and New Testament witnesses (${refs.join(', ')}).`,
-        organicDevelopmentAndRuleOfFaith: `Read through the Rule of Faith, the seed of revelation in ${story.ref} matures organically within salvation history, finding its ultimate telos in Christ and His Church.`,
-        crossReferences: refs.length > 0 ? refs.slice(0, 4) : ['Genesis 12:1-3', 'Luke 24:27', 'Hebrews 1:1-2']
-      },
-      phase5: {
-        patristicConsensus: `Early Church Fathers (including Chrysostom, Augustine, and Cyril) read ${story.ref} both historically and christologically, discerning pastoral instruction in virtue and divine grace.`,
-        medievalAndReformation: `Synthesized in the Catena tradition and Reformation exegesis (Calvin, Luther) to emphasize God's sovereign initiative, humble faith, and the accountability of spiritual leaders.`,
-        modernCriticalScholarship: `Contemporary grammatical-historical commentaries affirm the literary unity and theological intentionality of ${story.ref} within its ancient setting.`
-      },
-      phase6: {
-        exegeticalVerdict: `${story.preAnalyzed?.interpretation || story.why} Integrates immediate biblical theology (redemptive history) with enduring systematic truth.`,
-        originalApplication: `Called the original hearers of ${story.ref} to wholehearted covenantal trust, repentance, and faithful stewardship.`,
-        levelOfSpecificity: `While specific ancient customs belong to the historical horizon of ${story.ref}, the underlying moral and theological demands transcend cultural boundaries.`,
-        crossCulturalPrinciple: `${story.why}`,
-        contemporaryEmbodiment: `${story.preAnalyzed?.application || `Embody the truth of ${cleanTitle} today through humble servant leadership, integrity, and love of God and neighbor.`}`
+      application: {
+        spacepets_audit: {
+          applicable_categories: ["Truth to believe", "Example to follow"],
+          audit_explanation: "The text demands a response of faith and alignment with God's will."
+        },
+        action_plan: {
+          internal_alignment: "Shift perspective to trust God's sovereignty.",
+          relational_impact: "Treat others with the grace received from Christ.",
+          measurable_action: story.preAnalyzed?.application || "Reflect on this truth in prayer today."
+        }
       }
     };
   };
 
-  // 6-Phase Exegetical & Hermeneutical Framework Analyzer
+  // Inductive Bible Study (OIA) Analyzer
   const handlePhaseAnalysis = async (
-    phaseId: ExegeticalPhaseId,
+    phaseId: OiaPhaseId,
     overrideWord?: string,
     overrideSentence?: string
   ) => {
@@ -912,8 +954,8 @@ export default function App() {
 
     setSentenceToolView(phaseId);
 
-    if (sixPhaseCache[cacheKey]) {
-      setSixPhaseData(sixPhaseCache[cacheKey]);
+    if (oiaCache[cacheKey]) {
+      setOiaData(oiaCache[cacheKey]);
       return;
     }
 
@@ -924,7 +966,6 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mode: 'SIX_PHASE_FRAMEWORK',
           storyId: selectedStory.id,
           title: selectedStory.title,
           ref: selectedStory.ref,
@@ -937,45 +978,22 @@ export default function App() {
       });
 
       if (!response.ok) {
-        throw new Error(`6-Phase analysis HTTP ${response.status}`);
+        throw new Error(`OIA analysis HTTP ${response.status}`);
       }
 
       const json = await response.json();
       if (!json.success || !json.data) {
-        throw new Error('Invalid 6-Phase payload');
+        throw new Error('Invalid OIA payload');
       }
 
-      setSixPhaseData(json.data);
-      setSixPhaseCache(prev => ({ ...prev, [cacheKey]: json.data }));
-    } catch (err) {
-      const fallback = buildFallbackSixPhaseData(selectedStory, targetWord, activeSent);
-      setSixPhaseData(fallback);
-      setSixPhaseCache(prev => ({ ...prev, [cacheKey]: fallback }));
+      setOiaData(json.data);
+      setOiaCache(prev => ({ ...prev, [cacheKey]: json.data }));
+    } catch {
+      const fallback = buildFallbackOiaData(selectedStory, targetWord, activeSent);
+      setOiaData(fallback);
+      setOiaCache(prev => ({ ...prev, [cacheKey]: fallback }));
     } finally {
       setIsAnalyzingScope(false);
-    }
-  };
-
-  const handleCrossReferenceClick = async (ref: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    captureTapOrigin(e.clientX, e.clientY);
-    setSentenceToolView('CROSS_REF');
-    setIsFetchingChapter(true);
-    setChapterLookupText(null);
-    setDisplaySentence(`Scripture Reference: ${ref}`);
-    setActiveSentence(`Scripture Reference: ${ref}`);
-
-    try {
-      const response = await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=kjv`);
-      if (!response.ok) throw new Error('API Error');
-      const data = await response.json();
-      setChapterLookupText(
-        data.text ? `${data.reference || ref} (KJV)\n\n${data.text.replace(/\s+/g, ' ').trim()}` : `Could not load passage.`
-      );
-    } catch (err) {
-      setChapterLookupText(`Could not load passage for ${ref}.`);
-    } finally {
-      setIsFetchingChapter(false);
     }
   };
 
@@ -1014,16 +1032,8 @@ export default function App() {
     isBackSwipe: boolean;
   } | null>(null);
 
-  const [analysisResult, setAnalysisResult] = useState<ExtendedAnalysisData | null>(
-    MASTER_CONTENT[0].preAnalyzed 
-      ? {
-          observation: MASTER_CONTENT[0].preAnalyzed.observation,
-          interpretation: MASTER_CONTENT[0].preAnalyzed.interpretation,
-          application: MASTER_CONTENT[0].preAnalyzed.application,
-        }
-      : null
-  );
-  const [activeStudyTab, setActiveStudyTab] = useState<'CORE' | 'BEGINNER' | 'HISTORY' | 'THEOLOGY' | 'QUESTIONS'>('CORE');
+  const [analysisResult, setAnalysisResult] = useState<OiaAnalysisData | null>(null);
+  const [activeStudyTab, setActiveStudyTab] = useState<OiaPhaseId>('OBSERVATION');
   const [activeCitations, setActiveCitations] = useState<Array<{ uri?: string; title?: string }>>([]);
   const [isAiGrounded, setIsAiGrounded] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -1077,18 +1087,10 @@ export default function App() {
 
   const handleStoryChange = (story: ContentItem) => {
     setSelectedStory(story);
-    setAnalysisResult(
-      story.preAnalyzed 
-        ? {
-            observation: story.preAnalyzed.observation,
-            interpretation: story.preAnalyzed.interpretation,
-            application: story.preAnalyzed.application,
-          }
-        : null
-    );
+    setAnalysisResult(null);
     setActiveCitations([]);
     setIsAiGrounded(false);
-    setActiveStudyTab('CORE');
+    setActiveStudyTab('OBSERVATION');
     setPassageText(null);
     setError(null);
     setTextError(null);
@@ -1239,21 +1241,7 @@ export default function App() {
       setIsAiGrounded(Boolean(json.groundedWithRag));
     } catch (err: any) {
       console.warn('Falling back to local scholarship foundation:', err.message);
-      const cleanTitle = story.title.replace(/^[0-9.]+\s*/, '').trim();
-      setAnalysisResult({
-        overview: `A canonical analysis of ${story.ref} (${cleanTitle}), examining its literary structure, original setting, and enduring theological principles.`,
-        observation: story.preAnalyzed?.observation || `Key textual movements in ${story.ref}: ${story.body}`,
-        interpretation: story.preAnalyzed?.interpretation || `Theological & Historical Context: ${story.why}`,
-        application: story.preAnalyzed?.application || `Living by Faith: Apply the lessons of ${cleanTitle} through humble obedience and servant leadership.`,
-        historicalCulturalContext: `Set within the redemptive history of Israel and the early Church, addressing covenant obedience and spiritual formation.`,
-        theologicalSignificance: `Demonstrates God's unyielding covenant faithfulness and the requirement for authentic faith over mere formal observance.`,
-        beginnerSummary: `This passage shows how God guides, tests, and redeems His people through pivotal moments of decision and trust.`,
-        keyTakeaways: [
-          `Authority in Scripture is always given as a stewardship from God.`,
-          `Faithfulness matters most when circumstances seem uncertain.`,
-          `Integrity and humility define authentic biblical leadership.`
-        ]
-      });
+      setAnalysisResult(buildFallbackOiaData(story, 'Leadership', story.body));
       setError(null);
     } finally {
       setIsLoading(false);
@@ -1601,10 +1589,10 @@ export default function App() {
               >
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wider text-[#e3c178]">
-                    Fullscreen Mode • Add to Home Screen
+                    {isFullscreenActive ? 'Exit Fullscreen Mode' : 'Fullscreen Mode • Add to Home Screen'}
                   </div>
                   <div className="text-[10px] text-[#fdfaf2]/80">
-                    Install as a Progressive Web App (PWA)
+                    {isFullscreenActive ? 'Currently running in fullscreen' : 'Install as a Progressive Web App (PWA)'}
                   </div>
                 </div>
                 <svg className="w-5 h-5 text-[#e3c178] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1887,7 +1875,7 @@ export default function App() {
 
   const renderPageContent = (story: ContentItem, isBacksideCopy = false, isTargetPage = false) => {
     const isActive = story.id === selectedStory.id;
-    const showAnalysis = isActive ? (story.preAnalyzed ? story.preAnalyzed : analysisResult) : (story.preAnalyzed || null);
+    const showAnalysis = isActive ? analysisResult : null;
     const showPassage = isActive ? passageText : null;
     const showLoading = isActive ? isLoading : false;
     const showFetchingText = isActive ? isFetchingText : false;
@@ -1941,10 +1929,10 @@ export default function App() {
                       setBoldedWordToken(trimmedWord);
                       setDisplaySentence(sentence);
                       setActiveSentence(sentence);
-                      handlePhaseAnalysis('PHASE_1', trimmedWord, sentence);
+                      handlePhaseAnalysis('OBSERVATION', trimmedWord, sentence);
                     }}
                     className="text-[#8b0000] font-bold underline decoration-[#8b0000]/60 decoration-dotted underline-offset-2 cursor-pointer hover:bg-[#8b0000]/15 px-0.5 rounded transition-colors"
-                    title={`Click for Phase 1 Exegetical & Linguistic analysis on "${entry.term}"`}
+                    title={`Click for Inductive Bible Study (OIA) on "${entry.term}"`}
                   >
                     {token}
                   </span>
@@ -1963,7 +1951,7 @@ export default function App() {
                     setActiveSentence(sentence);
 
                     if (isBolded) {
-                      handlePhaseAnalysis('PHASE_1', trimmedWord, sentence);
+                      handlePhaseAnalysis('OBSERVATION', trimmedWord, sentence);
                     } else {
                       setSentenceToolView('NONE');
                     }
@@ -1973,7 +1961,7 @@ export default function App() {
                       ? 'font-bold bg-[#c5a059]/25 text-[#382117] underline decoration-[#c5a059]'
                       : 'hover:bg-stone-300/30'
                   }`}
-                  title={`Tap to focus in Liquid Glass (tap again or select any of the 6 Exegetical Phase buttons)`}
+                  title={`Tap to focus in Liquid Glass (tap again or select any of the OIA buttons)`}
                 >
                   {token}
                 </span>
@@ -1982,23 +1970,6 @@ export default function App() {
           </span>
         );
       });
-    };
-
-    const markdownComponents = {
-      p: ({ children }: any) => (
-        <p>
-          {React.Children.map(children, (child) =>
-            typeof child === 'string' ? renderInteractiveText(child) : child
-          )}
-        </p>
-      ),
-      li: ({ children }: any) => (
-        <li>
-          {React.Children.map(children, (child) =>
-            typeof child === 'string' ? renderInteractiveText(child) : child
-          )}
-        </li>
-      ),
     };
 
     const bibleGatewaySearch = encodeURIComponent(story.ref.replace(/\|/g, ';').replace(/Book of/g, '').trim());
@@ -2360,232 +2331,125 @@ export default function App() {
               <div className="flex bg-[#fdfaf2] border border-[#c5a059]/60 rounded-md p-0.5 shadow-sm text-[10px] font-bold uppercase tracking-wider ui-font overflow-x-auto no-scrollbar">
                 <button
                   type="button"
-                  onClick={() => setActiveStudyTab('CORE')}
-                  className={`flex-1 py-1 px-2 rounded transition-all whitespace-nowrap ${
-                    activeStudyTab === 'CORE'
+                  onClick={() => setActiveStudyTab('OBSERVATION')}
+                  className={`flex-1 py-1.5 px-2 rounded transition-all whitespace-nowrap ${
+                    activeStudyTab === 'OBSERVATION'
                       ? 'bg-[#8b0000] text-white shadow-xs'
                       : 'text-[#4a3b32] hover:bg-stone-200/50'
                   }`}
                 >
-                  OIA Core
+                  Observation
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveStudyTab('BEGINNER')}
-                  className={`flex-1 py-1 px-2 rounded transition-all whitespace-nowrap ${
-                    activeStudyTab === 'BEGINNER'
+                  onClick={() => setActiveStudyTab('INTERPRETATION')}
+                  className={`flex-1 py-1.5 px-2 rounded transition-all whitespace-nowrap ${
+                    activeStudyTab === 'INTERPRETATION'
                       ? 'bg-[#8b0000] text-white shadow-xs'
                       : 'text-[#4a3b32] hover:bg-stone-200/50'
                   }`}
                 >
-                  Guide
+                  Interpretation
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveStudyTab('HISTORY')}
-                  className={`flex-1 py-1 px-2 rounded transition-all whitespace-nowrap ${
-                    activeStudyTab === 'HISTORY'
+                  onClick={() => setActiveStudyTab('APPLICATION')}
+                  className={`flex-1 py-1.5 px-2 rounded transition-all whitespace-nowrap ${
+                    activeStudyTab === 'APPLICATION'
                       ? 'bg-[#8b0000] text-white shadow-xs'
                       : 'text-[#4a3b32] hover:bg-stone-200/50'
                   }`}
                 >
-                  History
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveStudyTab('THEOLOGY')}
-                  className={`flex-1 py-1 px-2 rounded transition-all whitespace-nowrap ${
-                    activeStudyTab === 'THEOLOGY'
-                      ? 'bg-[#8b0000] text-white shadow-xs'
-                      : 'text-[#4a3b32] hover:bg-stone-200/50'
-                  }`}
-                >
-                  Theology
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveStudyTab('QUESTIONS')}
-                  className={`flex-1 py-1 px-2 rounded transition-all whitespace-nowrap ${
-                    activeStudyTab === 'QUESTIONS'
-                      ? 'bg-[#8b0000] text-white shadow-xs'
-                      : 'text-[#4a3b32] hover:bg-stone-200/50'
-                  }`}
-                >
-                  Reflect
+                  Application
                 </button>
               </div>
 
-              {activeStudyTab === 'CORE' && (
+              {activeStudyTab === 'OBSERVATION' && (
                 <div className="space-y-3 animate-fade-in">
-                  {showAnalysis.overview && (
-                    <div className="p-3 bg-[#fdfaf2] border border-[#c5a059]/40 rounded-sm text-xs italic text-stone-700 leading-relaxed">
-                      {renderInteractiveText(showAnalysis.overview)}
+                  <div className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm">
+                    <h3 className="text-xs font-bold text-[#8b0000] uppercase tracking-widest mb-3 border-b border-[#c5a059]/30 pb-1">Journalistic Baseline</h3>
+                    <div className="space-y-2 text-[11.5px] text-stone-800 leading-relaxed">
+                      <p><strong className="text-[#382117]">Who:</strong> {showAnalysis.observation.journalistic_baseline.who}</p>
+                      <p><strong className="text-[#382117]">What:</strong> {showAnalysis.observation.journalistic_baseline.what}</p>
+                      <p><strong className="text-[#382117]">Where:</strong> {showAnalysis.observation.journalistic_baseline.where}</p>
+                      <p><strong className="text-[#382117]">When:</strong> {showAnalysis.observation.journalistic_baseline.when}</p>
+                      <p><strong className="text-[#382117]">Why Here:</strong> {showAnalysis.observation.journalistic_baseline.why_here}</p>
                     </div>
-                  )}
+                  </div>
 
-                  <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-[#8b0000]/80"></div>
-                    <h3 className="text-xs font-bold text-[#8b0000] uppercase tracking-widest mb-2">Observation</h3>
-                    <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 reading-font">
-                      <ReactMarkdown components={markdownComponents}>{showAnalysis.observation}</ReactMarkdown>
-                    </div>
-                  </article>
-
-                  <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-[#c5a059]"></div>
-                    <h3 className="text-xs font-bold text-[#c5a059] uppercase tracking-widest mb-2">Interpretation</h3>
-                    <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 reading-font">
-                      <ReactMarkdown components={markdownComponents}>{showAnalysis.interpretation}</ReactMarkdown>
-                    </div>
-                  </article>
-
-                  <article className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-stone-700"></div>
-                    <h3 className="text-xs font-bold text-stone-700 uppercase tracking-widest mb-2">Application</h3>
-                    <div className="prose prose-sm prose-stone max-w-none prose-p:leading-relaxed prose-p:text-stone-800 reading-font">
-                      <ReactMarkdown components={markdownComponents}>{showAnalysis.application}</ReactMarkdown>
-                    </div>
-                  </article>
-                </div>
-              )}
-
-              {activeStudyTab === 'BEGINNER' && (
-                <div className="space-y-3 animate-fade-in">
                   <div className="bg-[#fdfaf2] p-4 rounded border border-[#c5a059]/40 shadow-sm">
-                    <h3 className="text-xs font-bold text-[#8b0000] uppercase tracking-widest mb-1.5">Plain Language Summary</h3>
-                    <p className="text-sm leading-relaxed text-stone-800">
-                      {renderInteractiveText(showAnalysis.beginnerSummary || showAnalysis.overview || story.body)}
-                    </p>
+                    <h3 className="text-xs font-bold text-[#c5a059] uppercase tracking-widest mb-3 border-b border-[#c5a059]/30 pb-1">Grammar & Structure</h3>
+                    <div className="space-y-2 text-[11.5px] text-stone-800 leading-relaxed">
+                      <p><strong className="text-[#382117]">Verbs:</strong> {showAnalysis.observation.grammar_and_structure.verbs_analysis}</p>
+                      <p><strong className="text-[#382117]">Conjunctions:</strong> {showAnalysis.observation.grammar_and_structure.key_conjunctions}</p>
+                      <p><strong className="text-[#382117]">Pronouns:</strong> {showAnalysis.observation.grammar_and_structure.pronoun_tracing}</p>
+                    </div>
                   </div>
 
-                  {showAnalysis.keyTakeaways && showAnalysis.keyTakeaways.length > 0 && (
-                    <div className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm">
-                      <h3 className="text-xs font-bold text-[#c5a059] uppercase tracking-widest mb-2">Key Takeaways</h3>
-                      <ul className="space-y-1.5 text-xs text-stone-800 list-disc list-inside">
-                        {showAnalysis.keyTakeaways.map((takeaway, idx) => (
-                          <li key={idx} className="leading-relaxed">
-                            {renderInteractiveText(takeaway)}
-                          </li>
-                        ))}
-                      </ul>
+                  <div className="bg-[#fffcf5] p-4 rounded border border-stone-200 shadow-sm">
+                    <h3 className="text-xs font-bold text-stone-600 uppercase tracking-widest mb-3 border-b border-stone-200 pb-1">Literary Features</h3>
+                    <div className="space-y-2 text-[11.5px] text-stone-800 leading-relaxed">
+                      <p><strong className="text-[#382117]">Repetition:</strong> {showAnalysis.observation.literary_features.repetition.join(', ')}</p>
+                      <p><strong className="text-[#382117]">Comparisons:</strong> {showAnalysis.observation.literary_features.comparisons_contrasts}</p>
+                      <p><strong className="text-[#382117]">Tone:</strong> {showAnalysis.observation.literary_features.tone}</p>
                     </div>
-                  )}
-
-                  {showAnalysis.commonMisunderstandings && showAnalysis.commonMisunderstandings.length > 0 && (
-                    <div className="bg-[#fffcf5] p-4 rounded border border-stone-200 shadow-sm">
-                      <h3 className="text-xs font-bold text-stone-600 uppercase tracking-widest mb-2">Common Misconceptions</h3>
-                      <ul className="space-y-1.5 text-xs text-stone-700 list-disc list-inside">
-                        {showAnalysis.commonMisunderstandings.map((mis, idx) => (
-                          <li key={idx} className="leading-relaxed">
-                            {renderInteractiveText(mis)}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  </div>
                 </div>
               )}
 
-              {activeStudyTab === 'HISTORY' && (
+              {activeStudyTab === 'INTERPRETATION' && (
                 <div className="space-y-3 animate-fade-in">
                   <div className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm">
-                    <h3 className="text-xs font-bold text-[#8b0000] uppercase tracking-widest mb-2">Historical Setting & Customs</h3>
-                    <p className="text-xs leading-relaxed text-stone-800">
-                      {renderInteractiveText(showAnalysis.historicalCulturalContext || "Examining the ancient Near Eastern and Greco-Roman world that framed this biblical witness.")}
-                    </p>
+                    <h3 className="text-xs font-bold text-[#8b0000] uppercase tracking-widest mb-3 border-b border-[#c5a059]/30 pb-1">Contextual Analysis</h3>
+                    <div className="space-y-2 text-[11.5px] text-stone-800 leading-relaxed">
+                      <p><strong className="text-[#382117]">Immediate Context:</strong> {showAnalysis.interpretation.contextual_analysis.immediate_context}</p>
+                      <p><strong className="text-[#382117]">Book Context:</strong> {showAnalysis.interpretation.contextual_analysis.book_context}</p>
+                      <p><strong className="text-[#382117]">Cultural/Historical:</strong> {showAnalysis.interpretation.contextual_analysis.cultural_historical_context}</p>
+                    </div>
                   </div>
 
-                  {showAnalysis.keyTerms && showAnalysis.keyTerms.length > 0 && (
-                    <div className="bg-[#fdfaf2] p-4 rounded border border-[#c5a059]/40 shadow-sm">
-                      <h3 className="text-xs font-bold text-[#c5a059] uppercase tracking-widest mb-2">Passage Terminology & Linguistics</h3>
-                      <div className="divide-y divide-stone-200/60">
-                        {showAnalysis.keyTerms.map((termItem, idx) => (
-                          <div key={idx} className="py-2 first:pt-0 last:pb-0">
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-xs text-[#382117]">{termItem.term}</span>
-                              {termItem.originalLanguage && (
-                                <span className="text-[10px] italic text-[#8b0000]">{termItem.originalLanguage}</span>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-stone-700 mt-0.5">{termItem.definition}</p>
-                            <p className="text-[10px] text-stone-500 italic mt-0.5">{termItem.relevance}</p>
-                          </div>
-                        ))}
-                      </div>
+                  <div className="bg-[#fdfaf2] p-4 rounded border border-[#c5a059]/40 shadow-sm">
+                    <h3 className="text-xs font-bold text-[#c5a059] uppercase tracking-widest mb-3 border-b border-[#c5a059]/30 pb-1">Theological Analysis</h3>
+                    <div className="space-y-2 text-[11.5px] text-stone-800 leading-relaxed">
+                      <p><strong className="text-[#382117]">Theology Proper:</strong> {showAnalysis.interpretation.theological_analysis.theology_proper}</p>
+                      <p><strong className="text-[#382117]">Christology:</strong> {showAnalysis.interpretation.theological_analysis.christology}</p>
+                      <p><strong className="text-[#382117]">Anthropology:</strong> {showAnalysis.interpretation.theological_analysis.anthropology}</p>
                     </div>
-                  )}
+                  </div>
+
+                  <div className="bg-stone-100/70 p-4 rounded border border-stone-200 shadow-sm text-center">
+                    <h3 className="text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1.5">The Principlizing Bridge</h3>
+                    <p className="text-xs text-[#382117] italic leading-relaxed font-medium">"{showAnalysis.interpretation.principlizing_bridge}"</p>
+                  </div>
                 </div>
               )}
 
-              {activeStudyTab === 'THEOLOGY' && (
+              {activeStudyTab === 'APPLICATION' && (
                 <div className="space-y-3 animate-fade-in">
                   <div className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm">
-                    <h3 className="text-xs font-bold text-[#8b0000] uppercase tracking-widest mb-2">Theological Significance</h3>
-                    <p className="text-xs leading-relaxed text-stone-800">
-                      {renderInteractiveText(showAnalysis.theologicalSignificance || "Revelation of God's character and redemptive covenant.")}
+                    <h3 className="text-xs font-bold text-[#8b0000] uppercase tracking-widest mb-3 border-b border-[#c5a059]/30 pb-1">The Personal Audit (SPACEPETS)</h3>
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {showAnalysis.application.spacepets_audit.applicable_categories.map((cat, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded-full bg-[#8b0000]/10 text-[#8b0000] text-[9.5px] font-bold uppercase tracking-wider ui-font border border-[#8b0000]/20">
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-[11.5px] text-stone-800 leading-relaxed">
+                      {showAnalysis.application.spacepets_audit.audit_explanation}
                     </p>
                   </div>
 
-                  {showAnalysis.biblicalConnections && showAnalysis.biblicalConnections.length > 0 && (
-                    <div className="bg-[#fdfaf2] p-4 rounded border border-[#c5a059]/40 shadow-sm">
-                      <h3 className="text-xs font-bold text-[#c5a059] uppercase tracking-widest mb-2">Scriptural Connections</h3>
-                      <div className="space-y-2">
-                        {showAnalysis.biblicalConnections.map((conn, idx) => (
-                          <div key={idx} className="p-2.5 rounded bg-white/70 border border-stone-200">
-                            <div className="flex items-center justify-between mb-1">
-                              <button 
-                                onClick={(e) => handleCrossReferenceClick(conn.reference, e)}
-                                className="font-bold text-xs text-[#8b0000] hover:underline active:opacity-70 flex items-center gap-1 text-left"
-                                title={`Read ${conn.reference}`}
-                              >
-                                {conn.reference} ↗
-                              </button>
-                              <span className="text-[9px] uppercase font-bold text-[#c5a059]">{conn.connectionType}</span>
-                            </div>
-                            <p className="text-[11px] text-stone-800">{conn.description}</p>
-                            <p className="text-[10px] text-stone-500 italic mt-1">{conn.significance}</p>
-                          </div>
-                        ))}
-                      </div>
+                  <div className="bg-[#fdfaf2] p-4 rounded border border-[#c5a059]/40 shadow-sm">
+                    <h3 className="text-xs font-bold text-[#c5a059] uppercase tracking-widest mb-3 border-b border-[#c5a059]/30 pb-1">Action Plan</h3>
+                    <div className="space-y-2 text-[11.5px] text-stone-800 leading-relaxed">
+                      <p><strong className="text-[#382117]">Internal Alignment:</strong> {showAnalysis.application.action_plan.internal_alignment}</p>
+                      <p><strong className="text-[#382117]">Relational Impact:</strong> {showAnalysis.application.action_plan.relational_impact}</p>
                     </div>
-                  )}
-
-                  {showAnalysis.interpretationCaveats && showAnalysis.interpretationCaveats.length > 0 && (
-                    <details className="p-3 bg-stone-100/70 border border-stone-200 rounded text-[11px] text-stone-600 group cursor-pointer">
-                      <summary className="font-bold text-stone-700 mb-1 select-none flex items-center gap-1 outline-none">
-                        <span className="group-open:rotate-90 transition-transform">▶</span> 
-                        Scholarly Considerations & Caveats
-                      </summary>
-                      <div className="mt-2 space-y-1.5 pl-3 border-l-2 border-stone-300 italic">
-                        {showAnalysis.interpretationCaveats.map((caveat, i) => (
-                          <p key={i}>• {caveat}</p>
-                        ))}
-                      </div>
-                    </details>
-                  )}
-                </div>
-              )}
-
-              {activeStudyTab === 'QUESTIONS' && (
-                <div className="space-y-3 animate-fade-in">
-                  <div className="bg-[#fffafa] p-4 rounded border border-[#c5a059]/40 shadow-sm">
-                    <h3 className="text-xs font-bold text-[#8b0000] uppercase tracking-widest mb-2">Questions for Reflection</h3>
-                    {showAnalysis.reflectionQuestions && showAnalysis.reflectionQuestions.length > 0 ? (
-                      <div className="space-y-2">
-                        {showAnalysis.reflectionQuestions.map((q, idx) => (
-                          <div key={idx} className="p-2.5 rounded bg-white/80 border border-stone-200">
-                            <span className="text-[9px] font-bold uppercase text-[#c5a059] block mb-0.5">{q.level}</span>
-                            <p className="text-xs font-medium text-[#382117]">{q.question}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <ul className="text-xs text-stone-700 space-y-2 list-disc list-inside">
-                        <li>What does this passage reveal about the character and heart of God?</li>
-                        <li>How does the response of the main figures challenge your own choices this week?</li>
-                        <li>In what area of your life or leadership is God calling you to deeper trust?</li>
-                      </ul>
-                    )}
+                    <div className="mt-3 p-3 rounded-lg bg-white/50 border border-[#c5a059]/30">
+                      <strong className="text-[#8b0000] uppercase text-[9px] tracking-widest block ui-font mb-1">Measurable 48-Hour Action</strong>
+                      <p className="text-xs font-medium text-[#382117]">{showAnalysis.application.action_plan.measurable_action}</p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -3318,26 +3182,25 @@ export default function App() {
                     >
                       <div className="overflow-hidden">
                         <div
-                          className="rounded-2xl p-3 text-xs text-[#1f100a] max-h-56 overflow-y-auto no-scrollbar reading-font transition-all duration-300"
+                          className="rounded-2xl p-3 text-xs text-[#1f100a] max-h-64 overflow-y-auto no-scrollbar reading-font transition-all duration-300"
                           style={{
                             background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.14) 100%)',
                             border: '1px solid rgba(255, 255, 255, 0.6)',
                             boxShadow: 'inset 0 1px 1.5px rgba(255, 255, 255, 0.75)',
                           }}
                         >
-                          {sentenceToolView.startsWith('PHASE_') && (
+                          {(sentenceToolView === 'OBSERVATION' ||
+                            sentenceToolView === 'INTERPRETATION' ||
+                            sentenceToolView === 'APPLICATION') && (
                             <div className="animate-fade-in space-y-2">
                               <div className="flex items-center justify-between gap-2 border-b border-[#4a3b32]/15 pb-1">
-                                <span className="text-[9px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
-                                  {sentenceToolView === 'PHASE_1' && 'Phase 1 • Text, Linguistics & Signs'}
-                                  {sentenceToolView === 'PHASE_2' && 'Phase 2 • Historical-Cultural Context'}
-                                  {sentenceToolView === 'PHASE_3' && 'Phase 3 • Literary Context & Genre'}
-                                  {sentenceToolView === 'PHASE_4' && 'Phase 4 • Canonical & OT/NT Links'}
-                                  {sentenceToolView === 'PHASE_5' && 'Phase 5 • History of Interpretation'}
-                                  {sentenceToolView === 'PHASE_6' && 'Phase 6 • Synthesis & Application'}
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
+                                  {sentenceToolView === 'OBSERVATION' && '1 • Observation (Forensic)'}
+                                  {sentenceToolView === 'INTERPRETATION' && '2 • Interpretation (Exegetical)'}
+                                  {sentenceToolView === 'APPLICATION' && '3 • Application (Transformational)'}
                                 </span>
                                 <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#8b0000]/10 text-[#8b0000] ui-font shrink-0">
-                                  ✦ Exegesis AI
+                                  ✦ OIA Analysis
                                 </span>
                               </div>
 
@@ -3345,72 +3208,62 @@ export default function App() {
                                 <div className="py-4 flex flex-col items-center justify-center gap-2 text-center">
                                   <span className="w-4 h-4 rounded-full border-2 border-[#8b0000]/30 border-t-[#8b0000] animate-spin" />
                                   <p className="text-[11px] italic text-stone-700 animate-pulse">
-                                    Running 6-Phase Exegetical & Hermeneutical Analysis...
+                                    Running OIA Inductive Bible Study...
                                   </p>
                                 </div>
-                              ) : sixPhaseData ? (
-                                <div className="space-y-2 text-[11px] leading-relaxed text-[#1f100a]">
-                                  {sentenceToolView === 'PHASE_1' && (
+                              ) : oiaData ? (
+                                <div className="space-y-2.5 text-[11px] leading-relaxed text-[#1f100a]">
+                                  {sentenceToolView === 'OBSERVATION' && (
                                     <>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Original Languages & Variants</strong>{sixPhaseData.phase1.originalLanguagesAndVariants}</p>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Lexical & Grammatical Analysis</strong>{sixPhaseData.phase1.lexicalAndGrammaticalAnalysis}</p>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Figurative Language & "Signs"</strong>{sixPhaseData.phase1.figurativeLanguageAndSigns}</p>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Journalistic Baseline</strong>
+                                      <span className="text-[10.5px]"><strong>Who:</strong> {oiaData.observation.journalistic_baseline.who}<br/>
+                                      <strong>What:</strong> {oiaData.observation.journalistic_baseline.what}<br/>
+                                      <strong>Where:</strong> {oiaData.observation.journalistic_baseline.where}<br/>
+                                      <strong>When:</strong> {oiaData.observation.journalistic_baseline.when}</span></p>
+                                      
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font mt-2">Grammar & Structure</strong>
+                                      <span className="text-[10.5px]"><strong>Verbs:</strong> {oiaData.observation.grammar_and_structure.verbs_analysis}<br/>
+                                      <strong>Transitions:</strong> {oiaData.observation.grammar_and_structure.key_conjunctions}</span></p>
+                                      
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font mt-2">Literary Features</strong>
+                                      <span className="text-[10.5px]"><strong>Tone:</strong> {oiaData.observation.literary_features.tone}<br/>
+                                      <strong>Repetition:</strong> {oiaData.observation.literary_features.repetition.join(', ')}</span></p>
                                     </>
                                   )}
 
-                                  {sentenceToolView === 'PHASE_2' && (
+                                  {sentenceToolView === 'INTERPRETATION' && (
                                     <>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Ancient Worldview</strong>{sixPhaseData.phase2.ancientWorldview}</p>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Relational Dynamics</strong>{sixPhaseData.phase2.relationalDynamics}</p>
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Contextual Analysis</strong>
+                                      <span className="text-[10.5px]"><strong>Immediate:</strong> {oiaData.interpretation.contextual_analysis.immediate_context}<br/>
+                                      <strong>Historical:</strong> {oiaData.interpretation.contextual_analysis.cultural_historical_context}</span></p>
+                                      
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font mt-2">Theological Analysis</strong>
+                                      <span className="text-[10.5px]"><strong>Theology Proper:</strong> {oiaData.interpretation.theological_analysis.theology_proper}<br/>
+                                      <strong>Christology:</strong> {oiaData.interpretation.theological_analysis.christology}<br/>
+                                      <strong>Anthropology:</strong> {oiaData.interpretation.theological_analysis.anthropology}</span></p>
+                                      
+                                      <div className="p-2 mt-2 rounded-lg bg-white/40 border border-white/50 text-center">
+                                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#382117] block ui-font mb-0.5">The Principlizing Bridge</span>
+                                        <p className="text-[11px] italic font-medium">"{oiaData.interpretation.principlizing_bridge}"</p>
+                                      </div>
                                     </>
                                   )}
 
-                                  {sentenceToolView === 'PHASE_3' && (
+                                  {sentenceToolView === 'APPLICATION' && (
                                     <>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Circles of Context</strong>{sixPhaseData.phase3.circlesOfContext}</p>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Genre & Form</strong>{sixPhaseData.phase3.genreAndForm}</p>
-                                    </>
-                                  )}
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">The Personal Audit (SPACEPETS)</strong>
+                                      <span className="flex flex-wrap gap-1 mb-1">{oiaData.application.spacepets_audit.applicable_categories.map((c, i) => (
+                                        <span key={i} className="px-1.5 py-0.5 bg-[#8b0000]/10 text-[#8b0000] rounded text-[8.5px] font-bold uppercase ui-font border border-[#8b0000]/20">{c}</span>
+                                      ))}</span>
+                                      <span className="text-[10.5px]">{oiaData.application.spacepets_audit.audit_explanation}</span></p>
 
-                                  {sentenceToolView === 'PHASE_4' && (
-                                    <>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Intertextuality (OT/NT)</strong>{sixPhaseData.phase4.intertextuality}</p>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Organic Development & Rule of Faith</strong>{sixPhaseData.phase4.organicDevelopmentAndRuleOfFaith}</p>
-                                      {sixPhaseData.phase4.crossReferences && sixPhaseData.phase4.crossReferences.length > 0 && (
-                                        <div className="pt-1 flex flex-wrap items-center gap-1 ui-font">
-                                          <span className="text-[9px] font-bold uppercase text-stone-600">Refs:</span>
-                                          {sixPhaseData.phase4.crossReferences.map((refStr, idx) => (
-                                            <button
-                                              key={idx}
-                                              type="button"
-                                              onClick={(e) => handleCrossReferenceClick(refStr, e)}
-                                              className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/50 hover:bg-white/80 border border-white/70 text-[#8b0000] transition-colors"
-                                            >
-                                              {refStr} ↗
-                                            </button>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </>
-                                  )}
+                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font mt-2">Internal & Relational Impact</strong>
+                                      <span className="text-[10.5px]"><strong>Internal:</strong> {oiaData.application.action_plan.internal_alignment}<br/>
+                                      <strong>Relational:</strong> {oiaData.application.action_plan.relational_impact}</span></p>
 
-                                  {sentenceToolView === 'PHASE_5' && (
-                                    <>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Early Church / Patristic Consensus</strong>{sixPhaseData.phase5.patristicConsensus}</p>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Medieval & Reformation Theology</strong>{sixPhaseData.phase5.medievalAndReformation}</p>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Modern Critical Scholarship</strong>{sixPhaseData.phase5.modernCriticalScholarship}</p>
-                                    </>
-                                  )}
-
-                                  {sentenceToolView === 'PHASE_6' && (
-                                    <>
-                                      <p><strong className="text-[#8b0000] uppercase text-[9.5px] tracking-wider block ui-font">Exegetical Verdict</strong>{sixPhaseData.phase6.exegeticalVerdict}</p>
-                                      <div className="p-2 rounded-lg bg-white/35 border border-white/50 space-y-1">
-                                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#382117] block ui-font">4-Step Application ("Principlizing")</span>
-                                        <p className="text-[10.5px]"><strong>1. Original:</strong> {sixPhaseData.phase6.originalApplication}</p>
-                                        <p className="text-[10.5px]"><strong>2. Specificity:</strong> {sixPhaseData.phase6.levelOfSpecificity}</p>
-                                        <p className="text-[10.5px]"><strong>3. Principle:</strong> {sixPhaseData.phase6.crossCulturalPrinciple}</p>
-                                        <p className="text-[10.5px] text-[#8b0000] font-medium"><strong>4. Embodiment:</strong> {sixPhaseData.phase6.contemporaryEmbodiment}</p>
+                                      <div className="p-2.5 mt-2 rounded-lg bg-white/50 border border-white/60">
+                                        <span className="text-[9.5px] font-bold uppercase tracking-wider text-[#8b0000] block ui-font mb-0.5">Measurable 48-Hour Action</span>
+                                        <p className="text-[11px] font-medium text-[#382117]">{oiaData.application.action_plan.measurable_action}</p>
                                       </div>
                                     </>
                                   )}
@@ -3418,91 +3271,14 @@ export default function App() {
                               ) : null}
                             </div>
                           )}
-
-                          {sentenceToolView === 'SEARCH' && (
-                            <div className="animate-fade-in space-y-2">
-                              <div className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
-                                Webster's 1828 & Scripture Search
-                              </div>
-                              <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search term or passage..."
-                                className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white/45 border border-white/60 text-[#24130c] placeholder:text-stone-500 focus:outline-none focus:border-[#8b0000] ui-font"
-                              />
-                              {(() => {
-                                const q = (searchQuery.trim() || getPrimaryWordFromSentence(displaySentence)).trim();
-                                const lexEntry = getKjvDictionaryEntry(q);
-                                const matchingPassages = MASTER_CONTENT.filter(
-                                  item =>
-                                    item.title.toLowerCase().includes(q.toLowerCase()) ||
-                                    item.body.toLowerCase().includes(q.toLowerCase()) ||
-                                    item.why.toLowerCase().includes(q.toLowerCase())
-                                ).slice(0, 3);
-
-                                return (
-                                  <div className="space-y-1.5 pt-0.5">
-                                    <div className="p-2 rounded-lg bg-white/30 border border-white/40">
-                                      <div className="font-bold text-[#382117] text-[11px]">{lexEntry.term}</div>
-                                      <div className="text-[11px] leading-snug text-[#24130c] mt-0.5">{lexEntry.shortDef}</div>
-                                    </div>
-                                    {matchingPassages.length > 0 && (
-                                      <div className="space-y-1">
-                                        <div className="text-[9px] font-bold uppercase tracking-wider text-stone-600 ui-font">
-                                          Related Passages
-                                        </div>
-                                        {matchingPassages.map(mp => (
-                                          <button
-                                            key={mp.id}
-                                            type="button"
-                                            onClick={() => {
-                                              setActiveSection(mp.section);
-                                              handleStoryChange(mp);
-                                            }}
-                                            className="w-full text-left px-2 py-1 rounded bg-white/25 hover:bg-white/45 transition-colors flex items-center justify-between gap-2 ui-font"
-                                          >
-                                            <span className="text-[10px] font-bold text-[#382117] truncate">{mp.title}</span>
-                                            <span className="text-[9px] text-[#8b0000] shrink-0">{mp.ref}</span>
-                                          </button>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          )}
-
-                          {sentenceToolView === 'CROSS_REF' && (
-                            <div className="animate-fade-in space-y-2">
-                              <div className="flex items-center justify-between gap-2 border-b border-[#4a3b32]/15 pb-1">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000] ui-font">
-                                  Cross Reference Lookup
-                                </span>
-                              </div>
-                              {isFetchingChapter ? (
-                                <div className="py-4 flex flex-col items-center justify-center gap-2 text-center">
-                                  <span className="w-4 h-4 rounded-full border-2 border-[#8b0000]/30 border-t-[#8b0000] animate-spin" />
-                                  <p className="italic text-[11px] text-stone-600 animate-pulse py-2">
-                                    Loading passage from King James Scripture...
-                                  </p>
-                                </div>
-                              ) : (
-                                <p className="leading-relaxed whitespace-pre-line text-[11.5px] text-[#1f100a]">
-                                  {chapterLookupText}
-                                </p>
-                              )}
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Single Centered Liquid Glass Pill: 6 Exegetical & Hermeneutical Phase Buttons */}
+                    {/* Single Centered Liquid Glass Pill: 3 OIA Phase Buttons */}
                     <div className="mt-3.5 flex items-center justify-center ui-font select-none">
                       <div
-                        className="flex items-center gap-1 rounded-full px-2.5 py-1 relative z-10"
+                        className="flex items-center gap-1.5 rounded-full px-3 py-1.5 relative z-10"
                         style={{
                           background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.72) 100%)',
                           border: '1px solid rgba(255, 255, 255, 0.95)',
@@ -3514,151 +3290,77 @@ export default function App() {
                           `,
                         }}
                       >
+                        {/* 1. Observation (Magnifying Glass) */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (sentenceToolView === 'PHASE_1') {
+                            if (sentenceToolView === 'OBSERVATION') {
                               setSentenceToolView('NONE');
                               return;
                             }
-                            handlePhaseAnalysis('PHASE_1');
+                            handlePhaseAnalysis('OBSERVATION');
                           }}
-                          title="Phase 1: Original Text, Linguistics, and Signs"
-                          aria-label="Phase 1: Original Text, Linguistics, and Signs"
-                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'PHASE_1'
+                          title="Phase 1: Observation"
+                          aria-label="Phase 1: Observation"
+                          className={`h-9 w-12 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'OBSERVATION'
                               ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner font-bold'
                               : 'text-[#24130c] hover:bg-black/5'
                           }`}
                         >
-                          <svg className="w-[18px] h-[17px]" viewBox="0 0 26 24" fill="currentColor">
-                            <text x="1" y="17.5" fontSize="11.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">a</text>
-                            <text x="9.5" y="17.5" fontSize="15.5" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">A</text>
+                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
                           </svg>
                         </button>
 
+                        {/* 2. Interpretation (Book/Lightbulb) */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (sentenceToolView === 'PHASE_2') {
+                            if (sentenceToolView === 'INTERPRETATION') {
                               setSentenceToolView('NONE');
                               return;
                             }
-                            handlePhaseAnalysis('PHASE_2');
+                            handlePhaseAnalysis('INTERPRETATION');
                           }}
-                          title="Phase 2: Historical-Cultural Context"
-                          aria-label="Phase 2: Historical-Cultural Context"
-                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'PHASE_2'
+                          title="Phase 2: Interpretation"
+                          aria-label="Phase 2: Interpretation"
+                          className={`h-9 w-12 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'INTERPRETATION'
                               ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
                               : 'text-[#24130c] hover:bg-black/5'
                           }`}
                         >
-                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 9l9-5 9 5v2H3V9z" />
-                            <line x1="6" y1="11" x2="6" y2="18" />
-                            <line x1="10" y1="11" x2="10" y2="18" />
-                            <line x1="14" y1="11" x2="14" y2="18" />
-                            <line x1="18" y1="11" x2="18" y2="18" />
-                            <path d="M3 18h18v2H3z" />
+                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                           </svg>
                         </button>
 
+                        {/* 3. Application (Action/Hand) */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (sentenceToolView === 'PHASE_3') {
+                            if (sentenceToolView === 'APPLICATION') {
                               setSentenceToolView('NONE');
                               return;
                             }
-                            handlePhaseAnalysis('PHASE_3');
+                            handlePhaseAnalysis('APPLICATION');
                           }}
-                          title="Phase 3: Literary Context and Genre"
-                          aria-label="Phase 3: Literary Context and Genre"
-                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'PHASE_3'
+                          title="Phase 3: Application"
+                          aria-label="Phase 3: Application"
+                          className={`h-9 w-12 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
+                            sentenceToolView === 'APPLICATION'
                               ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
                               : 'text-[#24130c] hover:bg-black/5'
                           }`}
                         >
-                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="9" />
-                            <circle cx="12" cy="12" r="5.5" />
-                            <circle cx="12" cy="12" r="2" fill="currentColor" />
-                          </svg>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (sentenceToolView === 'PHASE_4') {
-                              setSentenceToolView('NONE');
-                              return;
-                            }
-                            handlePhaseAnalysis('PHASE_4');
-                          }}
-                          title="Phase 4: Canonical & Old/New Testament Connections"
-                          aria-label="Phase 4: Canonical & Old/New Testament Connections"
-                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'PHASE_4'
-                              ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
-                              : 'text-[#24130c] hover:bg-black/5'
-                          }`}
-                        >
-                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                          </svg>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (sentenceToolView === 'PHASE_5') {
-                              setSentenceToolView('NONE');
-                              return;
-                            }
-                            handlePhaseAnalysis('PHASE_5');
-                          }}
-                          title="Phase 5: History of Interpretation (The Great Chain of Tradition)"
-                          aria-label="Phase 5: History of Interpretation"
-                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'PHASE_5'
-                              ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
-                              : 'text-[#24130c] hover:bg-black/5'
-                          }`}
-                        >
-                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                          </svg>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (sentenceToolView === 'PHASE_6') {
-                              setSentenceToolView('NONE');
-                              return;
-                            }
-                            handlePhaseAnalysis('PHASE_6');
-                          }}
-                          title="Phase 6: Exegetical Synthesis and Contemporary Application"
-                          aria-label="Phase 6: Exegetical Synthesis and Contemporary Application"
-                          className={`h-8 w-8 rounded-full transition-all active:scale-90 active:opacity-60 flex items-center justify-center ${
-                            sentenceToolView === 'PHASE_6'
-                              ? 'bg-[#8b0000]/15 text-[#8b0000] shadow-inner'
-                              : 'text-[#24130c] hover:bg-black/5'
-                          }`}
-                        >
-                          <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="9" />
-                            <polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5 15.5 8.5" fill="currentColor" stroke="currentColor" strokeWidth="1.2" />
+                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z" />
                           </svg>
                         </button>
                       </div>
