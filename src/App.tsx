@@ -20,9 +20,19 @@ interface ContentItem {
 interface LexiconEntry {
   term: string;
   category: 'Person' | 'Place' | 'Concept & Artifact';
+  volumeRef?: string;
   shortDef: string;
   significance: string;
+  rank?: number;
+  isTop100?: boolean;
 }
+
+const AYBD_BASE_URL = "https://www.theologyandreligiononline.com/custom-browse?docid=AnchorYaleBibleDictionaryAZ";
+
+const getAybdSearchUrl = (query?: string) => {
+  if (!query || !query.trim()) return AYBD_BASE_URL;
+  return `https://www.theologyandreligiononline.com/search?q=${encodeURIComponent(query.trim() + " Anchor Yale Bible Dictionary")}`;
+};
 
 interface BookmarkedSentence {
   id: string;
@@ -81,101 +91,377 @@ interface OiaAnalysisData {
   };
 }
 
-const BIBLICAL_LEXICON: Record<string, LexiconEntry> = {
-  "God": { term: "God (Elohim / YHWH)", category: "Person", shortDef: "Webster 1828: The Supreme Being; Jehovah; the eternal and infinite Spirit, creator and sovereign of the universe.", significance: "Reveals Himself through creation, redemption, and covenant faithfulness across all of Scripture." },
-  "Lord": { term: "The Lord (Adonai / Kyrios)", category: "Person", shortDef: "Webster 1828: Master; ruler; governor; a title of supreme power, applied in Scripture to God and Christ.", significance: "Affirms God's rightful rule over history and the believer's call to wholehearted allegiance." },
-  "Jesus": { term: "Jesus Christ (Yeshua)", category: "Person", shortDef: "Webster 1828: Savior; Jehovah saves. The personal name of the Son of God incarnate.", significance: "Fulfils the Old Testament covenants through His life, sacrificial death, and bodily resurrection." },
-  "Christ": { term: "Christ (Messiah / Anointed One)", category: "Person", shortDef: "Webster 1828: Anointed; the title given to the Savior and Deliverer of mankind, consecrated by God.", significance: "Identifies Jesus as the long-awaited King who inaugurates God's eternal Kingdom." },
-  "Holy Spirit": { term: "The Holy Spirit (Ruach / Pneuma)", category: "Person", shortDef: "Webster 1828: The third person of the Holy Trinity; the divine Comforter, inspirer, and sanctifier.", significance: "Indwells believers, forms the Church at Pentecost, and produces spiritual fruit and gifts for ministry." },
-  "Spirit": { term: "The Spirit of God", category: "Person", shortDef: "Webster 1828: An immaterial, intelligent being; breath; the divine influence animating the soul.", significance: "Empowers leaders, prophets, and the Church for faithful witness and transformation." },
-  "Adam": { term: "Adam", category: "Person", shortDef: "Webster 1828: Earthy, red earth; the first man created by God, federal head of humanity.", significance: "Entrusted with stewarding Eden; his disobedience introduced sin, contrasting with Christ the Last Adam." },
-  "Eve": { term: "Eve", category: "Person", shortDef: "Webster 1828: Living, mother of all living; the first woman, wife of Adam.", significance: "Created as an equal partner in bearing God's image and stewarding creation." },
-  "Eden": { term: "Garden of Eden", category: "Place", shortDef: "Webster 1828: Pleasure, delight; the paradise prepared by God for the habitation of innocent man.", significance: "Represents unbroken fellowship with God, later echoed in the New Jerusalem of Revelation." },
-  "Cain": { term: "Cain", category: "Person", shortDef: "Webster 1828: Possession, acquisition; firstborn son of Adam and Eve who slew Abel.", significance: "His jealousy and murder of Abel illustrate how quickly sin corrupts human brotherhood." },
-  "Abel": { term: "Abel", category: "Person", shortDef: "Webster 1828: Vanity, breath, vapor; second son of Adam and Eve, righteous shepherd.", significance: "Offered an acceptable sacrifice by faith and became the first martyr in biblical history." },
-  "Noah": { term: "Noah", category: "Person", shortDef: "Webster 1828: Rest, repose; patriarch chosen by God to build the Ark and preserve humanity.", significance: "Models steadfast obedience in a corrupt generation and receives God's rainbow covenant." },
-  "Babel": { term: "Tower of Babel", category: "Place", shortDef: "Webster 1828: Confusion; the city and tower where God confounded human language.", significance: "Symbolizes collective human hubris and self-exaltation apart from God." },
-  "Abraham": { term: "Abraham", category: "Person", shortDef: "Webster 1828: Father of a great multitude; patriarch called out of Ur of the Chaldees.", significance: "Model of justification by faith; through his lineage God promised to bless all nations." },
-  "Isaac": { term: "Isaac", category: "Person", shortDef: "Webster 1828: Laughter, rejoicing; miracle son of promise born to Abraham and Sarah.", significance: "His near-sacrifice on Mount Moriah foreshadows God's provision of a sacrificial Lamb." },
-  "Jacob": { term: "Jacob (Israel)", category: "Person", shortDef: "Webster 1828: He who supplants, heel-catcher; son of Isaac and father of the twelve tribes.", significance: "Wrestled with God at Peniel, where his name was changed from 'supplanter' to 'Israel'." },
-  "Esau": { term: "Esau", category: "Person", shortDef: "Webster 1828: Hairy, formed; twin brother of Jacob who sold his birthright.", significance: "His eventual reconciliation with Jacob demonstrates the healing of deep family division." },
-  "Joseph": { term: "Joseph", category: "Person", shortDef: "Webster 1828: Addition, increase; eleventh son of Jacob who governed Egypt during famine.", significance: "Exemplifies integrity under temptation, administrative wisdom, and radical forgiveness." },
-  "Egypt": { term: "Egypt", category: "Place", shortDef: "Webster 1828: That troubles or oppresses; ancient empire of the Nile where Israel was enslaved.", significance: "The stage for the Exodus deliverance, symbolizing bondage from which God redeems His people." },
-  "Moses": { term: "Moses", category: "Person", shortDef: "Webster 1828: Drawn out of the water; lawgiver, prophet, and leader of Israel in the Exodus.", significance: "Models humble intercessory leadership, mediating the Sinai covenant between God and Israel." },
-  "Sinai": { term: "Mount Sinai (Horeb)", category: "Place", shortDef: "Webster 1828: A bush of brambles, hostility; sacred mountain where the Law was given.", significance: "Site of the burning bush, covenant ratification, and Elijah's later encounter with God's whisper." },
-  "Israel": { term: "Israel", category: "Place", shortDef: "Webster 1828: Who prevails with God; covenant name given to Jacob and his descendants.", significance: "Called to be a kingdom of priests and a light to the nations." },
-  "Canaan": { term: "Land of Canaan", category: "Place", shortDef: "Webster 1828: Merchant, trader, humbled; the Promised Land pledged to Abraham's seed.", significance: "Represents God's tangible inheritance and rest for a trusting community." },
-  "Joshua": { term: "Joshua", category: "Person", shortDef: "Webster 1828: Jehovah is salvation; successor to Moses who led Israel into Canaan.", significance: "Demonstrates courageous obedience and faithful transition of spiritual leadership." },
-  "Jericho": { term: "Jericho", category: "Place", shortDef: "Webster 1828: His moon, city of fragrance; fortified Canaanite city whose walls fell.", significance: "Proves that spiritual victory comes through unconventional obedience to God's word." },
-  "Ruth": { term: "Ruth", category: "Person", shortDef: "Webster 1828: Drunken, satisfied, beauty; Moabite widow devoted to Naomi.", significance: "Great-grandmother of King David and ancestor of Jesus, showing God's inclusion of outsiders." },
-  "Naomi": { term: "Naomi", category: "Person", shortDef: "Webster 1828: My pleasantness, my amenity; mother-in-law of Ruth in Bethlehem.", significance: "Her journey from bitterness ('Mara') to restoration highlights God's redeeming providence." },
-  "Boaz": { term: "Boaz", category: "Person", shortDef: "Webster 1828: In him is strength; wealthy Bethlehemite landowner and kinsman-redeemer.", significance: "Foreshadows Christ as our ultimate Kinsman-Redeemer who rescues the vulnerable." },
-  "Samuel": { term: "Samuel", category: "Person", shortDef: "Webster 1828: Heard of God; last judge and prophet who anointed Israel's kings.", significance: "Guided Israel through political transition while reminding kings of their accountability to God." },
-  "David": { term: "King David", category: "Person", shortDef: "Webster 1828: Well-beloved, dear; shepherd-king of Israel and psalmist.", significance: "Called 'a man after God's own heart'—honored for his faith and psalms, yet humbled by repentance." },
-  "Goliath": { term: "Goliath of Gath", category: "Person", shortDef: "Webster 1828: Passage, revolution, uncovered; giant champion slain by David.", significance: "Represents intimidating worldly power overcome by reliance on the living God." },
-  "Bathsheba": { term: "Bathsheba", category: "Person", shortDef: "Webster 1828: Daughter of the oath, daughter of abundance; wife of Uriah, mother of Solomon.", significance: "Her story exposes David's abuse of royal power while showing God's redemptive grace in Solomon's line." },
-  "Nathan": { term: "Nathan the Prophet", category: "Person", shortDef: "Webster 1828: Given, giving; faithful court prophet who rebuked David.", significance: "Models the prophetic courage required to speak truth to power." },
-  "Solomon": { term: "King Solomon", category: "Person", shortDef: "Webster 1828: Peaceful, perfect; king renowned for wisdom and builder of the Temple.", significance: "Illustrates both the pinnacle of royal wisdom and the tragedy of a divided, compromised heart." },
-  "Elijah": { term: "Elijah", category: "Person", shortDef: "Webster 1828: God the Lord, my God is Jehovah; Tishbite prophet of fire and zeal.", significance: "Demonstrates bold prophetic zeal followed by vulnerable exhaustion and divine renewal." },
-  "Baal": { term: "Baal", category: "Concept & Artifact", shortDef: "Webster 1828: Lord, master, owner; principal male deity of Phoenicians and Canaanites.", significance: "Represents the perennial temptation to trade covenant faithfulness for cultural syncretism." },
-  "Babylon": { term: "Babylon", category: "Place", shortDef: "Webster 1828: Confusion, mixture; ancient Mesopotamian empire and capital of exile.", significance: "Archetype of worldly empire and cultural pressure where believers must maintain integrity." },
-  "Daniel": { term: "Daniel", category: "Person", shortDef: "Webster 1828: Judgment of God; prophet in Babylon known for wisdom and integrity.", significance: "Models unwavering prayer, wisdom, and faithfulness in a pluralistic, hostile environment." },
-  "Esther": { term: "Queen Esther", category: "Person", shortDef: "Webster 1828: Secret, hidden, myrtle; Jewish queen of Persia who saved her people.", significance: "Exemplifies strategic courage and using one's platform 'for such a time as this.'" },
-  "Persia": { term: "Persia", category: "Place", shortDef: "Webster 1828: Cutting, horseman; great empire under Cyrus that released exiles.", significance: "Context for Esther's advocacy and Nehemiah's commission to rebuild Jerusalem." },
-  "Nehemiah": { term: "Nehemiah", category: "Person", shortDef: "Webster 1828: Comforted of Jehovah; cupbearer who rebuilt Jerusalem's walls.", significance: "Premier biblical model of prayerful planning, vision-casting, and overcoming opposition." },
-  "Jerusalem": { term: "Jerusalem (Zion)", category: "Place", shortDef: "Webster 1828: Vision of peace; holy city, capital of David and site of the Temple.", significance: "Center of redemptive history, pointing toward the heavenly New Jerusalem." },
-  "Jonah": { term: "Jonah", category: "Person", shortDef: "Webster 1828: Dove; prophet sent to Nineveh who fled to Tarshish.", significance: "Exposes narrow religious nationalism and highlights God's boundless compassion for all peoples." },
-  "Nineveh": { term: "Nineveh", category: "Place", shortDef: "Webster 1828: Handsome, agreeable habitation; capital of Assyria that repented.", significance: "Proves that no city or culture is beyond the reach of repentance and divine mercy." },
-  "Job": { term: "Job", category: "Person", shortDef: "Webster 1828: Sorrowful, hated, patient sufferer; patriarch of Uz tried by affliction.", significance: "Teaches that authentic faith clings to God Himself even when suffering remains a mystery." },
-  "Isaiah": { term: "Isaiah", category: "Person", shortDef: "Webster 1828: Salvation of Jehovah; eighth-century prophet of holiness and the Messiah.", significance: "Foretold the coming Messiah and the Suffering Servant who bears the sins of many." },
-  "Jeremiah": { term: "Jeremiah", category: "Person", shortDef: "Webster 1828: Exaltation of Jehovah; weeping prophet of Judah's final days.", significance: "Prophesied the New Covenant in which God writes His law directly upon human hearts." },
-  "Ezekiel": { term: "Ezekiel", category: "Person", shortDef: "Webster 1828: Strength of God; priest-prophet among the captives in Babylon.", significance: "Proclaimed God as the True Shepherd and envisioned the Valley of Dry Bones restored to life." },
-  "Amos": { term: "Amos", category: "Person", shortDef: "Webster 1828: Loading, weighty, burden-bearer; shepherd prophet of social justice.", significance: "Insists that religious rituals are empty unless accompanied by justice rolling like waters." },
-  "Bethlehem": { term: "Bethlehem", category: "Place", shortDef: "Webster 1828: House of bread; Judean town, birthplace of David and Jesus.", significance: "Demonstrates how God chooses humble, overlooked places to bring forth salvation." },
-  "John": { term: "John (Apostle / Baptist)", category: "Person", shortDef: "Webster 1828: Grace or mercy of the Lord; forerunner or beloved apostle.", significance: "Witnesses to Jesus as the Lamb of God, the eternal Word, and the source of divine love." },
-  "Samaritan": { term: "Samaritan", category: "Person", shortDef: "Webster 1828: Inhabitant of Samaria; mixed race viewed with prejudice by Jews.", significance: "In Jesus' parable, the Good Samaritan redefines neighborly love across ethnic and religious divides." },
-  "Pharisee": { term: "Pharisees", category: "Person", shortDef: "Webster 1828: Separated; strict religious sect in Judaism emphasizing tradition and law.", significance: "Often warned by Jesus against trading inward humility and mercy for outward self-righteousness." },
-  "Peter": { term: "Simon Peter (Cephas)", category: "Person", shortDef: "Webster 1828: A rock or stone; leading apostle of the early Christian Church.", significance: "Shows how Christ restores a flawed, impulsive follower into a courageous shepherd." },
-  "Judas": { term: "Judas Iscariot", category: "Person", shortDef: "Webster 1828: The praise of the Lord; disciple who betrayed Jesus for silver.", significance: "Tragic warning that proximity to spiritual things does not guarantee a surrendered heart." },
-  "Pilate": { term: "Pontius Pilate", category: "Person", shortDef: "Webster 1828: Armed with a spear; Roman governor who condemned Jesus.", significance: "Illustrates the moral failure of caving to crowd pressure over truth and justice." },
-  "Gethsemane": { term: "Garden of Gethsemane", category: "Place", shortDef: "Webster 1828: Valley of oil press; olive garden of Christ's agony and prayer.", significance: "Model of honest anguish surrendered to the Father's will: 'Not my will, but thine, be done.'" },
-  "Pentecost": { term: "Pentecost", category: "Concept & Artifact", shortDef: "Webster 1828: Fiftieth; Jewish feast when the Holy Spirit descended in power.", significance: "Reverses the division of Babel and launches the multi-ethnic mission of the Church." },
-  "Stephen": { term: "Stephen", category: "Person", shortDef: "Webster 1828: Crown, crowned; first Christian martyr stoned in Jerusalem.", significance: "Mirrored Christ by proclaiming redemptive history boldly and forgiving his executioners." },
-  "Paul": { term: "Apostle Paul (Saul of Tarsus)", category: "Person", shortDef: "Webster 1828: Small, little; apostle to the Gentiles and author of epistles.", significance: "Pioneered church planting across the Roman Empire and authored much of the New Testament." },
-  "Saul": { term: "Saul", category: "Person", shortDef: "Webster 1828: Demanded, asked for; Israel's first king or Paul's Hebrew name.", significance: "Highlights the contrast between proud self-will and humble surrender to Christ's lordship." },
-  "Cornelius": { term: "Cornelius", category: "Person", shortDef: "Webster 1828: A horn; devout Roman centurion baptized by Peter.", significance: "Marks the historic breakthrough confirming that Gentiles receive the Spirit on equal footing." },
-  "Silas": { term: "Silas (Silvanus)", category: "Person", shortDef: "Webster 1828: Woody, forest; missionary companion of Paul.", significance: "Models joyful resilience and partnership in gospel ministry during persecution." },
-  "Rome": { term: "Rome", category: "Place", shortDef: "Webster 1828: Strength, power; imperial capital of the classical Western world.", significance: "Paul's journey to Rome demonstrates that the gospel advances even into the heart of empire." },
-  "Stewardship": { term: "Stewardship", category: "Concept & Artifact", shortDef: "Webster 1828: The office, duties, or management of a steward; the responsible overseeing and care of another's property, resources, or household.", significance: "Establishes that leaders and believers own nothing absolute, but are accountable to God for managing time, talents, and resources faithfully." },
-  "Righteousness": { term: "Righteousness (Tzedakah / Dikaiosyne)", category: "Concept & Artifact", shortDef: "Webster 1828: Purity of heart and rectitude of life; conformity of heart and life to the divine law.", significance: "The moral perfection required by God, imputed to believers through faith in Christ and expressed in upright living." },
-  "Redemption": { term: "Redemption (Golel / Apyltrosis)", category: "Concept & Artifact", shortDef: "Webster 1828: Repurchase of captured goods or freedom; deliverance from sin, penalty, or bondage by the payment of a ransom.", significance: "The heart of the gospel story—Christ paying the ultimate price to liberate humanity from the slavery of sin." },
-  "Faith": { term: "Faith (Pistis / Emunah)", category: "Concept & Artifact", shortDef: "Webster 1828: Belief in the divine revelation; the assent of the mind to the truth of divine propositions; the confident trust in God's promises.", significance: "The foundational posture of the believer; 'the substance of things hoped for, the evidence of things not seen' (Hebrews 11:1)." },
-  "Grace": { term: "Grace (Charis)", category: "Concept & Artifact", shortDef: "Webster 1828: Unmerited favor; divine clemency and spiritual enablement freely bestowed upon humanity through Christ.", significance: "Replaces legalistic performance with empowering love, justifying the ungodly and equipping them for good works." },
-  "Atonement": { term: "Atonement (Kapporeth / Hilasmos)", category: "Concept & Artifact", shortDef: "Webster 1828: Reconciliation; the satisfaction or reparation made by Jesus Christ for sin through His sufferings and death on the cross.", significance: "Bridges the infinite chasm between a holy God and sinful humanity, satisfying divine justice while offering mercy." },
-  "Sanctification": { term: "Sanctification (Hagiasmos)", category: "Concept & Artifact", shortDef: "Webster 1828: The act of making holy or setting apart for sacred use; the ongoing process of moral purification and spiritual growth.", significance: "The lifelong journey wherein the Holy Spirit transforms the believer into the likeness of Jesus Christ." },
-  "Covenant": { term: "Covenant (Berith / Diatheke)", category: "Concept & Artifact", shortDef: "Webster 1828: A mutual agreement, testament, or solemn pledge of grace between God and man.", significance: "Anchors leadership and faith in God's unchanging promises rather than human contract." },
-  "Wisdom": { term: "Wisdom (Chokmah / Sophia)", category: "Concept & Artifact", shortDef: "Webster 1828: The right use or exercise of knowledge; the faculty of discerning what is true, proper, or best, guided by moral integrity and the fear of God.", significance: "Practical divine guidance for living skillfully and leading justly in a complex world." },
-  "Mercy": { term: "Mercy (Chesed / Eleos)", category: "Concept & Artifact", shortDef: "Webster 1828: Tenderness of heart; disposition to forgive injuries or forbear punishment; compassionate clemency toward the miserable.", significance: "Reflects God's heart toward the broken, calling leaders to temper truth with compassion." },
-  "Patience": { term: "Patience (Makrothymia)", category: "Concept & Artifact", shortDef: "Webster 1828: The quality of enduring evil, trouble, or suffering without murmuring or retaliation; long-suffering perseverance.", significance: "Essential virtue for spiritual leadership, mirroring God's patient endurance with human frailty." },
-  "Glory": { term: "Glory (Kabod / Doxa)", category: "Concept & Artifact", shortDef: "Webster 1828: Brightness; splendor; the manifestation of divine perfection, majesty, and honor due to God alone.", significance: "The ultimate aim of all creation and leadership: that God's supreme worth be recognized and magnified." },
-  "Truth": { term: "Truth (Emet / Aletheia)", category: "Concept & Artifact", shortDef: "Webster 1828: Conformity to fact or reality; exact accordance with divine revelation; integrity and faithfulness in word and deed.", significance: "Absolute standard anchored in God's character, setting people free from deception." },
-  "Love": { term: "Love (Agape / Chesed)", category: "Concept & Artifact", shortDef: "Webster 1828: An affection of the mind directed toward supreme moral excellence; sacrificial goodwill and active devotion to others.", significance: "The greatest of spiritual gifts and the defining mark of Christ's disciples." },
-  "Hope": { term: "Hope (Elpis)", category: "Concept & Artifact", shortDef: "Webster 1828: Desire of good coupled with expectation; confident anticipation of future blessings promised by God.", significance: "An anchor of the soul that sustains leaders through trials and points toward eternal renewal." },
-  "Justice": { term: "Justice (Mishpat / Dikaiosyne)", category: "Concept & Artifact", shortDef: "Webster 1828: The invariable rendering to every man his due; equity, fairness, and the active protection of the vulnerable.", significance: "Inseparable from true worship and righteousness in God's eyes." },
-  "Peace": { term: "Peace (Shalom / Eirene)", category: "Concept & Artifact", shortDef: "Webster 1828: Freedom from war, terror, or agitation; quiet, order, and harmonious reconciliation between God and humanity.", significance: "The tranquil wholeness and flourishing produced by the rule of God." },
-  "Salvation": { term: "Salvation (Yeshuan / Soteria)", category: "Concept & Artifact", shortDef: "Webster 1828: Deliverance from sin, eternal death, and every evil; the attainment of spiritual happiness and eternal life through Christ.", significance: "The grand sweep of God's rescuing work from Genesis to Revelation." },
-  "Holiness": { term: "Holiness (Kodesh / Hagiosyne)", category: "Concept & Artifact", shortDef: "Webster 1828: Spiritual purity; moral excellence; complete separation from sin and dedication to the service of God.", significance: "The defining attribute of God ('Be holy, for I am holy') imparted to His people." },
-  "Repentance": { term: "Repentance (Metanoia)", category: "Concept & Artifact", shortDef: "Webster 1828: Sorrow for sin and a real turning from it unto God with amendment of life.", significance: "The essential gateway to spiritual renewal, restoration, and authentic leadership." }
+const RAW_TOP_PEOPLE: [number, string, string][] = [
+  [1, "Jesus", "The central figure of the New Testament; also referred to as Christ, Lord, and Son of Man."],
+  [2, "David", "King of Israel, credited with many Psalms; the most mentioned Old Testament figure."],
+  [3, "Moses", "Prophet and lawgiver who led the Exodus out of Egypt."],
+  [4, "Jacob (Israel)", "Patriarch whose 12 sons became the tribes of Israel."],
+  [5, "Saul", "The first King of Israel (and the original name of the Apostle Paul)."],
+  [6, "Aaron", "Moses' brother and the first High Priest of Israel."],
+  [7, "Abraham (Abram)", "The founding patriarch of the Israelites."],
+  [8, "Solomon", "Son of David; King known for his wisdom and building the first Temple."],
+  [9, "Joseph", "Son of Jacob who became a ruler in Egypt (also Jesus' earthly father in the NT)."],
+  [10, "Joshua", "Moses' successor who led the Israelites into Canaan."],
+  [11, "Paul", "Apostle to the Gentiles and author of much of the New Testament."],
+  [12, "Peter (Simon)", "Leading Apostle of Jesus."],
+  [13, "Jeremiah", "The weeping prophet of the Old Testament."],
+  [14, "Samuel", "Prophet and judge who anointed Saul and David."],
+  [15, "Isaac", "Son of Abraham and father of Jacob."],
+  [16, "John (The Baptist)", "The prophet who prepared the way for Jesus."],
+  [17, "John (The Apostle)", "Disciple of Jesus and traditional author of a Gospel, Epistles, and Revelation."],
+  [18, "Elijah", "Major prophet of the Northern Kingdom of Israel."],
+  [19, "Isaiah", "Major Old Testament prophet widely quoted in the New Testament."],
+  [20, "Mary (Mother of Jesus)", "The most mentioned woman in the Bible."],
+  [21, "Daniel", "Prophet known for his visions and surviving the lions' den."],
+  [22, "Ezekiel", "Major Old Testament prophet during the Babylonian exile."],
+  [23, "Hezekiah", "One of the most prominent kings of Judah."],
+  [24, "Joab", "Commander of King David's army."],
+  [25, "Absalom", "David's rebellious son."],
+  [26, "Elisha", "Prophet who succeeded Elijah and performed numerous miracles."],
+  [27, "Ahab", "One of the most wicked kings of northern Israel, married to Jezebel."],
+  [28, "Jeroboam", "The first king of the divided northern kingdom of Israel."],
+  [29, "Sarah (Sarai)", "Wife of Abraham and matriarch of the Jewish people."],
+  [30, "Jonathan", "King Saul's son and King David's most loyal friend."],
+  [31, "Gideon", "A judge who delivered Israel from the Midianites with only 300 men."],
+  [32, "Herod", "A dynasty of Roman-appointed rulers, including Herod the Great and Herod Antipas."],
+  [33, "Pilate (Pontius)", "The Roman governor of Judea who authorized the crucifixion of Jesus."],
+  [34, "James", "Refers primarily to the Apostle and the half-brother of Jesus."],
+  [35, "Josiah", "A righteous king of Judah who instituted major religious reforms."],
+  [36, "Judas (Iscariot)", "The disciple who betrayed Jesus for thirty pieces of silver."],
+  [37, "Asa", "An early king of Judah noted for stripping away foreign idols."],
+  [38, "Jehoshaphat", "A generally righteous king of Judah who allied with the northern kingdom."],
+  [39, "Esau", "Jacob's twin brother who sold his birthright; ancestor of the Edomites."],
+  [40, "Rachel", "Jacob's favored wife and the mother of Joseph and Benjamin."],
+  [41, "Job", "The central figure of the Book of Job, tested by suffering to demonstrate faithfulness."],
+  [42, "Nehemiah", "The cupbearer to the Persian king who returned to rebuild the walls of Jerusalem."],
+  [43, "Ezra", "A priest and scribe who led exiles back to Jerusalem and restored the Torah."],
+  [44, "Timothy", "A young pastor and Paul's closest protégé, recipient of two New Testament letters."],
+  [45, "Barnabas", "An early Christian leader and Paul's first missionary companion."],
+  [46, "Ishmael", "Abraham's first son (by Hagar)."],
+  [47, "Ruth", "A Moabite woman who showed intense loyalty to Naomi, becoming an ancestor of David."],
+  [48, "Esther", "A Jewish woman who became Queen of Persia and saved her people from genocide."],
+  [49, "Stephen", "The first recorded Christian martyr, stoned to death in Acts."],
+  [50, "Miriam", "Moses and Aaron's sister, a prophetess who led the Israelites in worship."],
+  [51, "Abner", "Commander of King Saul's army and a major player in Israel's early civil wars."],
+  [52, "Rebekah", "Wife of Isaac and mother of the twins Jacob and Esau."],
+  [53, "Balaam", "The foreign prophet who was hired to curse Israel but was rebuked by his donkey."],
+  [54, "Zedekiah", "The last, tragic king of Judah, whose rebellion led to the destruction of Jerusalem."],
+  [55, "Samson", "The famously strong, tragic Judge of Israel who fought the Philistines."],
+  [56, "Jehu", "The furious chariot-driving king of Israel who violently wiped out Ahab's royal line."],
+  [57, "Lot", "Abraham's nephew who barely escaped the destruction of Sodom."],
+  [58, "Silas", "A leading member of the early church and Paul's primary companion on his second journey."],
+  [59, "Titus", "A Gentile convert and trusted troubleshooter for the Apostle Paul."],
+  [60, "Luke", "A physician, traveling companion of Paul, and author of a Gospel and Acts."],
+  [61, "Mary Magdalene", "A devoted follower of Jesus and the first recorded witness to his resurrection."],
+  [62, "Martha", "The pragmatic, hardworking sister of Mary and Lazarus."],
+  [63, "Lazarus", "The friend of Jesus who was famously raised from the dead after four days."],
+  [64, "Thomas", "The Apostle best known for demanding physical proof of Jesus' resurrection."],
+  [65, "Nicodemus", "A Pharisee and member of the Sanhedrin who secretly sought out Jesus at night."],
+  [66, "Caleb", "Along with Joshua, the only spy who believed God would give Israel the Promised Land."],
+  [67, "Manasseh", "Joseph's son (tribal patriarch) or the wicked king in Judah's history who repented."],
+  [68, "Leah", "Jacob's unloved first wife, but the mother of Judah and ancestor of Jesus."],
+  [69, "Levi", "Son of Jacob and the patriarch of the tribe that became Israel's priests."],
+  [70, "Judah", "Son of Jacob who suggested selling Joseph, later offering himself as a substitute for Benjamin."],
+  [71, "Benaiah", "One of David's mighty men; later Solomon's army commander."],
+  [72, "Boaz", "The honorable landowner who served as Ruth's kinsman-redeemer."],
+  [73, "Hagar", "Sarah's Egyptian handmaid and the mother of Ishmael."],
+  [74, "Zechariah", "Prophet who urged rebuilding the Temple; also John the Baptist's father."],
+  [75, "Hosea", "Prophet commanded to marry an unfaithful woman as a metaphor for God and Israel."],
+  [76, "Noah", "The righteous man chosen to build the Ark and survive the global flood."],
+  [77, "Rehoboam", "Solomon's son whose harsh policies caused the kingdom to split in two."],
+  [78, "Laban", "Jacob's uncle and father-in-law, known for his cunning and trickery."],
+  [79, "Abimelech", "A recurring Philistine royal title, and the name of Gideon's ruthless son."],
+  [80, "Ahaz", "A notoriously wicked king of Judah who practiced child sacrifice."],
+  [81, "Uzziah (Azariah)", "A mostly righteous king of Judah who was struck with leprosy for pride."],
+  [82, "Haman", "The arrogant Persian official who plotted a genocide of the Jews."],
+  [83, "Mordecai", "Esther's cousin and guardian who helped her thwart Haman's plot."],
+  [84, "Ahasuerus (Xerxes)", "The volatile King of the Persian Empire who made Esther his queen."],
+  [85, "Jonah", "The reluctant prophet swallowed by a great fish after fleeing his mission to Nineveh."],
+  [86, "Eli", "The High Priest and judge at Shiloh who mentored the boy Samuel."],
+  [87, "Uriah (the Hittite)", "One of David's elite warriors, murdered to cover up David's affair."],
+  [88, "Bathsheba", "Uriah's wife, who became David's queen and the mother of King Solomon."],
+  [89, "Amos", "A shepherd-turned-prophet who condemned the northern kingdom for social injustice."],
+  [90, "Micah", "A prophet who championed the poor and foretold the Messiah's birth in Bethlehem."],
+  [91, "Philip", "Refers to an original Apostle and Philip the Evangelist who preached in Samaria."],
+  [92, "Apollos", "An eloquent Jewish Christian from Alexandria who became a key leader."],
+  [93, "Mark (John Mark)", "Companion of Paul and Peter, traditional author of the Gospel of Mark."],
+  [94, "Cornelius", "A Roman centurion whose conversion opened the Gospel to Gentiles."],
+  [95, "Agrippa", "The Roman-appointed Jewish king who heard Paul's defense in Caesarea."],
+  [96, "Felix", "The corrupt Roman governor of Judea who kept Paul imprisoned for two years."],
+  [97, "Festus", "Felix's successor, who eventually sent Paul to Rome to stand trial."],
+  [98, "Priscilla", "A Jewish Christian tentmaker who risked her life for Paul and instructed Apollos."],
+  [99, "Aquila", "Priscilla's husband and co-laborer in early church planting."],
+  [100, "Enoch", "A patriarch before the flood who walked with God, and he was not, for God took him."]
+];
+
+const RAW_TOP_PLACES: [number, string, string][] = [
+  [1, "Jerusalem (Zion)", "The political and spiritual capital of biblical Israel."],
+  [2, "Israel", "The nation, the land, and the people descended from Jacob."],
+  [3, "Egypt", "The empire where the Israelites were enslaved, and a frequent refuge."],
+  [4, "Judah", "The southern kingdom and the primary tribe of the Jewish people."],
+  [5, "Babylon", "The empire that destroyed Jerusalem and exiled the Jews."],
+  [6, "Canaan", "The Promised Land before the Israelite conquest."],
+  [7, "Jordan (River)", "The major water source and boundary crossing."],
+  [8, "Ephraim", "The dominant tribe of the northern kingdom, often used as a synonym for the north."],
+  [9, "Samaria", "The capital of the northern kingdom, later a region despised by Judeans."],
+  [10, "Edom", "The nation descended from Esau, Jacob's brother."],
+  [11, "Moab", "A neighboring nation to Israel, descended from Lot."],
+  [12, "Damascus", "Capital of Syria; site of Paul's conversion."],
+  [13, "Assyria", "The empire that conquered and exiled the northern kingdom of Israel."],
+  [14, "Galilee", "The northern region of Israel where Jesus conducted most of his ministry."],
+  [15, "Bethel", "A major religious site where Jacob had his ladder dream."],
+  [16, "Gilead", "A mountainous region east of the Jordan River."],
+  [17, "Bethlehem", "The birthplace of both King David and Jesus."],
+  [18, "Sinai (Horeb)", "The mountain where God gave the Law to Moses."],
+  [19, "Tyre", "A wealthy Phoenician coastal city frequently condemned by prophets."],
+  [20, "Jericho", "The first city conquered by Joshua; a prominent New Testament stop."],
+  [21, "Rome", "Capital of the ruling empire in the New Testament; Paul's final destination."],
+  [22, "Philistia", "The coastal territory of Israel's perennial enemies, the Philistines."],
+  [23, "Antioch (Syria)", "The city where believers were first called Christians."],
+  [24, "Nazareth", "The hometown where Jesus was raised."],
+  [25, "Ephesus", "A major Roman city and recipient of one of Paul's letters."],
+  [26, "Aram (Syria)", "An ancient region northeast of Israel, often at war with the Israelite kings."],
+  [27, "Hebron", "King David's first capital and the burial site of the patriarchs."],
+  [28, "Shechem", "An ancient Canaanite city where Joshua renewed the covenant."],
+  [29, "Shiloh", "The primary religious center and resting place of the Ark before the Temple."],
+  [30, "Gilgal", "The first camp of the Israelites after crossing the Jordan River."],
+  [31, "Corinth", "A wealthy Greek trading city and recipient of two of Paul's letters."],
+  [32, "Nineveh", "The fierce capital of the Assyrian Empire and destination of Jonah."],
+  [33, "Sodom", "A city famously destroyed by God for its extreme wickedness."],
+  [34, "Beersheba", "The southernmost major city of ancient Israel."],
+  [35, "Bashan", "A fertile region east of the Sea of Galilee."],
+  [36, "Euphrates", "The major river of Mesopotamia, marking the eastern boundary of the biblical world."],
+  [37, "Mount Carmel", "Where Elijah had his fiery showdown with the prophets of Baal."],
+  [38, "Mount of Olives", "The ridge east of Jerusalem central to Jesus' final week."],
+  [39, "Gath", "One of the five major Philistine cities and hometown of Goliath."],
+  [40, "Macedonia", "A Roman province in northern Greece where Paul established churches."],
+  [41, "Thessalonica", "The capital of Macedonia and a major hub for early Christian expansion."],
+  [42, "Sea of Galilee", "The lake where Jesus walked on water and called his disciples."],
+  [43, "Philippi", "A Roman colony and site of the first Christian church in Europe."],
+  [44, "Ur (of Chaldeans)", "The wealthy Mesopotamian city where Abraham originally lived."],
+  [45, "Susa (Shushan)", "The winter capital of the Persian Empire, setting for Esther and Nehemiah."],
+  [46, "Ashdod", "A major Philistine city where the Ark of the Covenant toppled Dagon."],
+  [47, "Gaza", "A Philistine stronghold where Samson destroyed the temple of Dagon."],
+  [48, "Capernaum", "A fishing village that served as the home base for Jesus' ministry."],
+  [49, "Gethsemane", "The olive grove where Jesus prayed and was arrested."],
+  [50, "Golgotha (Calvary)", "The hill outside Jerusalem's walls where Jesus was crucified."],
+  [51, "Midian", "The wilderness region where Moses fled as a fugitive."],
+  [52, "Ammon", "A nation east of the Jordan River, frequently at war with Israel."],
+  [53, "Sidon", "A wealthy Phoenician coastal city paired in judgment with Tyre."],
+  [54, "Gibeon", "The Canaanite city that tricked Joshua; site where the sun stood still."],
+  [55, "Mizpah", "A frequent gathering place for national assembly and repentance."],
+  [56, "Ramah", "The hometown and base of operations for the prophet Samuel."],
+  [57, "Mount Nebo", "The peak where Moses viewed the Promised Land before his death."],
+  [58, "Kadesh-Barnea", "The wilderness oasis where Israel tragically refused to enter the Promised Land."],
+  [59, "Tarsus", "A major intellectual hub in Asia Minor; hometown of Paul."],
+  [60, "Cyprus", "A Mediterranean island, homeland of Barnabas, first stop on Paul's journey."],
+  [61, "Athens", "The intellectual center where Paul debated philosophers on Mars Hill."],
+  [62, "Colossae", "A city in Asia Minor and recipient of Paul's letter to the Colossians."],
+  [63, "Galatia", "A Roman province in central Asia Minor where Paul established churches."],
+  [64, "Joppa", "The seaport where Jonah fled, and where Peter had his vision."],
+  [65, "Caesarea (Maritima)", "The Roman coastal capital of Judea where Paul was imprisoned."],
+  [66, "Caesarea Philippi", "A heavily pagan city where Peter confessed You are the Christ."],
+  [67, "Mount Seir", "The rugged, mountainous homeland of the Edomites."],
+  [68, "Red Sea", "The body of water miraculously parted by God for the Exodus."],
+  [69, "Nile River", "The lifeblood of Egypt; site of the plague of blood."],
+  [70, "Dead Sea", "The lowest point on earth and eastern boundary of Judah."],
+  [71, "Megiddo", "A highly strategic fortress city; prophesied as the site of Armageddon."],
+  [72, "Peniel (Penuel)", "Where Jacob wrestled with God and his name was changed to Israel."],
+  [73, "Patmos", "The rocky prison island where John received the visions of Revelation."],
+  [74, "Babel", "Site of humanity's rebellion and God's confusion of languages."],
+  [75, "Gomorrah", "The neighboring city to Sodom, associated with extreme wickedness."],
+  [76, "Dan", "The northernmost city of ancient Israel, infamous for idol worship."],
+  [77, "Ziklag", "A Philistine city given to David as a refuge when fleeing Saul."],
+  [78, "En-gedi", "A lush oasis near the Dead Sea where David spared Saul's life."],
+  [79, "Jezreel", "A strategic valley and the winter capital of Ahab and Jezebel."],
+  [80, "Ramoth-Gilead", "A highly contested city where King Ahab was killed in battle."],
+  [81, "Jabesh-Gilead", "City whose residents bravely recovered the bodies of Saul and his sons."],
+  [82, "Hazor", "A massive Canaanite stronghold in the north that Joshua destroyed."],
+  [83, "Mount Hermon", "The highest snow-capped peak, marking Israel's northern boundary."],
+  [84, "Mount Tabor", "Rallying point for Deborah; traditionally the Mount of Transfiguration."],
+  [85, "Valley of Hinnom", "A cursed ravine outside Jerusalem, later becoming a symbol for Hell (Gehenna)."],
+  [86, "Kidron Valley", "The ravine crossed by Jesus before his arrest in Gethsemane."],
+  [87, "Tarshish", "A distant maritime location that Jonah tried to escape to."],
+  [88, "Ophir", "A legendary region famous for supplying King Solomon with gold."],
+  [89, "Sheba", "A wealthy kingdom in southern Arabia whose queen visited Solomon."],
+  [90, "Troas", "The coastal city where Paul received his vision calling him to Europe."],
+  [91, "Miletus", "A seaport where Paul gave a tearful farewell to the Ephesian elders."],
+  [92, "Iconium", "A city in Asia Minor where Paul faced intense opposition but made converts."],
+  [93, "Lystra", "A city where Paul was worshipped, then nearly stoned to death."],
+  [94, "Derbe", "The furthest city reached on Paul's first missionary journey."],
+  [95, "Berea (Beroea)", "A city praised because its residents eagerly searched the Scriptures."],
+  [96, "Crete", "A large island where Paul left Titus to organize the early churches."],
+  [97, "Malta", "The island where Paul was shipwrecked on his way to Rome."],
+  [98, "Laodicea", "A wealthy city housing the lukewarm church severely rebuked in Revelation."],
+  [99, "Smyrna", "A city housing a persecuted church in Revelation, told to remain faithful."],
+  [100, "Pergamum", "A city described in Revelation as the place where Satan has his throne."]
+];
+
+const RAW_TOP_CONCEPTS: [number, string, string][] = [
+  [1, "God / Lord", "The supreme deity; the most frequently used nouns in the entire Bible."],
+  [2, "King / Kingdom", "The concept of earthly rulers and the sovereign reign of God."],
+  [3, "Law / Commandment", "The Torah, the rules, and the divine instructions for living."],
+  [4, "Sin / Iniquity / Evil", "Human rebellion and failure to meet divine standards."],
+  [5, "Son / Children", "Used for human lineage, the Children of Israel, and the Son of God."],
+  [6, "Love / Mercy", "God's loyal devotion (Hesed) and unconditional love (Agape)."],
+  [7, "Faith / Belief", "Trust in God's promises; the central mechanism of salvation."],
+  [8, "Righteousness", "Moral purity and the equitable treatment of others."],
+  [9, "Covenant", "The binding agreements between God and humanity."],
+  [10, "Blood / Sacrifice", "The cost of atonement and the sealing of covenants."],
+  [11, "Holy / Holiness", "To be set apart; the defining attribute of God's nature."],
+  [12, "Grace / Favor", "Unmerited divine assistance and goodwill."],
+  [13, "Truth", "Ultimate reality as defined by God's character and word."],
+  [14, "Spirit", "The breath of life, the human soul, and the Holy Spirit."],
+  [15, "Wisdom", "Practical insight for living a godly life, highly emphasized in Proverbs."],
+  [16, "Life / Eternal Life", "Both physical existence and spiritual salvation."],
+  [17, "Death / Sheol", "The consequence of sin and the realm of the dead."],
+  [18, "Peace (Shalom)", "Wholeness, well-being, and the absence of conflict."],
+  [19, "Flesh", "Physical humanity, often contrasted with the Spirit in Paul's writings."],
+  [20, "Heaven", "The sky, the cosmos, and the dwelling place of God."],
+  [21, "Earth / World", "The physical creation and the systems of human society."],
+  [22, "Light / Darkness", "The primary metaphor for good vs. evil and truth vs. ignorance."],
+  [23, "Salvation", "Deliverance from enemies, slavery, or spiritual death."],
+  [24, "Glory", "The heavy, radiant weight of God's presence and honor."],
+  [25, "Prophet / Prophecy", "The mouthpieces of God warning of judgment and promising restoration."],
+  [26, "Heart", "The seat of the human will, intellect, and decision-making."],
+  [27, "Temple / Tabernacle", "Structures representing God's localized presence among His people."],
+  [28, "Priest / Priesthood", "The mediators appointed to offer sacrifices and intercede."],
+  [29, "Praise / Worship", "The act of ascribing ultimate worth, honor, and adoration to God."],
+  [30, "Fear (of the Lord)", "Deep reverence and submission, often called the beginning of wisdom."],
+  [31, "Blessing", "Divine favor, multiplication, and empowerment for success."],
+  [32, "Curse", "The removal of divine protection and the imposition of judgment."],
+  [33, "Word", "Scripture, prophecies, and theologically Jesus himself (the Logos)."],
+  [34, "Joy / Rejoicing", "A deep gladness rooted in God's character rather than circumstances."],
+  [35, "Prayer", "Direct communication with God, including petition and lament."],
+  [36, "Angel", "Spiritual beings serving as God's messengers and warriors."],
+  [37, "Soul", "The living essence of a person; the whole self."],
+  [38, "Hope", "A confident expectation of future salvation based on God's faithfulness."],
+  [39, "Forgiveness", "The canceling of a moral debt or offense."],
+  [40, "Repentance", "A complete change of mind and direction; turning away from sin."],
+  [41, "Judgment", "God's righteous evaluation of human actions."],
+  [42, "Wrath", "God's active, settled, and holy hostility toward evil."],
+  [43, "Sabbath", "The seventh day of rest, instituted at creation."],
+  [44, "Cross / Crucifixion", "Roman execution method that became the symbol of Christian atonement."],
+  [45, "Resurrection", "The physical raising of the dead to new, immortal life."],
+  [46, "Satan / Devil", "The primary spiritual adversary; the accuser."],
+  [47, "Bread", "Daily sustenance; used metaphorically by Jesus as the Bread of Life."],
+  [48, "Wine", "A symbol of joy, the blood of the New Covenant, and God's wrath."],
+  [49, "Remnant", "A small, surviving group of faithful people whom God preserves."],
+  [50, "Creation", "God's act of bringing the universe into existence out of nothing."],
+  [51, "Altar", "A raised structure used for offering sacrifices and incense."],
+  [52, "Anointing (Oil)", "Pouring of oil to symbolize consecration and the Holy Spirit's power."],
+  [53, "Ark", "Noah's vessel of salvation and the gold-covered Ark of the Covenant."],
+  [54, "Fasting", "Intentional abstention from food to express mourning or focus on prayer."],
+  [55, "Idolatry / Idols", "The creation and worship of false gods."],
+  [56, "Circumcision", "The physical removal of the foreskin, sign of the Abrahamic covenant."],
+  [57, "Tithes / Offerings", "The requirement to give a tenth of wealth back to God."],
+  [58, "Atonement", "Covering over sin and turning away divine wrath through a substitute."],
+  [59, "Fire", "A frequent symbol of God's holy presence, purification, and judgment."],
+  [60, "Water", "A dual symbol representing cleansing and destructive chaos."],
+  [61, "Shepherd / Sheep", "Metaphor for leadership, vulnerability, and God's tender care."],
+  [62, "Visions / Dreams", "Methods of divine revelation for warnings and prophecies."],
+  [63, "Fool / Folly", "Moral deficiency and the stubborn rejection of God's ways."],
+  [64, "Gospel (Good News)", "Announcement of Jesus' victory and invitation into his kingdom."],
+  [65, "Church (Ekklesia)", "The gathered community of believers called out by God."],
+  [66, "Mystery", "A part of God's redemptive plan once hidden but revealed in Christ."],
+  [67, "Fruit / Harvest", "A metaphor for spiritual maturity and the final ingathering of souls."],
+  [68, "Crown", "Symbol of royal authority, victory, and eternal reward."],
+  [69, "Famine", "A shortage of food, frequently a tool of divine testing or discipline."],
+  [70, "Plague / Pestilence", "Outbreaks of disease or ecological disaster used as divine judgment."],
+  [71, "Genealogy", "Tracing of family lines to prove inheritances and Messianic promises."],
+  [72, "Exile / Captivity", "The ultimate covenant curse: being forcibly removed from the Land."],
+  [73, "Redeemer (Kinsman)", "A close relative responsible for buying back family land or avenging."],
+  [74, "Widows and Orphans", "Vulnerable members of society whose treatment tested a nation's justice."],
+  [75, "New Heavens & Earth", "The final, perfected state of creation where God dwells with humanity."],
+  [76, "Inheritance", "The physical land promised to Israel, and the eternal kingdom."],
+  [77, "Wilderness", "A desolate place representing divine testing and reliance on God."],
+  [78, "Firstfruits", "Giving God the first and best portion of the harvest."],
+  [79, "Firstborn", "The eldest son who held special status and belonged to God."],
+  [80, "Jubilee", "The 50th year when debts were canceled and slaves freed."],
+  [81, "Oath / Vow", "A solemn, binding promise made before God."],
+  [82, "Justification", "The legal declaration of a sinner being made right before God."],
+  [83, "Sanctification", "The ongoing process of being made holy and purified."],
+  [84, "Humility / Meekness", "A virtue characterized by lowliness and submission to God's will."],
+  [85, "Pride", "The fundamental sin of elevating self above God and others."],
+  [86, "Hypocrisy", "Pretending to be morally righteous while masking inward sin."],
+  [87, "Blasphemy", "Speaking sacrilegiously against God."],
+  [88, "Conscience", "The internal moral compass bearing witness to God's universal law."],
+  [89, "Leaven / Yeast", "A frequent symbol of the pervasive, spreading nature of sin."],
+  [90, "Yoke", "A harness; metaphor for slavery, burdensome laws, or submission."],
+  [91, "Cornerstone", "The foundational stone of a building; primary metaphor for Jesus."],
+  [92, "Vine / Vineyard", "Metaphor representing the nation of Israel, and later Jesus."],
+  [93, "Sword", "Symbol of war, divine judgment, and the truth of the Word of God."],
+  [94, "Trumpet (Shofar)", "Used to sound alarms, gather assemblies, and announce the end times."],
+  [95, "Incense", "A fragrant offering symbolizing the prayers of God's people."],
+  [96, "Manna", "The miraculous bread from heaven that sustained the Israelites."],
+  [97, "Adoption", "The reality of believers being legally brought into God's family."],
+  [98, "Election", "God sovereignly selecting individuals or nations for His purposes."],
+  [99, "Hospitality", "The sacred duty of welcoming and protecting strangers."],
+  [100, "Refuge", "God as a safe shelter; also physical Cities of Refuge for manslayers."]
+];
+
+const BIBLICAL_LEXICON: Record<string, LexiconEntry> = {};
+const LEXICON_LOOKUP: Record<string, LexiconEntry> = {};
+
+const registerTop100Category = (
+  data: [number, string, string][],
+  category: 'Person' | 'Place' | 'Concept & Artifact'
+) => {
+  const catLabel =
+    category === 'Person'
+      ? 'Top 100 Most Referenced People'
+      : category === 'Place'
+      ? 'Top 100 Most Referenced Places'
+      : 'Top 100 Most Referenced Concepts';
+
+  data.forEach(([rank, termStr, shortDef]) => {
+    const uniqueKey = `${category}-${rank}-${termStr}`;
+    const entry: LexiconEntry = {
+      term: termStr,
+      category,
+      volumeRef: `${catLabel} • Rank #${rank}`,
+      shortDef,
+      significance: `Ranked #${rank} in the ${catLabel} across the Old and New Testaments.`,
+      rank,
+      isTop100: true,
+    };
+
+    BIBLICAL_LEXICON[uniqueKey] = entry;
+
+    // Index all individual alias words for in-text scanner highlighting
+    const aliases = termStr
+      .replace(/[\(\)]/g, ' ')
+      .split(/[\/,&]|\band\b|\bof\b|\bthe\b/i)
+      .map(s => s.trim())
+      .filter(s => s.length >= 3);
+
+    const primaryWord = termStr.split(/[\(\/]/)[0].trim();
+    if (primaryWord) {
+      LEXICON_LOOKUP[primaryWord.toLowerCase()] = entry;
+    }
+    aliases.forEach(alias => {
+      const lower = alias.toLowerCase();
+      if (!LEXICON_LOOKUP[lower]) {
+        LEXICON_LOOKUP[lower] = entry;
+      }
+      alias.split(/\s+/).forEach(part => {
+        const cleanPart = part.replace(/[^a-zA-Z]/g, '').toLowerCase();
+        if (cleanPart.length >= 3 && !LEXICON_LOOKUP[cleanPart]) {
+          LEXICON_LOOKUP[cleanPart] = entry;
+        }
+      });
+    });
+  });
 };
 
-const LEXICON_KEYS_SORTED = Object.keys(BIBLICAL_LEXICON).sort((a, b) => b.length - a.length);
+registerTop100Category(RAW_TOP_PEOPLE, 'Person');
+registerTop100Category(RAW_TOP_PLACES, 'Place');
+registerTop100Category(RAW_TOP_CONCEPTS, 'Concept & Artifact');
 
 const findLexiconEntry = (word: string): LexiconEntry | undefined => {
-  const exact = BIBLICAL_LEXICON[word];
-  if (exact) return exact;
-  const lower = word.toLowerCase();
-  const matchedKey = LEXICON_KEYS_SORTED.find(k => k.toLowerCase() === lower);
-  return matchedKey ? BIBLICAL_LEXICON[matchedKey] : undefined;
+  const clean = word.replace(/[^a-zA-Z']/g, '').toLowerCase();
+  if (!clean) return undefined;
+  return LEXICON_LOOKUP[clean];
 };
 
 const getKjvDictionaryEntry = (word: string): LexiconEntry => {
@@ -187,8 +473,9 @@ const getKjvDictionaryEntry = (word: string): LexiconEntry => {
   return {
     term: capitalized,
     category: "Concept & Artifact",
-    shortDef: `Webster 1828 Dictionary: "${capitalized}" — a classical English term found within the King James Bible vocabulary denoting a specific action, object, or attribute.`,
-    significance: `Frequently utilized in classical 1611 scripture translations to express exact moral, historical, or theological nuances.`
+    volumeRef: "Biblical References Compilation",
+    shortDef: `"${capitalized}" — canonical biblical term analyzed within historical and theological context.`,
+    significance: `Selected term for inductive scripture observation and interpretation.`
   };
 };
 
@@ -238,6 +525,14 @@ const NARRATIVE_ART_SEARCH_TERMS: Record<string, string> = {
   "NAR-08": "Resurrection of Christ Carl Bloch biblical painting",
   "NAR-09": "Pentecost Jean II Restout biblical painting",
   "NAR-10": "The New Jerusalem Gustave Dore Revelation biblical art"
+};
+
+const INTRODUCTORY_TILE_SEARCH_TERMS: Record<StorySection, string> = {
+  NARRATIVE: "Creation of Light Gustave Dore Genesis painting",
+  OT: "Moses with the Tablets of the Law Rembrandt painting",
+  NT: "Sermon on the Mount Carl Bloch painting",
+  THEMES: "David with the Harp Rembrandt biblical painting",
+  PERICOPES: "St Jerome in His Study Caravaggio painting"
 };
 
 const NARRATIVE_STORIES: ContentItem[] = [
@@ -640,8 +935,26 @@ export default function App() {
   const [sentenceToolView, setSentenceToolView] = useState<'NONE' | OiaPhaseId>('NONE');
   const [popupOrigin, setPopupOrigin] = useState<{ x: string; y: string }>({ x: '50%', y: '50%' });
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [lexiconFilter, setLexiconFilter] = useState<'ALL' | 'Person' | 'Place' | 'Concept & Artifact'>('ALL');
+  const [aybdLetterFilter, setAybdLetterFilter] = useState<string>('ALL');
+  const [aybdCategoryFilter, setAybdCategoryFilter] = useState<'ALL' | 'Person' | 'Place' | 'Concept & Artifact'>('ALL');
+  const [isLexiconFilterExpanded, setIsLexiconFilterExpanded] = useState<boolean>(false);
+  const [aybdSearchInput, setAybdSearchInput] = useState<string>('');
   const homeScrollRef = useRef<HTMLDivElement>(null);
+  const lexiconScrollRef = useRef<HTMLDivElement>(null);
+  
+  const [isHomeScrolled, setIsHomeScrolled] = useState(false);
+  const lastScrollY = useRef(0);
+
+  const handleHomeScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const currentScrollY = e.currentTarget.scrollTop;
+    if (currentScrollY > 15 && currentScrollY > lastScrollY.current) {
+      setIsHomeScrolled(true);
+      setIsLexiconFilterExpanded(false);
+    } else if (currentScrollY < lastScrollY.current - 5 || currentScrollY <= 15) {
+      setIsHomeScrolled(false);
+    }
+    lastScrollY.current = currentScrollY;
+  };
 
   // OIA AI Analysis State for Liquid Glass Popup
   const [oiaData, setOiaData] = useState<OiaAnalysisData | null>(null);
@@ -800,7 +1113,7 @@ export default function App() {
     section: 'NARRATIVE',
     story: MASTER_CONTENT[0],
   });
-  const [tocSubView, setTocSubView] = useState<'HUB' | 'BOOKMARKS' | 'LEXICON' | 'SEARCH'>('HUB');
+  const [tocSubView, setTocSubView] = useState<'HUB' | 'DAILY' | 'BOOKMARKS' | 'LEXICON' | 'SEARCH'>('HUB');
   const [showPwaPrompt, setShowPwaPrompt] = useState<boolean>(false);
   const [deferredPwaPrompt, setDeferredPwaPrompt] = useState<any>(null);
 
@@ -1215,6 +1528,62 @@ export default function App() {
     }
   };
 
+  // Prefetch classical biblical artwork for all Home screen tiles (Introductory + Category rows) on mount
+  React.useEffect(() => {
+    let isCancelled = false;
+
+    const prefetchAllHomeTileArt = async () => {
+      // 1. Fetch Introductory division tiles first
+      const introEntries = Object.entries(INTRODUCTORY_TILE_SEARCH_TERMS) as [StorySection, string][];
+      await Promise.all(
+        introEntries.map(async ([secId, query]) => {
+          const cacheKey = `INTRO-${secId}`;
+          if (artCacheRef.current[cacheKey]) return;
+          try {
+            const url = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=4&gsrsearch=${encodeURIComponent(query)}&prop=pageimages&pithumbsize=500`;
+            const res = await fetch(url);
+            if (!res.ok) return;
+            const data = await res.json();
+            const pages = data.query?.pages;
+            if (pages) {
+              const pageWithThumb: any = Object.values(pages).find((p: any) => p?.thumbnail?.source);
+              if (pageWithThumb?.thumbnail?.source && !isCancelled) {
+                const resolved = {
+                  imageUrl: pageWithThumb.thumbnail.source,
+                  title: pageWithThumb.title,
+                  pageUrl: 'https://bible.art/'
+                };
+                artCacheRef.current[cacheKey] = resolved;
+                setArtCache(prev => ({ ...prev, [cacheKey]: resolved }));
+              }
+            }
+          } catch {}
+        })
+      );
+
+      // 2. Fetch artwork for every tile displayed in the Home carousels in batches
+      const homeTileStories: ContentItem[] = [
+        ...NARRATIVE_STORIES,
+        ...OT_STORIES,
+        ...NT_STORIES,
+        ...THEME_STORIES,
+        ...PERICOPE_STORIES.slice(0, 15)
+      ];
+
+      const batchSize = 6;
+      for (let i = 0; i < homeTileStories.length; i += batchSize) {
+        if (isCancelled) break;
+        const batch = homeTileStories.slice(i, i + batchSize);
+        await Promise.all(batch.map(story => fetchBibleArt(story, true)));
+      }
+    };
+
+    prefetchAllHomeTileArt();
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
   React.useEffect(() => {
     if (selectedStory.section === 'NARRATIVE' || selectedStory.preAnalyzed) {
       fetchBibleArt(selectedStory, false);
@@ -1516,21 +1885,237 @@ export default function App() {
     });
   };
 
+  // Reusable Apple Liquid Glass Bottom Navigation Dock
+  const renderBottomToolbar = (interactive = true, forceVisible = false) => {
+    const shouldHide = !forceVisible && isHomeScrolled && tocSubView !== 'DAILY';
+    return (
+      <div
+        className={`absolute bottom-4 left-0 right-0 z-30 shrink-0 ui-font flex justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+          shouldHide ? 'translate-y-[150%] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
+        }`}
+      >
+        <div
+          className="flex items-center justify-around rounded-full px-2 py-1.5 border border-[#c5a059]/70 shadow-[0_10px_25px_rgba(36,19,12,0.22)] w-[95%] max-w-[340px]"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(253, 250, 242, 0.94) 0%, rgba(239, 229, 208, 0.88) 100%)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+          }}
+        >
+          {/* 1. Home */}
+          <button
+            type="button"
+            onClick={
+              interactive
+                ? () => {
+                    setIsHomeScrolled(false);
+                    if (!isTocOpen) {
+                      setTocSubView('HUB');
+                      triggerRibbonTocPageTurn();
+                    } else {
+                      setTocSubView('HUB');
+                      homeScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }
+                : undefined
+            }
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
+              isTocOpen && tocSubView === 'HUB'
+                ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
+                : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3l9-8z" />
+            </svg>
+            <span className="text-[9px]">Home</span>
+          </button>
+
+          {/* 2. Daily */}
+          <button
+            type="button"
+            onClick={
+              interactive
+                ? () => {
+                    setIsHomeScrolled(false);
+                    handleDailyPericope();
+                    setTocSubView('DAILY');
+                    if (!isTocOpen) {
+                      setIsTocOpen(true);
+                    }
+                  }
+                : undefined
+            }
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
+              isTocOpen && tocSubView === 'DAILY'
+                ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
+                : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <span className="text-[9px]">Daily</span>
+          </button>
+
+          {/* 3. Lexicon */}
+          <button
+            type="button"
+            onClick={
+              interactive
+                ? () => {
+                    setIsHomeScrolled(false);
+                    setIsHighlightMode(true);
+                    if (!isTocOpen) {
+                      setTocSubView('LEXICON');
+                      setIsTocOpen(true);
+                    } else {
+                      setTocSubView(prev => (prev === 'LEXICON' ? 'HUB' : 'LEXICON'));
+                    }
+                  }
+                : undefined
+            }
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
+              isTocOpen && tocSubView === 'LEXICON'
+                ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
+                : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
+            }`}
+          >
+            {renderDoveIcon()}
+            <span className="text-[9px]">Lexicon</span>
+          </button>
+
+          {/* 4. Library */}
+          <button
+            type="button"
+            onClick={
+              interactive
+                ? () => {
+                    setIsHomeScrolled(false);
+                    if (!isTocOpen) {
+                      setTocSubView('BOOKMARKS');
+                      setIsTocOpen(true);
+                    } else {
+                      setTocSubView(prev => (prev === 'BOOKMARKS' ? 'HUB' : 'BOOKMARKS'));
+                    }
+                  }
+                : undefined
+            }
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors relative cursor-pointer ${
+              isTocOpen && tocSubView === 'BOOKMARKS'
+                ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
+                : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            <span className="text-[9px]">Library</span>
+          </button>
+
+          {/* 5. Search */}
+          <button
+            type="button"
+            onClick={
+              interactive
+                ? () => {
+                    setIsHomeScrolled(false);
+                    if (!isTocOpen) {
+                      setTocSubView('SEARCH');
+                      setIsTocOpen(true);
+                    } else {
+                      setTocSubView(prev => (prev === 'SEARCH' ? 'HUB' : 'SEARCH'));
+                    }
+                    setTimeout(() => {
+                      const input = document.querySelector<HTMLInputElement>('#home-search-input');
+                      if (input) input.focus();
+                    }, 60);
+                  }
+                : undefined
+            }
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
+              isTocOpen && tocSubView === 'SEARCH'
+                ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
+                : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <span className="text-[9px]">Search</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // Replaced Table of Contents with Apple TV-Style "Home" Horizontal Tile Carousel Screen
   const renderTocContent = (interactive = true) => {
-    const filteredBySearch = searchQuery.trim()
+    const q = searchQuery.trim().toLowerCase();
+    const matchedStories = q
       ? MASTER_CONTENT.filter(
           s =>
-            s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.ref.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.body.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.why.toLowerCase().includes(searchQuery.toLowerCase())
-        ).slice(0, 25)
-      : MASTER_CONTENT.slice(0, 12);
+            s.title.toLowerCase().includes(q) ||
+            s.ref.toLowerCase().includes(q) ||
+            s.body.toLowerCase().includes(q) ||
+            s.why.toLowerCase().includes(q) ||
+            s.section.toLowerCase().includes(q)
+        ).slice(0, 20)
+      : MASTER_CONTENT.slice(0, 8);
 
-    const allLexiconEntries = Object.values(BIBLICAL_LEXICON).filter(entry =>
-      lexiconFilter === 'ALL' ? true : entry.category === lexiconFilter
-    );
+    const matchedLexicon = q
+      ? Object.values(BIBLICAL_LEXICON)
+          .filter(
+            e =>
+              e.term.toLowerCase().includes(q) ||
+              e.shortDef.toLowerCase().includes(q) ||
+              e.category.toLowerCase().includes(q) ||
+              `#${e.rank}` === q
+          )
+          .sort((a, b) => (a.rank || 999) - (b.rank || 999))
+          .slice(0, 20)
+      : Object.values(BIBLICAL_LEXICON).slice(0, 6);
+
+    const matchedBookmarks = q
+      ? bookmarks.filter(
+          b =>
+            b.sentence.toLowerCase().includes(q) ||
+            b.storyTitle.toLowerCase().includes(q) ||
+            b.storyRef.toLowerCase().includes(q)
+        )
+      : bookmarks;
+
+    const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const allLexiconEntries = Object.values(BIBLICAL_LEXICON)
+      .filter(entry => {
+        const matchesCategory =
+          aybdCategoryFilter === 'ALL' || entry.category === aybdCategoryFilter;
+        const matchesLetter =
+          aybdLetterFilter === 'ALL' ||
+          entry.term.toUpperCase().startsWith(aybdLetterFilter);
+        const matchesQuery =
+          !aybdSearchInput.trim() ||
+          entry.term.toLowerCase().includes(aybdSearchInput.toLowerCase()) ||
+          entry.shortDef.toLowerCase().includes(aybdSearchInput.toLowerCase()) ||
+          entry.significance.toLowerCase().includes(aybdSearchInput.toLowerCase());
+        return matchesCategory && matchesLetter && matchesQuery;
+      })
+      .sort((a, b) =>
+        aybdLetterFilter !== 'ALL'
+          ? a.term.localeCompare(b.term)
+          : (a.rank || 999) - (b.rank || 999)
+      );
+
+    const activeCategoryLabel =
+      aybdCategoryFilter === 'ALL'
+        ? 'All (300)'
+        : aybdCategoryFilter === 'Person'
+        ? 'People (100)'
+        : aybdCategoryFilter === 'Place'
+        ? 'Places (100)'
+        : 'Concepts (100)';
 
     const INTRODUCTORY_TILES: {
       id: StorySection;
@@ -1630,14 +2215,21 @@ export default function App() {
     ];
 
     return (
-      <div className="w-full max-w-[356px] mx-auto flex flex-col h-full reading-font select-none">
-        {/* Top Header: "Home" + Fullscreen & PWA Controls */}
-        <header className="flex items-center justify-between border-b-2 border-double border-[#c5a059] pb-2.5 mb-3 shrink-0">
+      <div className="w-full max-w-[356px] mx-auto flex flex-col h-full overflow-hidden reading-font select-none relative">
+        {/* Top Header: Clean "Home" Title Only */}
+        <header
+          className={`absolute top-0 left-0 right-0 z-30 flex items-center justify-between border-b border-[#c5a059]/40 pb-2.5 pt-1 px-2 bg-[#fffcf5]/95 backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+            isHomeScrolled && tocSubView !== 'DAILY'
+              ? '-translate-y-[120%] opacity-0 pointer-events-none'
+              : 'translate-y-0 opacity-100'
+          }`}
+        >
           <button
             type="button"
             onClick={
               interactive
                 ? () => {
+                    setIsHomeScrolled(false);
                     setTocSubView('HUB');
                     homeScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                   }
@@ -1645,68 +2237,23 @@ export default function App() {
             }
             className="text-left focus:outline-none group"
           >
-            <div className="text-[8.5px] font-bold uppercase tracking-[0.28em] text-[#8b0000] ui-font">
-              Holybook Library
-            </div>
             <h2 className="text-2xl font-bold tracking-[0.06em] text-[#382117] leading-tight group-hover:text-[#8b0000] transition-colors">
               Home
             </h2>
           </button>
-
-          <div className="flex items-center gap-1.5 ui-font mr-7">
-            <button
-              type="button"
-              onClick={interactive ? (e) => handleFullscreenAndPwa(e) : undefined}
-              title={isAnyFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-              className={`px-2.5 py-1.5 rounded-full border flex items-center gap-1 transition-all apple-gpu-btn cursor-pointer ${
-                isAnyFullscreen
-                  ? 'bg-[#8b0000] text-[#fdfaf2] border-[#8b0000] shadow-sm'
-                  : 'bg-[#fdfaf2] text-[#382117] border-[#c5a059]/90 hover:border-[#8b0000]'
-              }`}
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isAnyFullscreen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M9 9L4 4m0 0v4m0-4h4m7 5l5-5m0 0v4m0-4h-4M9 15l-5 5m0 0v-4m0 4h4m7-5l5 5m0 0v-4m0 4h-4" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                )}
-              </svg>
-              <span className="text-[9.5px] font-bold uppercase tracking-wider">
-                {isAnyFullscreen ? 'Exit' : 'Full'}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={
-                interactive
-                  ? async (e) => {
-                      e.stopPropagation();
-                      if (deferredPwaPrompt) {
-                        try {
-                          deferredPwaPrompt.prompt();
-                          await deferredPwaPrompt.userChoice;
-                          setDeferredPwaPrompt(null);
-                          return;
-                        } catch {}
-                      }
-                      setShowPwaPrompt(true);
-                    }
-                  : undefined
-              }
-              title="Install App Instructions"
-              className="px-2.5 py-1.5 rounded-full border border-[#c5a059]/90 bg-[#fdfaf2] hover:border-[#8b0000] text-[#382117] text-[9.5px] font-bold uppercase tracking-wider apple-gpu-btn cursor-pointer"
-            >
-              PWA
-            </button>
-          </div>
+          {tocSubView === 'DAILY' && (
+            <span className="text-[9.5px] font-bold uppercase tracking-widest text-[#8b0000] bg-[#c5a059]/20 px-2.5 py-0.5 rounded-full ui-font">
+              Daily Pericope
+            </span>
+          )}
         </header>
 
-        {/* Main Body Subviews: HUB | LEXICON | BOOKMARKS | SEARCH */}
+        {/* Main Body Subviews: HUB | DAILY | LEXICON | BOOKMARKS | SEARCH */}
         {tocSubView === 'HUB' && (
           <div
             ref={homeScrollRef}
-            className="flex-1 overflow-y-auto no-scrollbar space-y-5 pr-0.5 pb-4"
+            onScroll={handleHomeScroll}
+            className="flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain touch-pan-y no-scrollbar space-y-5 px-0.5 pt-14 pb-20"
           >
             {/* 1. First Headline: "Introductory" with the 5 Canonical Tiles */}
             <section className="space-y-2">
@@ -1732,10 +2279,14 @@ export default function App() {
                 </span>
               </div>
 
-              <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1.5 pt-0.5 -mx-1 px-1 snap-x snap-mandatory touch-pan-x">
+              <div className="flex gap-2.5 overflow-x-auto overflow-y-hidden overscroll-x-contain no-scrollbar pb-1.5 pt-0.5 px-0.5 snap-x snap-mandatory touch-pan-x">
                 {INTRODUCTORY_TILES.map((tile, idx) => {
                   const isCurrent = activeSection === tile.id;
                   const firstInDivision = MASTER_CONTENT.find(s => s.section === tile.id);
+                  const introThumb =
+                    artCache[`INTRO-${tile.id}`]?.imageUrl ||
+                    (firstInDivision ? artCache[firstInDivision.id]?.imageUrl : undefined);
+
                   return (
                     <button
                       key={tile.id}
@@ -1750,11 +2301,18 @@ export default function App() {
                         isCurrent ? 'border-[#8b0000] ring-2 ring-[#c5a059]' : 'border-[#c5a059]/45'
                       }`}
                     >
+                      {introThumb && (
+                        <img
+                          src={introThumb}
+                          alt={tile.title}
+                          className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-luminosity"
+                        />
+                      )}
                       <div
-                        className="pointer-events-none absolute inset-0 opacity-30"
+                        className="pointer-events-none absolute inset-0"
                         style={{
                           background:
-                            'radial-gradient(circle at 20% 15%, rgba(255,255,255,0.55) 0%, transparent 60%)',
+                            'linear-gradient(to bottom, rgba(20,12,8,0.12) 0%, rgba(20,12,8,0.82) 100%)',
                         }}
                       />
 
@@ -1806,7 +2364,7 @@ export default function App() {
                   </span>
                 </div>
 
-                <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1.5 pt-0.5 -mx-1 px-1 snap-x snap-mandatory touch-pan-x">
+                <div className="flex gap-2.5 overflow-x-auto overflow-y-hidden overscroll-x-contain no-scrollbar pb-1.5 pt-0.5 px-0.5 snap-x snap-mandatory touch-pan-x">
                   {row.items.map((item, idx) => {
                     const cleanTitle = item.title.replace(/^[0-9.]+\s*/, '').trim();
                     const bgGrad = row.gradients[idx % row.gradients.length];
@@ -1860,71 +2418,229 @@ export default function App() {
           </div>
         )}
 
-        {/* Lexicon Subview (Triggered by "Lexicon" Dock Button) */}
-        {tocSubView === 'LEXICON' && (
-          <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pr-0.5 pb-4 animate-fade-in">
-            <div className="bg-[#fdfaf2] border border-[#c5a059]/80 rounded-xl p-3 shadow-xs ui-font flex items-center justify-between">
-              <div>
-                <div className="text-xs font-bold text-[#382117]">
-                  Webster's 1828 In-Text Scanner
-                </div>
-                <div className="text-[10px] text-stone-500">
-                  Highlight key biblical terms inside scripture passages
-                </div>
-              </div>
+        {/* 1) Daily Tab View with Persistent Bottom Toolbar */}
+        {tocSubView === 'DAILY' && (
+          <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain touch-pan-y no-scrollbar pt-14 pb-20 animate-fade-in">
+            <div className="flex items-center justify-between px-1 mb-2 ui-font">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
+                Appointed Reading of the Day
+              </span>
               <button
                 type="button"
-                onClick={interactive ? () => setIsHighlightMode(prev => !prev) : undefined}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                  isHighlightMode
-                    ? 'bg-[#8b0000] text-[#fdfaf2]'
-                    : 'bg-stone-200 text-stone-700'
-                }`}
+                onClick={
+                  interactive
+                    ? () => {
+                        const randomIdx = Math.floor(Math.random() * PERICOPE_STORIES.length);
+                        handleStoryChange(PERICOPE_STORIES[randomIdx]);
+                      }
+                    : undefined
+                }
+                className="text-[10px] font-bold text-[#8b0000] hover:underline cursor-pointer"
               >
-                {isHighlightMode ? 'Scanner ON' : 'Scanner OFF'}
+                ↻ Shuffle Pericope
               </button>
             </div>
+            {renderPageContent(selectedStory, false, false)}
+          </div>
+        )}
 
-            <div className="flex gap-1 ui-font text-[9.5px] font-bold uppercase tracking-wider overflow-x-auto no-scrollbar">
-              {(['ALL', 'Person', 'Place', 'Concept & Artifact'] as const).map(cat => (
+        {/* 2 & 3) Lexicon Subview: Full-height scroll sheet when toolbar exits, collapsible "All" filter pill, Apple right-edge A-Z scrubber, and search bar exiting vertically underneath Home banner */}
+        {tocSubView === 'LEXICON' && (
+          <div className="flex-1 relative overflow-hidden animate-fade-in">
+            {/* Search bar & Collapsible Category Pill that smoothly exit vertically underneath the "Home" banner */}
+            <div
+              className={`absolute top-11 left-0 right-5 z-20 flex flex-col gap-1.5 bg-[#fffcf5]/92 backdrop-blur-md pb-2 pt-1 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                isHomeScrolled
+                  ? '-translate-y-[150%] opacity-0 pointer-events-none'
+                  : 'translate-y-0 opacity-100'
+              }`}
+            >
+              {/* Search Headwords Input */}
+              <div className="bg-[#fdfaf2] border border-[#c5a059]/80 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center gap-2 ui-font">
+                <svg className="w-3.5 h-3.5 text-[#8b0000] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  value={aybdSearchInput}
+                  onChange={(e) => setAybdSearchInput(e.target.value)}
+                  placeholder="Filter 300 Top People, Places & Concepts..."
+                  className="w-full text-xs bg-transparent focus:outline-none text-[#382117] placeholder:text-stone-400"
+                />
+                {aybdSearchInput && (
+                  <button
+                    type="button"
+                    onClick={() => setAybdSearchInput('')}
+                    className="text-[10px] text-stone-400 hover:text-[#8b0000] cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Collapsible Single Button ("All") that expands into People, Places, and Concepts */}
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar ui-font">
+                {!isLexiconFilterExpanded ? (
+                  <button
+                    type="button"
+                    onClick={interactive ? () => setIsLexiconFilterExpanded(true) : undefined}
+                    className="px-3 py-1 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-[#8b0000] text-[#fdfaf2] border border-[#8b0000] shadow-2xs flex items-center gap-1.5 cursor-pointer apple-gpu-btn"
+                  >
+                    <span>{activeCategoryLabel}</span>
+                    <span className="text-[10px] opacity-85">▸</span>
+                  </button>
+                ) : (
+                  (
+                    [
+                      { id: 'ALL', label: 'All (300)' },
+                      { id: 'Person', label: 'People' },
+                      { id: 'Place', label: 'Places' },
+                      { id: 'Concept & Artifact', label: 'Concepts' },
+                    ] as const
+                  ).map(tab => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={
+                        interactive
+                          ? () => {
+                              setAybdCategoryFilter(tab.id);
+                              setIsLexiconFilterExpanded(false);
+                            }
+                          : undefined
+                      }
+                      className={`px-2.5 py-1 rounded-full text-[9.5px] font-bold uppercase tracking-wider shrink-0 border cursor-pointer transition-all apple-gpu-btn ${
+                        aybdCategoryFilter === tab.id
+                          ? 'bg-[#8b0000] text-[#fdfaf2] border-[#8b0000] shadow-2xs'
+                          : 'bg-[#fdfaf2] text-[#382117] border-[#c5a059]/60 hover:border-[#8b0000]'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))
+                )}
+
+                {aybdLetterFilter !== 'ALL' && (
+                  <button
+                    type="button"
+                    onClick={interactive ? () => setAybdLetterFilter('ALL') : undefined}
+                    className="px-2 py-1 rounded-full text-[9px] font-bold uppercase bg-[#382117] text-[#e3c178] shrink-0 cursor-pointer"
+                  >
+                    Letter: {aybdLetterFilter} ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Apple-Style Vertical A–Z Index Scrubber along the Right Edge */}
+            <div
+              className="absolute right-0 top-12 bottom-4 z-30 w-4 flex flex-col items-center justify-center py-1 select-none ui-font rounded-full bg-[#fdfaf2]/70 backdrop-blur-xs border border-[#c5a059]/30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={
+                  interactive
+                    ? () => {
+                        setAybdLetterFilter('ALL');
+                        lexiconScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    : undefined
+                }
+                className={`text-[7.5px] font-extrabold leading-none py-0.5 w-full text-center cursor-pointer ${
+                  aybdLetterFilter === 'ALL' ? 'text-[#8b0000] scale-110' : 'text-[#4a3b32]/70 hover:text-[#8b0000]'
+                }`}
+                title="Show All Ranks"
+              >
+                •
+              </button>
+              {ALPHABET.map(letter => (
                 <button
-                  key={cat}
+                  key={letter}
                   type="button"
-                  onClick={interactive ? () => setLexiconFilter(cat) : undefined}
-                  className={`px-2.5 py-1 rounded-full border shrink-0 cursor-pointer ${
-                    lexiconFilter === cat
-                      ? 'bg-[#382117] text-[#e3c178] border-[#382117]'
-                      : 'bg-[#fdfaf2] text-[#4a3b32] border-[#c5a059]/50'
+                  onClick={
+                    interactive
+                      ? () => {
+                          setAybdLetterFilter(prev => (prev === letter ? 'ALL' : letter));
+                          lexiconScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      : undefined
+                  }
+                  className={`text-[7.5px] font-bold leading-[1.15] w-full text-center cursor-pointer transition-transform ${
+                    aybdLetterFilter === letter
+                      ? 'text-[#8b0000] font-extrabold scale-125'
+                      : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
                   }`}
                 >
-                  {cat === 'Concept & Artifact' ? 'Concepts' : cat}
+                  {letter}
                 </button>
               ))}
             </div>
 
-            <div className="space-y-2">
-              {allLexiconEntries.map(entry => (
-                <div
-                  key={entry.term}
-                  className="p-2.5 rounded-xl bg-[#fdfaf2] border border-[#e6d9c3] shadow-2xs space-y-1"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#8b0000]">{entry.term}</span>
-                    <span className="text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#c5a059]/20 text-[#382117] ui-font font-semibold">
-                      {entry.category}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#2c1810] leading-relaxed">{entry.shortDef}</p>
-                  <p className="text-[10.5px] italic text-stone-600">{entry.significance}</p>
+            {/* 300 Top Biblical References Scroll Sheet — expands into full vertical space when top & bottom bars exit */}
+            <div
+              ref={lexiconScrollRef}
+              onScroll={handleHomeScroll}
+              className={`h-full overflow-y-auto overflow-x-hidden overscroll-y-contain touch-pan-y no-scrollbar space-y-2 pr-5 transition-[padding] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                isHomeScrolled ? 'pt-2 pb-2' : 'pt-[118px] pb-20'
+              }`}
+            >
+              {allLexiconEntries.length === 0 ? (
+                <div className="p-4 rounded-xl bg-[#fdfaf2] border border-[#c5a059]/60 text-center space-y-1 ui-font">
+                  <p className="text-xs text-[#382117] font-semibold">
+                    No matching entries for "{aybdSearchInput || aybdLetterFilter}"
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAybdSearchInput('');
+                      setAybdLetterFilter('ALL');
+                      setAybdCategoryFilter('ALL');
+                    }}
+                    className="text-[10px] font-bold text-[#8b0000] underline cursor-pointer"
+                  >
+                    Reset Filters
+                  </button>
                 </div>
-              ))}
+              ) : (
+                allLexiconEntries.map(entry => (
+                  <div
+                    key={`${entry.category}-${entry.rank}-${entry.term}`}
+                    style={{
+                      background:
+                        'linear-gradient(135deg, rgba(255, 252, 245, 0.96) 0%, rgba(247, 232, 196, 0.48) 50%, rgba(253, 250, 242, 0.96) 100%)',
+                      boxShadow:
+                        '0 4px 12px rgba(36, 19, 12, 0.06), inset 0 1px 1.5px rgba(255, 255, 255, 0.9)',
+                    }}
+                    className="p-2.5 rounded-xl border border-[#c5a059]/75 space-y-1 relative overflow-hidden"
+                  >
+                    <div className="flex items-start justify-between gap-2 relative z-10">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="px-1.5 py-0.5 rounded-md bg-gradient-to-br from-[#c5a059] to-[#8b6520] text-[#fffcf5] text-[9.5px] font-bold ui-font shrink-0 shadow-2xs">
+                          #{entry.rank}
+                        </span>
+                        <span className="text-xs font-bold text-[#8b0000] truncate">
+                          {entry.term}
+                        </span>
+                      </div>
+                      <span className="text-[8.5px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#382117]/10 text-[#382117] ui-font font-bold shrink-0 border border-[#c5a059]/50">
+                        {entry.category === 'Concept & Artifact' ? 'Concept' : entry.category}
+                      </span>
+                    </div>
+                    <p className="text-[11.5px] text-[#2c1810] leading-relaxed relative z-10">
+                      {entry.shortDef}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
 
         {/* Saved Bookmarks Library View (Triggered by "Library" Dock Button) */}
         {tocSubView === 'BOOKMARKS' && (
-          <div className="flex-1 overflow-y-auto p-1 space-y-2.5 no-scrollbar pb-4 animate-fade-in">
+          <div className="flex-1 overflow-y-auto p-1 space-y-2.5 no-scrollbar pt-14 pb-20 animate-fade-in" onScroll={handleHomeScroll}>
             <div className="flex items-center justify-between border-b border-[#c5a059]/40 pb-1.5 ui-font">
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#8b0000]">
                 Saved Scripture Library ({bookmarks.length})
@@ -1994,10 +2710,14 @@ export default function App() {
           </div>
         )}
 
-        {/* Interactive Concordance Search View (Triggered by "Search" Dock Button) */}
+        {/* 4) Global App Search View: Searches across Stories/Pericopes, 300 Lexicon Terms, and Saved Bookmarks */}
         {tocSubView === 'SEARCH' && (
-          <div className="flex-1 flex flex-col overflow-hidden pb-4 animate-fade-in ui-font">
-            <div className="bg-[#fdfaf2] border-2 border-[#c5a059] rounded-xl p-2.5 shadow-xs mb-3 shrink-0">
+          <div className="flex-1 flex flex-col overflow-hidden animate-fade-in ui-font relative">
+            <div
+              className={`bg-[#fdfaf2] border-2 border-[#c5a059] rounded-xl p-2.5 shadow-xs mb-2 shrink-0 transition-all duration-300 ${
+                isHomeScrolled ? 'mt-2' : 'mt-12'
+              }`}
+            >
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-[#8b0000] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
                   <circle cx="11" cy="11" r="8" />
@@ -2008,7 +2728,7 @@ export default function App() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search 422 stories, verses, or leadership themes..."
+                  placeholder="Search stories, 300 Lexicon terms & bookmarks..."
                   className="w-full text-xs bg-transparent focus:outline-none text-[#382117] placeholder:text-stone-400"
                 />
                 {searchQuery && (
@@ -2023,162 +2743,135 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto no-scrollbar space-y-1.5 pr-0.5">
-              {filteredBySearch.length === 0 ? (
+            <div
+              className={`flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain touch-pan-y no-scrollbar space-y-4 pr-0.5 ${
+                isHomeScrolled ? 'pb-4' : 'pb-20'
+              }`}
+              onScroll={handleHomeScroll}
+            >
+              {matchedStories.length === 0 && matchedLexicon.length === 0 && matchedBookmarks.length === 0 ? (
                 <p className="text-xs text-stone-500 italic text-center py-8">
-                  No matching passages found for "{searchQuery}".
+                  No results across the app for "{searchQuery}".
                 </p>
               ) : (
-                filteredBySearch.map(item => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={
-                      interactive
-                        ? () => {
-                            setSearchQuery('');
-                            navigateFromHomeToStory(item.section, item);
+                <>
+                  {/* Passages & Stories Section */}
+                  {matchedStories.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="text-[9.5px] font-bold uppercase tracking-widest text-[#8b0000] px-1">
+                        Scripture & Leadership Passages ({matchedStories.length})
+                      </div>
+                      {matchedStories.map(item => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={
+                            interactive
+                              ? () => {
+                                  setSearchQuery('');
+                                  navigateFromHomeToStory(item.section, item);
+                                }
+                              : undefined
                           }
-                        : undefined
-                    }
-                    className="w-full text-left p-2.5 rounded-xl bg-[#fdfaf2] hover:bg-[#c5a059]/20 border border-[#e6d9c3] flex items-center justify-between gap-2 transition-colors cursor-pointer"
-                  >
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold text-[#382117] truncate">{item.title}</div>
-                      <div className="text-[10px] text-stone-500 truncate">{item.why}</div>
+                          className="w-full text-left p-2.5 rounded-xl bg-[#fdfaf2] hover:bg-[#c5a059]/20 border border-[#e6d9c3] flex items-center justify-between gap-2 transition-colors cursor-pointer"
+                        >
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-[#382117] truncate">{item.title}</div>
+                            <div className="text-[10px] text-stone-500 truncate">{item.why}</div>
+                          </div>
+                          <span className="text-[10px] font-bold text-[#8b0000] shrink-0">
+                            {item.ref.split('|')[0].trim()} →
+                          </span>
+                        </button>
+                      ))}
                     </div>
-                    <span className="text-[10px] font-bold text-[#8b0000] shrink-0">
-                      {item.ref.split('|')[0].trim()} →
-                    </span>
-                  </button>
-                ))
+                  )}
+
+                  {/* Top 100 Lexicon Compilation Section */}
+                  {matchedLexicon.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="text-[9.5px] font-bold uppercase tracking-widest text-[#8b0000] px-1">
+                        Top 100 Lexicon Terms ({matchedLexicon.length})
+                      </div>
+                      {matchedLexicon.map(entry => (
+                        <button
+                          key={`search-lex-${entry.category}-${entry.rank}`}
+                          type="button"
+                          onClick={
+                            interactive
+                              ? () => {
+                                  setAybdCategoryFilter('ALL');
+                                  setAybdLetterFilter('ALL');
+                                  setAybdSearchInput(entry.term.split(/[\(\/]/)[0].trim());
+                                  setTocSubView('LEXICON');
+                                }
+                              : undefined
+                          }
+                          style={{
+                            background:
+                              'linear-gradient(135deg, rgba(255, 252, 245, 0.96) 0%, rgba(247, 232, 196, 0.48) 50%, rgba(253, 250, 242, 0.96) 100%)',
+                          }}
+                          className="w-full text-left p-2.5 rounded-xl border border-[#c5a059]/75 flex flex-col gap-1 cursor-pointer"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="px-1.5 py-0.5 rounded bg-[#c5a059] text-[#fffcf5] text-[9px] font-bold shrink-0">
+                                #{entry.rank}
+                              </span>
+                              <span className="text-xs font-bold text-[#8b0000] truncate">{entry.term}</span>
+                            </div>
+                            <span className="text-[8.5px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#382117]/10 text-[#382117] font-bold shrink-0">
+                              {entry.category === 'Concept & Artifact' ? 'Concept' : entry.category}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#2c1810] line-clamp-2 reading-font">
+                            {entry.shortDef}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Saved Bookmarks Section */}
+                  {matchedBookmarks.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="text-[9.5px] font-bold uppercase tracking-widest text-[#8b0000] px-1">
+                        Saved Library Bookmarks ({matchedBookmarks.length})
+                      </div>
+                      {matchedBookmarks.map(bm => (
+                        <button
+                          key={`search-bm-${bm.id}`}
+                          type="button"
+                          onClick={
+                            interactive
+                              ? () => {
+                                  const target = MASTER_CONTENT.find(s => s.id === bm.storyId);
+                                  if (target) {
+                                    navigateFromHomeToStory(target.section, target);
+                                  }
+                                }
+                              : undefined
+                          }
+                          className="w-full text-left p-2.5 rounded-xl bg-[#fdfaf2] border border-[#c5a059]/60 flex flex-col gap-1 cursor-pointer"
+                        >
+                          <span className="text-[10px] font-bold text-[#8b0000]">
+                            {bm.storyTitle} • {bm.storyRef} →
+                          </span>
+                          <p className="text-xs italic text-[#2c1810] line-clamp-2 reading-font">
+                            "{bm.sentence}"
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
         )}
 
-        {/* Bottom Floating Liquid Glass Pill Dock: 5 Functional Buttons */}
-        <div className="mt-auto pt-2 shrink-0 ui-font">
-          <div
-            className="flex items-center justify-around rounded-full px-2 py-1.5 border border-[#c5a059]/70 shadow-[0_10px_25px_rgba(36,19,12,0.22)]"
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(253, 250, 242, 0.94) 0%, rgba(239, 229, 208, 0.88) 100%)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-            }}
-          >
-            {/* 1. Home */}
-            <button
-              type="button"
-              onClick={
-                interactive
-                  ? () => {
-                      setTocSubView('HUB');
-                      homeScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                  : undefined
-              }
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
-                tocSubView === 'HUB'
-                  ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
-                  : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3l9-8z" />
-              </svg>
-              <span className="text-[9px]">Home</span>
-            </button>
-
-            {/* 2. Daily */}
-            <button
-              type="button"
-              onClick={
-                interactive
-                  ? () => {
-                      const dailyStory = handleDailyPericope();
-                      navigateFromHomeToStory('PERICOPES', dailyStory);
-                    }
-                  : undefined
-              }
-              className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-full text-[#4a3b32]/75 hover:text-[#8b0000] active:bg-[#c5a059]/25 transition-colors cursor-pointer"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              <span className="text-[9px]">Daily</span>
-            </button>
-
-            {/* 3. Lexicon */}
-            <button
-              type="button"
-              onClick={
-                interactive
-                  ? () => {
-                      setIsHighlightMode(true);
-                      setTocSubView(prev => (prev === 'LEXICON' ? 'HUB' : 'LEXICON'));
-                    }
-                  : undefined
-              }
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
-                tocSubView === 'LEXICON'
-                  ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
-                  : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
-              }`}
-            >
-              {renderDoveIcon()}
-              <span className="text-[9px]">Lexicon</span>
-            </button>
-
-            {/* 4. Library */}
-            <button
-              type="button"
-              onClick={
-                interactive
-                  ? () => setTocSubView(prev => (prev === 'BOOKMARKS' ? 'HUB' : 'BOOKMARKS'))
-                  : undefined
-              }
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors relative cursor-pointer ${
-                tocSubView === 'BOOKMARKS'
-                  ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
-                  : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-              <span className="text-[9px]">Library</span>
-            </button>
-
-            {/* 5. Search */}
-            <button
-              type="button"
-              onClick={
-                interactive
-                  ? () => {
-                      setTocSubView(prev => (prev === 'SEARCH' ? 'HUB' : 'SEARCH'));
-                      setTimeout(() => {
-                        const input = document.querySelector<HTMLInputElement>('#home-search-input');
-                        if (input) input.focus();
-                      }, 60);
-                    }
-                  : undefined
-              }
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
-                tocSubView === 'SEARCH'
-                  ? 'text-[#8b0000] font-bold bg-[#c5a059]/25'
-                  : 'text-[#4a3b32]/75 hover:text-[#8b0000]'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <span className="text-[9px]">Search</span>
-            </button>
-          </div>
-        </div>
+        {/* Bottom Floating Liquid Glass Pill Dock */}
+        {renderBottomToolbar(interactive, tocSubView === 'DAILY')}
       </div>
     );
   };
@@ -2463,8 +3156,13 @@ export default function App() {
                       setActiveSentence(sentence);
                       handlePhaseAnalysis('OBSERVATION', trimmedWord, sentence);
                     }}
-                    className="text-[#8b0000] font-bold underline decoration-[#8b0000]/60 decoration-dotted underline-offset-2 cursor-pointer hover:bg-[#8b0000]/15 px-0.5 rounded transition-colors"
-                    title={`Click for Inductive Bible Study (OIA) on "${entry.term}"`}
+                    style={{
+                      background:
+                        'linear-gradient(120deg, rgba(255,255,255,0.65) 0%, rgba(227,193,120,0.38) 48%, rgba(139,0,0,0.12) 100%)',
+                      boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.8)',
+                    }}
+                    className="font-bold text-[#8b0000] border-b border-[#c5a059] cursor-pointer px-1 py-0.2 rounded-sm transition-all hover:brightness-105"
+                    title={`Top 100 ${entry.category} (#${entry.rank}): ${entry.term} — ${entry.shortDef}`}
                   >
                     {token}
                   </span>
@@ -2524,173 +3222,6 @@ export default function App() {
 
     return (
       <div className="w-full max-w-[356px] mx-auto flex flex-col gap-3.5 h-full reading-font">
-        <aside className="w-full flex flex-col gap-2.5 shrink-0 relative z-20">
-          
-          <div className="flex bg-[#fdfaf2] border border-[#c5a059] rounded-md p-0.5 shadow-sm">
-            {SECTIONS.map(section => (
-              <button
-                key={section.id}
-                onClick={interactive ? () => handleSectionChange(section.id) : undefined}
-                title={section.label}
-                aria-label={section.label}
-                className={`flex-1 flex items-center justify-center py-2 apple-gpu-btn overflow-hidden ${
-                  activeSection === section.id 
-                    ? 'bg-[#c5a059] text-[#fffcf5] shadow-sm rounded-[4px] scale-[1.01]' 
-                    : 'text-[#4a3b32] hover:bg-stone-200/50 rounded-[4px]'
-                }`}
-              >
-                {renderSectionIcon(section.id)}
-              </button>
-            ))}
-          </div>
-
-          {activeSection === 'PERICOPES' && (
-            <button
-              onClick={interactive ? handleDailyPericope : undefined}
-              className="w-full bg-[#fdfaf2] border border-[#c5a059] text-[#4a3b32] text-[11px] font-bold uppercase tracking-widest py-2 px-4 hover:bg-[#c5a059] hover:text-white apple-gpu-btn flex items-center justify-center gap-2 shadow-sm rounded-md ui-font"
-            >
-              <span>✦</span> Daily Pericope Generator
-            </button>
-          )}
-
-          <div className="flex flex-col gap-1 relative">
-            <div className="flex items-center justify-between">
-              <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ui-font">
-                Select Context
-              </label>
-              <span className="text-[9px] text-[#c5a059] font-semibold tracking-wider uppercase ui-font">
-                {displayIndex} of {filteredStories.length}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={interactive ? (e) => {
-                e.stopPropagation();
-                setIsContextDropdownOpen(prev => !prev);
-              } : undefined}
-              className={`w-full py-2 px-3 rounded-md border text-left flex items-center justify-between gap-2 apple-gpu-btn shadow-sm ui-font ${
-                isContextDropdownOpen && interactive
-                  ? 'bg-[#fdfaf2] border-[#8b0000] ring-2 ring-[#c5a059]/35'
-                  : 'bg-[#fdfaf2]/90 border-[#c5a059]/70 hover:border-[#c5a059]'
-              }`}
-            >
-              <div className="min-w-0 flex-1">
-                <div className="font-bold text-xs text-[#382117] truncate">
-                  {story.title}
-                </div>
-                <div className="text-[10px] text-[#8b0000]/80 truncate font-medium">
-                  {story.ref}
-                </div>
-              </div>
-              <span className={`w-6 h-6 rounded-full bg-[#c5a059]/15 text-[#4a3b32] flex items-center justify-center shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${isContextDropdownOpen && interactive ? 'rotate-180 bg-[#c5a059] text-white' : ''}`}>
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.3" d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
-            </button>
-
-            {interactive && (
-              <div
-                onClick={(e) => e.stopPropagation()}
-                className={`absolute left-0 right-0 top-full z-50 grid transition-[grid-template-rows,opacity,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] origin-top will-change-[grid-template-rows,opacity,transform] ${
-                  isContextDropdownOpen
-                    ? 'grid-rows-[1fr] opacity-100 mt-1.5 translate-y-0 scale-100'
-                    : 'grid-rows-[0fr] opacity-0 pointer-events-none mt-0 -translate-y-1 scale-[0.98]'
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <div className="bg-[#fdfaf2]/95 backdrop-blur-md border-2 border-[#c5a059] rounded-md shadow-[0_14px_30px_rgba(36,19,12,0.28)] overflow-hidden">
-                    {filteredStories.length > 10 && (
-                      <div className="p-2 border-b border-[#c5a059]/30 bg-[#fffcf5]">
-                        <input
-                          type="text"
-                          value={dropdownFilter}
-                          onChange={(e) => setDropdownFilter(e.target.value)}
-                          placeholder="Search title or scripture..."
-                          className="w-full px-2.5 py-1.5 text-xs bg-[#fdfaf2] border border-[#c5a059]/50 rounded focus:outline-none focus:border-[#8b0000] text-[#382117] placeholder:text-stone-400 ui-font"
-                        />
-                      </div>
-                    )}
-                    <div className="max-h-56 overflow-y-auto overscroll-contain divide-y divide-[#e6d9c3]/60 no-scrollbar">
-                      {visibleDropdownOptions.length === 0 ? (
-                        <div className="p-3 text-center text-xs text-stone-400 italic ui-font">
-                          No matching passages found
-                        </div>
-                      ) : (
-                        visibleDropdownOptions.map((item) => {
-                          const isSelected = item.id === story.id;
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => handleStoryChange(item)}
-                              className={`w-full text-left px-3 py-2 flex items-center justify-between gap-2 transition-colors ui-font ${
-                                isSelected
-                                  ? 'bg-gradient-to-r from-[#c5a059]/25 via-[#c5a059]/15 to-transparent text-[#8b0000] font-bold'
-                                  : 'hover:bg-[#c5a059]/10 text-stone-700'
-                              }`}
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="text-xs truncate">{item.title}</div>
-                                <div className="text-[10px] text-stone-500 truncate">{item.ref}</div>
-                              </div>
-                              {isSelected && (
-                                <span className="text-[#8b0000] text-xs font-bold shrink-0">✓</span>
-                              )}
-                            </button>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-stretch gap-2 mt-0.5 ui-font">
-            <button
-              onClick={interactive ? () => fetchAnalysis(story) : undefined}
-              disabled={showLoading || showFetchingText}
-              className="flex-1 bg-[#8b0000] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#660000] apple-gpu-btn disabled:opacity-50 shadow-sm rounded-md flex items-center justify-center gap-1.5"
-            >
-              {showLoading ? (
-                <>
-                  <span className="w-2.5 h-2.5 rounded-full border-2 border-white/30 border-t-white animate-spin inline-block" />
-                  <span>AI Scholar...</span>
-                </>
-              ) : (
-                <>
-                  <span>✦</span>
-                  <span>AI Analyze</span>
-                </>
-              )}
-            </button>
-            <button
-              onClick={interactive ? () => fetchPassageText(story) : undefined}
-              disabled={showFetchingText || showLoading}
-              className="flex-1 bg-[#4a3b32] text-[#fdfaf2] text-[11px] font-bold uppercase tracking-wider py-2.5 px-3 hover:bg-[#382117] apple-gpu-btn disabled:opacity-50 shadow-sm rounded-md"
-            >
-              {showFetchingText ? "Loading..." : "Read Text"}
-            </button>
-            <button
-              onClick={interactive ? () => {
-                setIsHighlightMode(prev => !prev);
-              } : undefined}
-              title={isHighlightMode ? "Disable Webster's 1828 Biblical Key Terms Scanner" : "Scan & Highlight Names, Places, and Key Terms with Webster's 1828 definitions"}
-              aria-label="Scan and highlight biblical terms"
-              className={`w-10 shrink-0 flex items-center justify-center rounded-md border apple-gpu-btn shadow-sm ${
-                isHighlightMode
-                  ? 'bg-[#8b0000] text-[#fdfaf2] border-[#8b0000] ring-2 ring-[#c5a059]/60'
-                  : 'bg-[#fdfaf2] text-[#4a3b32] border-[#c5a059] hover:bg-[#c5a059]/20'
-              }`}
-            >
-              {renderDoveIcon()}
-            </button>
-          </div>
-        </aside>
-
         <section
           key={`section-${story.id}-${isBacksideCopy}-${isTargetPage}`}
           className="w-full relative flex-1 min-h-[240px] flex flex-col overflow-y-auto overscroll-contain pb-5 no-scrollbar"
